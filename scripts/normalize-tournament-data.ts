@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { tournamentData } from "../src/data/tournament";
+import { tournamentData } from "../src/data/tournament.seed";
 import { validateTournamentData } from "../src/data/schema";
 
 const outputPath = resolve("src/data/tournament.generated.json");

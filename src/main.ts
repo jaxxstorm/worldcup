@@ -2,7 +2,7 @@ import "./styles.css";
 import { tournamentData, teamById, venueById } from "./data/tournament";
 import { validateTournamentData } from "./data/schema";
 import { groupFixturesByDisplayDate, orderFixturesChronologically } from "./engine/fixtures";
-import { projectTournament } from "./engine/knockout";
+import { drawSidesForProjection, projectTournament } from "./engine/knockout";
 import { interpretPredictionInput, isEditableFixture, setPrediction } from "./engine/predictions";
 import { calculateGroupStandings } from "./engine/standings";
 import { loadPredictions, savePredictions } from "./storage/session";
@@ -202,11 +202,74 @@ function renderBracketView(projection: ProjectedMatch[]) {
     <div class="bracket-page">
       <section>
         <h2>Bracket</h2>
-        <p class="section-note">Projected from the current tables, real results, and your active predictions.</p>
+        <p class="section-note">If we started today: projected from the current tables, real results, and your active predictions.</p>
+        ${renderDrawSides(projection)}
         <div class="bracket-rounds">
           ${bracketRounds.map((round) => renderBracketRound(round, projection.filter((match) => match.stage === round))).join("")}
         </div>
       </section>
+    </div>
+  `;
+}
+
+function renderDrawSides(projection: ProjectedMatch[]) {
+  return `
+    <section class="draw-side-board" aria-label="Projected bracket sides">
+      <div class="draw-side-heading">
+        <div>
+          <h3>Draw Sides</h3>
+          <p>Round-of-32 paths split into the two halves of the bracket.</p>
+        </div>
+      </div>
+      <div class="draw-side-grid">
+        ${drawSidesForProjection(projection).map(renderDrawSide).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderDrawSide(side: ReturnType<typeof drawSidesForProjection>[number]) {
+  return `
+    <section class="draw-side ${side.id}" aria-label="${side.label}">
+      <div class="draw-side-title">
+        <h4>${side.label}</h4>
+        <span>${side.matches.length} matches</span>
+      </div>
+      <div class="draw-match-list">
+        ${side.matches.map(renderDrawMatch).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderDrawMatch(match: ProjectedMatch) {
+  const venue = venueById.get(match.venueId);
+  return `
+    <article class="draw-match">
+      <div class="draw-match-main">
+        <div class="draw-match-code">${match.fixtureId}</div>
+        <div class="draw-participants">
+          ${renderDrawParticipant(match.home, match.homeSource)}
+          ${renderDrawParticipant(match.away, match.awaySource)}
+        </div>
+      </div>
+      <div class="draw-match-meta">
+        <span>${new Date(match.date).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</span>
+        <span>${venue ? `${venue.name}, ${venue.city}, ${venue.country}` : "Venue TBD"}</span>
+      </div>
+    </article>
+  `;
+}
+
+function renderDrawParticipant(team: QualifiedTeam, source = team.slot) {
+  const resolved = team.teamId ? teamById.get(team.teamId) : undefined;
+  return `
+    <div class="draw-team ${resolved ? "resolved" : "unresolved"}">
+      <span class="draw-team-identity">
+        <span class="flag">${resolved?.flag ?? "◇"}</span>
+        <span class="draw-team-name">${resolved?.name ?? source}</span>
+      </span>
+      <span class="slot-label">${source}</span>
     </div>
   `;
 }

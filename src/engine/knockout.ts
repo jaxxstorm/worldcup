@@ -4,6 +4,12 @@ import { bestThirdPlacedGroups, calculateGroupStandings, groupQualifiers, thirdP
 
 const knockoutOrder: MatchStage[] = ["round-of-32", "round-of-16", "quarter-final", "semi-final", "third-place", "final"];
 
+export interface DrawSide {
+  id: "left" | "right";
+  label: string;
+  matches: ProjectedMatch[];
+}
+
 export function projectTournament(data: TournamentData, predictions: PredictionMap): ProjectedMatch[] {
   const standings = calculateGroupStandings(data, predictions);
   const qualifiers = groupQualifiers(standings);
@@ -65,6 +71,18 @@ export function resolveSource(
   if (loserMatch) return losers.get(loserMatch[1]) ?? { slot: source, label: source };
 
   return { slot: source, label: source };
+}
+
+export function drawSidesForProjection(projection: ProjectedMatch[]): DrawSide[] {
+  const roundOf32 = projection
+    .filter((match) => match.stage === "round-of-32")
+    .sort((left, right) => left.matchNumber - right.matchNumber);
+  const splitIndex = Math.ceil(roundOf32.length / 2);
+
+  return [
+    { id: "left", label: "Left Side", matches: roundOf32.slice(0, splitIndex) },
+    { id: "right", label: "Right Side", matches: roundOf32.slice(splitIndex) }
+  ];
 }
 
 function pickWinner(home: QualifiedTeam, away: QualifiedTeam, homeScore: number, awayScore: number) {

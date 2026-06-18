@@ -11,7 +11,8 @@
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "normalize-data": "tsx scripts/normalize-tournament-data.ts"
+    "normalize-data": "tsx scripts/normalize-tournament-data.ts",
+    "update-results": "tsx scripts/update-results.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.3",

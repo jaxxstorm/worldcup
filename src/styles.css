@@ -263,6 +263,170 @@ h2 {
   padding: 24px clamp(16px, 4vw, 56px) 48px;
 }
 
+.draw-side-board {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.draw-side-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.draw-side-heading h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.draw-side-heading p {
+  margin: 4px 0 0;
+  color: #607268;
+  font-size: 14px;
+}
+
+.draw-side-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+}
+
+.draw-side {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #c9d7cc;
+  border-radius: 8px;
+  background: #fbfcfa;
+}
+
+.draw-side.left {
+  border-left: 4px solid #b43f3f;
+}
+
+.draw-side.right {
+  border-right: 4px solid #236f4e;
+}
+
+.draw-side-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.draw-side-title h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.draw-side-title span {
+  flex: 0 0 auto;
+  color: #607268;
+  font-size: 13px;
+}
+
+.draw-match-list {
+  display: grid;
+  gap: 12px;
+}
+
+.draw-match {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #d8e2d8;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.draw-match::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -13px;
+  width: 12px;
+  border-top: 2px solid #b6c6b8;
+}
+
+.draw-side.right .draw-match::after {
+  right: auto;
+  left: -13px;
+}
+
+.draw-match-main {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.draw-match-code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  border-radius: 999px;
+  color: #fff;
+  background: #163b2b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.draw-participants {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.draw-team {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid #dce5dd;
+  border-radius: 999px;
+  background: #f8faf7;
+}
+
+.draw-team.resolved {
+  background: #eef8f0;
+}
+
+.draw-team.unresolved {
+  color: #607268;
+}
+
+.draw-team-identity {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.draw-team-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.draw-match-meta {
+  display: grid;
+  gap: 3px;
+  padding-left: 52px;
+  color: #607268;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .bracket-rounds {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -347,5 +511,36 @@ h2 {
 
   .fixture {
     grid-template-columns: 1fr;
+  }
+
+  .draw-side-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .draw-match::after {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .draw-match-main {
+    grid-template-columns: 1fr;
+  }
+
+  .draw-match-code {
+    justify-content: flex-start;
+    width: fit-content;
+    min-height: 28px;
+    padding: 0 10px;
+  }
+
+  .draw-match-meta {
+    padding-left: 0;
+  }
+
+  .draw-team {
+    align-items: flex-start;
+    flex-direction: column;
+    border-radius: 8px;
   }
 }
