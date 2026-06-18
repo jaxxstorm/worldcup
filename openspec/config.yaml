@@ -1,0 +1,46 @@
+schema: spec-driven
+
+context: |
+  Project: World Cup 2026 predictor application.
+
+  Domain:
+    - The application models the FIFA World Cup 2026 tournament.
+    - It defines and consumes a JSON schema for fixtures, match results,
+      groups, teams, venues, locations, standings, and knockout paths.
+    - Fixture and result data should be pulled from an external authoritative
+      source where practical, then normalized into the local JSON schema.
+    - Matches with real results are immutable historical facts: they are fixed,
+      in the past, and must not be overwritten by user predictions.
+    - Predictions apply only to unplayed or unresolved matches.
+    - Results and predictions update group tables, qualification outcomes, and
+      potential next-round paths such as the round of 32 and later knockout
+      rounds.
+
+  User experience:
+    - Users can visit the site and build predictor models in the browser.
+    - Updating predictions should immediately recalculate standings and the
+      projected tournament outcome for that prediction set.
+    - The app should include country flags for teams.
+    - The app should include fixtures, venues, host cities, and match locations.
+    - Browser session storage should persist the user's active prediction
+      session without requiring an account.
+
+  Hosting and runtime:
+    - The application should be deployable as a static site on GitHub Pages.
+    - Avoid server-only requirements for core prediction behavior.
+    - Prefer client-side data loading, deterministic calculations, and static
+      assets compatible with GitHub Pages.
+
+rules:
+  proposal:
+    - Call out the authoritative external data source strategy when changes touch fixtures, results, teams, or venues.
+    - Distinguish immutable real results from mutable user predictions.
+    - Include GitHub Pages/static-hosting constraints for any architecture or routing change.
+  design:
+    - Specify the JSON schema impact for fixture, result, standings, venue, location, flag, or knockout-path changes.
+    - Define recalculation behavior for group tables and projected knockout qualification when predictions change.
+    - Account for session storage persistence and restoration where prediction state is involved.
+  tasks:
+    - Include data normalization tasks when external fixture or result sources are introduced or changed.
+    - Include tests for standings, qualification, and knockout-path calculations when those behaviors change.
+    - Include static deployment verification for GitHub Pages when build or routing behavior changes.
