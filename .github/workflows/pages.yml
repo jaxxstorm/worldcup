@@ -24,7 +24,14 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm test
       - run: npm run build
+      - uses: actions/configure-pages@v5
+      - name: Verify Pages artifact
+        run: |
+          test -f dist/index.html
+          ! grep -q "src/main.ts" dist/index.html
+          grep -q "assets/index-" dist/index.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
