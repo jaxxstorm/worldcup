@@ -12,10 +12,10 @@ describe("tournament data", () => {
     expect(tournamentData.venues.every((venue) => venue.name && venue.city && venue.country && venue.timeZone)).toBe(true);
   });
 
-  it("uses the normalized group-stage schedule cadence instead of one match from every group per day", () => {
+  it("uses the FIFA group-stage schedule cadence in browser-local date buckets", () => {
     const groupFixtures = tournamentData.fixtures.filter((fixture) => fixture.stage === "group");
     const countsByDate = groupFixtures.reduce<Record<string, number>>((counts, fixture) => {
-      const date = fixture.date.slice(0, 10);
+      const date = new Date(fixture.date).toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" });
       counts[date] = (counts[date] ?? 0) + 1;
       return counts;
     }, {});

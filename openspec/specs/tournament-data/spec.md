@@ -1,9 +1,7 @@
 ## Purpose
 
 Define the normalized World Cup 2026 tournament data contract, including fixtures, teams, venues, locations, real results, flags, source metadata, and knockout paths.
-
 ## Requirements
-
 ### Requirement: Normalized tournament schema
 The system SHALL define a normalized JSON schema for World Cup 2026 tournament data including teams, groups, fixtures, match results, venues, host cities, country flags, standings inputs, and knockout paths.
 
@@ -16,7 +14,7 @@ The system SHALL define a normalized JSON schema for World Cup 2026 tournament d
 - **THEN** the fixture MUST expose its venue, host city, and location data from the normalized schema
 
 ### Requirement: External data normalization
-The system SHALL support pulling fixture and result data from an external authoritative source where practical and normalizing it into the local tournament schema.
+The system SHALL support pulling fixture and result data from an external authoritative source where practical and normalizing it into the local tournament schema, including scheduled result refreshes that update generated static data.
 
 #### Scenario: External data is normalized
 - **WHEN** external fixture or result data is imported
@@ -30,8 +28,12 @@ The system SHALL support pulling fixture and result data from an external author
 - **WHEN** group-stage fixture dates are normalized
 - **THEN** fixtures MUST retain the authoritative match dates rather than assigning the same synthetic matchday pattern to every group
 
+#### Scenario: Scheduled results update generated data
+- **WHEN** a scheduled refresh imports completed match results
+- **THEN** those results MUST be written to the generated tournament dataset consumed by the static app
+
 ### Requirement: Real results are immutable
-The system SHALL mark completed matches with real results as immutable facts in the tournament dataset.
+The system SHALL mark completed matches with real results as immutable facts in the tournament dataset and reject scheduled refreshes that conflict with already recorded completed scores.
 
 #### Scenario: Completed match has a result
 - **WHEN** a fixture has an authoritative final result
@@ -40,6 +42,10 @@ The system SHALL mark completed matches with real results as immutable facts in 
 #### Scenario: Completed match feeds standings
 - **WHEN** standings are calculated
 - **THEN** authoritative real results MUST be included before any user predictions are applied
+
+#### Scenario: Scheduled refresh conflicts with completed result
+- **WHEN** an imported result has a different score for an already completed fixture
+- **THEN** the refresh process MUST fail without overwriting the completed fixture
 
 ### Requirement: Country flags are represented
 The system SHALL associate each team with a country flag asset or flag identifier suitable for display in the static browser app.
@@ -58,3 +64,4 @@ The system SHALL represent knockout round slots and advancement paths starting w
 #### Scenario: Knockout participant is resolved
 - **WHEN** qualification can be determined from real results and predictions
 - **THEN** the matching knockout slot MUST be resolvable to the projected team
+

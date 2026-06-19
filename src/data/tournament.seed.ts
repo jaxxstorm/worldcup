@@ -73,19 +73,79 @@ const teams: Team[] = Object.entries(groups).flatMap(([group, entries]) =>
 );
 
 const venueCycle = venues.map((venue) => venue.id);
-const groupSchedule: Record<GroupId, string[]> = {
-  A: ["2026-06-11T19:00:00Z", "2026-06-11T22:00:00Z", "2026-06-18T19:00:00Z", "2026-06-18T22:00:00Z", "2026-06-24T19:00:00Z", "2026-06-24T22:00:00Z"],
-  B: ["2026-06-12T19:00:00Z", "2026-06-13T19:00:00Z", "2026-06-18T19:00:00Z", "2026-06-18T22:00:00Z", "2026-06-24T19:00:00Z", "2026-06-24T22:00:00Z"],
-  C: ["2026-06-13T19:00:00Z", "2026-06-13T22:00:00Z", "2026-06-19T19:00:00Z", "2026-06-19T22:00:00Z", "2026-06-24T19:00:00Z", "2026-06-24T22:00:00Z"],
-  D: ["2026-06-12T22:00:00Z", "2026-06-13T22:00:00Z", "2026-06-19T19:00:00Z", "2026-06-19T22:00:00Z", "2026-06-25T19:00:00Z", "2026-06-25T22:00:00Z"],
-  E: ["2026-06-14T19:00:00Z", "2026-06-14T22:00:00Z", "2026-06-20T19:00:00Z", "2026-06-20T22:00:00Z", "2026-06-25T19:00:00Z", "2026-06-25T22:00:00Z"],
-  F: ["2026-06-14T19:00:00Z", "2026-06-14T22:00:00Z", "2026-06-20T19:00:00Z", "2026-06-20T22:00:00Z", "2026-06-25T19:00:00Z", "2026-06-25T22:00:00Z"],
-  G: ["2026-06-15T19:00:00Z", "2026-06-15T22:00:00Z", "2026-06-21T19:00:00Z", "2026-06-21T22:00:00Z", "2026-06-26T19:00:00Z", "2026-06-26T22:00:00Z"],
-  H: ["2026-06-15T19:00:00Z", "2026-06-15T22:00:00Z", "2026-06-21T19:00:00Z", "2026-06-21T22:00:00Z", "2026-06-26T19:00:00Z", "2026-06-26T22:00:00Z"],
-  I: ["2026-06-16T19:00:00Z", "2026-06-16T22:00:00Z", "2026-06-22T19:00:00Z", "2026-06-22T22:00:00Z", "2026-06-26T19:00:00Z", "2026-06-26T22:00:00Z"],
-  J: ["2026-06-16T19:00:00Z", "2026-06-16T22:00:00Z", "2026-06-22T19:00:00Z", "2026-06-22T22:00:00Z", "2026-06-27T19:00:00Z", "2026-06-27T22:00:00Z"],
-  K: ["2026-06-17T19:00:00Z", "2026-06-17T22:00:00Z", "2026-06-23T19:00:00Z", "2026-06-23T22:00:00Z", "2026-06-27T19:00:00Z", "2026-06-27T22:00:00Z"],
-  L: ["2026-06-17T19:00:00Z", "2026-06-17T22:00:00Z", "2026-06-23T19:00:00Z", "2026-06-23T22:00:00Z", "2026-06-27T19:00:00Z", "2026-06-27T22:00:00Z"]
+const groupFixtureDetails: Record<string, { date: string; venueId: string }> = {
+  m001: { date: "2026-06-11T19:00:00Z", venueId: "estadio-azteca" },
+  m002: { date: "2026-06-12T02:00:00Z", venueId: "estadio-akron" },
+  m003: { date: "2026-06-19T01:00:00Z", venueId: "estadio-akron" },
+  m004: { date: "2026-06-18T16:00:00Z", venueId: "mercedes-benz-stadium" },
+  m005: { date: "2026-06-25T01:00:00Z", venueId: "estadio-azteca" },
+  m006: { date: "2026-06-25T01:00:00Z", venueId: "estadio-bbva" },
+  m007: { date: "2026-06-12T19:00:00Z", venueId: "bmo-field" },
+  m008: { date: "2026-06-13T19:00:00Z", venueId: "levi-stadium" },
+  m009: { date: "2026-06-18T22:00:00Z", venueId: "bc-place" },
+  m010: { date: "2026-06-18T19:00:00Z", venueId: "sofi-stadium" },
+  m011: { date: "2026-06-24T19:00:00Z", venueId: "bc-place" },
+  m012: { date: "2026-06-24T19:00:00Z", venueId: "lumen-field" },
+  m013: { date: "2026-06-13T22:00:00Z", venueId: "metlife-stadium" },
+  m014: { date: "2026-06-14T01:00:00Z", venueId: "gillette-stadium" },
+  m015: { date: "2026-06-20T00:30:00Z", venueId: "lincoln-financial-field" },
+  m016: { date: "2026-06-19T22:00:00Z", venueId: "gillette-stadium" },
+  m017: { date: "2026-06-24T22:00:00Z", venueId: "hard-rock-stadium" },
+  m018: { date: "2026-06-24T22:00:00Z", venueId: "mercedes-benz-stadium" },
+  m019: { date: "2026-06-13T01:00:00Z", venueId: "sofi-stadium" },
+  m020: { date: "2026-06-14T04:00:00Z", venueId: "bc-place" },
+  m021: { date: "2026-06-19T19:00:00Z", venueId: "lumen-field" },
+  m022: { date: "2026-06-20T03:00:00Z", venueId: "levi-stadium" },
+  m023: { date: "2026-06-26T02:00:00Z", venueId: "sofi-stadium" },
+  m024: { date: "2026-06-26T02:00:00Z", venueId: "levi-stadium" },
+  m025: { date: "2026-06-14T17:00:00Z", venueId: "nrg-stadium" },
+  m026: { date: "2026-06-14T23:00:00Z", venueId: "lincoln-financial-field" },
+  m027: { date: "2026-06-20T20:00:00Z", venueId: "bmo-field" },
+  m028: { date: "2026-06-21T00:00:00Z", venueId: "arrowhead-stadium" },
+  m029: { date: "2026-06-25T20:00:00Z", venueId: "metlife-stadium" },
+  m030: { date: "2026-06-25T20:00:00Z", venueId: "lincoln-financial-field" },
+  m031: { date: "2026-06-14T20:00:00Z", venueId: "at-and-t-stadium" },
+  m032: { date: "2026-06-15T02:00:00Z", venueId: "estadio-bbva" },
+  m033: { date: "2026-06-20T17:00:00Z", venueId: "nrg-stadium" },
+  m034: { date: "2026-06-21T04:00:00Z", venueId: "estadio-bbva" },
+  m035: { date: "2026-06-25T23:00:00Z", venueId: "arrowhead-stadium" },
+  m036: { date: "2026-06-25T23:00:00Z", venueId: "at-and-t-stadium" },
+  m037: { date: "2026-06-15T19:00:00Z", venueId: "lumen-field" },
+  m038: { date: "2026-06-16T01:00:00Z", venueId: "sofi-stadium" },
+  m039: { date: "2026-06-21T19:00:00Z", venueId: "sofi-stadium" },
+  m040: { date: "2026-06-22T01:00:00Z", venueId: "bc-place" },
+  m041: { date: "2026-06-27T03:00:00Z", venueId: "bc-place" },
+  m042: { date: "2026-06-27T03:00:00Z", venueId: "lumen-field" },
+  m043: { date: "2026-06-15T16:00:00Z", venueId: "mercedes-benz-stadium" },
+  m044: { date: "2026-06-15T22:00:00Z", venueId: "hard-rock-stadium" },
+  m045: { date: "2026-06-21T16:00:00Z", venueId: "mercedes-benz-stadium" },
+  m046: { date: "2026-06-21T22:00:00Z", venueId: "hard-rock-stadium" },
+  m047: { date: "2026-06-27T00:00:00Z", venueId: "estadio-akron" },
+  m048: { date: "2026-06-27T00:00:00Z", venueId: "nrg-stadium" },
+  m049: { date: "2026-06-16T19:00:00Z", venueId: "metlife-stadium" },
+  m050: { date: "2026-06-16T22:00:00Z", venueId: "gillette-stadium" },
+  m051: { date: "2026-06-22T21:00:00Z", venueId: "lincoln-financial-field" },
+  m052: { date: "2026-06-23T00:00:00Z", venueId: "metlife-stadium" },
+  m053: { date: "2026-06-26T19:00:00Z", venueId: "gillette-stadium" },
+  m054: { date: "2026-06-26T19:00:00Z", venueId: "bmo-field" },
+  m055: { date: "2026-06-17T01:00:00Z", venueId: "arrowhead-stadium" },
+  m056: { date: "2026-06-17T04:00:00Z", venueId: "levi-stadium" },
+  m057: { date: "2026-06-22T17:00:00Z", venueId: "at-and-t-stadium" },
+  m058: { date: "2026-06-23T03:00:00Z", venueId: "levi-stadium" },
+  m059: { date: "2026-06-28T02:00:00Z", venueId: "at-and-t-stadium" },
+  m060: { date: "2026-06-28T02:00:00Z", venueId: "arrowhead-stadium" },
+  m061: { date: "2026-06-17T17:00:00Z", venueId: "nrg-stadium" },
+  m062: { date: "2026-06-18T02:00:00Z", venueId: "estadio-azteca" },
+  m063: { date: "2026-06-23T17:00:00Z", venueId: "nrg-stadium" },
+  m064: { date: "2026-06-24T02:00:00Z", venueId: "estadio-akron" },
+  m065: { date: "2026-06-27T23:30:00Z", venueId: "hard-rock-stadium" },
+  m066: { date: "2026-06-27T23:30:00Z", venueId: "mercedes-benz-stadium" },
+  m067: { date: "2026-06-17T20:00:00Z", venueId: "at-and-t-stadium" },
+  m068: { date: "2026-06-17T23:00:00Z", venueId: "bmo-field" },
+  m069: { date: "2026-06-23T20:00:00Z", venueId: "gillette-stadium" },
+  m070: { date: "2026-06-23T23:00:00Z", venueId: "bmo-field" },
+  m071: { date: "2026-06-27T21:00:00Z", venueId: "metlife-stadium" },
+  m072: { date: "2026-06-27T21:00:00Z", venueId: "lincoln-financial-field" }
 };
 
 function groupFixtures(): Fixture[] {
@@ -99,16 +159,17 @@ function groupFixtures(): Fixture[] {
   ] as const;
   let matchNumber = 1;
 
-  return Object.entries(groups).flatMap(([groupId, groupTeams], groupIndex) =>
-    pairings.map(([homeIndex, awayIndex], pairingIndex) => {
+  return Object.entries(groups).flatMap(([groupId, groupTeams]) =>
+    pairings.map(([homeIndex, awayIndex]) => {
       const id = `m${String(matchNumber).padStart(3, "0")}`;
+      const details = groupFixtureDetails[id];
       const fixture: Fixture = {
         id,
         matchNumber,
         stage: "group",
         group: groupId as GroupId,
-        date: groupSchedule[groupId as GroupId][pairingIndex],
-        venueId: venueCycle[(groupIndex * 3 + pairingIndex) % venueCycle.length],
+        date: details.date,
+        venueId: details.venueId,
         home: groupTeams[homeIndex][0],
         away: groupTeams[awayIndex][0],
         status: "scheduled"

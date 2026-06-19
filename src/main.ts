@@ -1,6 +1,7 @@
 import "./styles.css";
 import { tournamentData, teamById, venueById } from "./data/tournament";
 import { validateTournamentData } from "./data/schema";
+import { buildBracketLayout, type BracketLayout, type BracketNode } from "./engine/bracket-layout";
 import { formatFixtureKickoff, groupFixturesByDisplayDate, orderFixturesChronologically } from "./engine/fixtures";
 import { drawSidesForProjection, projectTournament } from "./engine/knockout";
 import { interpretPredictionInput, isEditableFixture, setPrediction } from "./engine/predictions";
@@ -22,6 +23,7 @@ let predictions: PredictionMap = loadPredictions(tournamentData);
 let activeView: "main" | "bracket" = "main";
 
 const bracketRounds: MatchStage[] = ["round-of-32", "round-of-16", "quarter-final", "semi-final", "third-place", "final"];
+const fixtureById = new Map(tournamentData.fixtures.map((fixture) => [fixture.id, fixture]));
 
 function render() {
   const projection = projectTournament(tournamentData, predictions);
@@ -192,13 +194,144 @@ function renderBracketView(projection: ProjectedMatch[]) {
       <section>
         <h2>Bracket</h2>
         <p class="section-note">If we started today: projected from the current tables, real results, and your active predictions.</p>
-        ${renderDrawSides(projection)}
-        <div class="bracket-rounds">
-          ${bracketRounds.map((round) => renderBracketRound(round, projection.filter((match) => match.stage === round))).join("")}
-        </div>
+        ${renderBracketPanel(projection)}
+        ${renderBracketFixtureTable(projection)}
       </section>
     </div>
   `;
+}
+
+function renderBracketPanel(projection: ProjectedMatch[]) {
+  const layout = buildBracketLayout(projection);
+  return `
+    <section class="bracket-panel" aria-label="Interactive projected bracket">
+      <div class="bracket-panel-header">
+        <div>
+          <h3>Draw Bracket</h3>
+          <p>Projected from real results and your active predictions.</p>
+        </div>
+      </div>
+      <div class="bracket-scroll" tabindex="0" aria-label="Scrollable bracket diagram">
+        <svg class="bracket-diagram" viewBox="0 0 ${layout.width} ${layout.height}" role="img" aria-label="World Cup knockout bracket diagram">
+          ${renderBracketRoundLabels(layout)}
+          <g class="bracket-connectors" aria-hidden="true">
+            ${layout.connectors.map((connector) => `<path d="${connector.path}" />`).join("")}
+          </g>
+          <g class="bracket-nodes">
+            ${layout.nodes.map(renderBracketNode).join("")}
+          </g>
+        </svg>
+      </div>
+    </section>
+  `;
+}
+
+function renderBracketRoundLabels(layout: BracketLayout) {
+  const labels = [
+    { x: 24, text: "Round of 32" },
+    { x: 292, text: "Round of 16" },
+    { x: 560, text: "Quarter-finals" },
+    { x: 794, text: "Semi-final" },
+    { x: 1062, text: "Final" },
+    { x: 1330, text: "Semi-final" },
+    { x: 1600, text: "Quarter-finals" },
+    { x: 1868, text: "Round of 16" },
+    { x: 2136, text: "Round of 32" }
+  ];
+
+  return `
+    <g class="bracket-round-labels">
+      ${labels.map((label) => `<text x="${label.x + 107}" y="48" text-anchor="middle">${label.text}</text>`).join("")}
+    </g>
+  `;
+}
+
+function renderBracketNode(node: BracketNode) {
+  return `
+    <foreignObject x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="diagram-node ${node.side}">
+        ${renderBracketNodeContent(node.match)}
+      </div>
+    </foreignObject>
+  `;
+}
+
+function renderBracketNodeContent(match: ProjectedMatch) {
+  const venue = venueById.get(match.venueId);
+  return `
+    <div class="diagram-node-meta">
+      <span>${match.fixtureId}</span>
+      <span>${formatStage(match.stage)}</span>
+    </div>
+    <div class="diagram-node-teams">
+      ${renderDiagramTeam(match.home, match.homeSource, match.winner?.teamId)}
+      ${renderDiagramTeam(match.away, match.awaySource, match.winner?.teamId)}
+    </div>
+    <div class="diagram-node-detail">${formatFixtureKickoff(match)} · ${venue ? `${venue.city}` : "Venue TBD"}</div>
+  `;
+}
+
+function renderDiagramTeam(team: QualifiedTeam, source: string, winnerTeamId?: string) {
+  const resolved = team.teamId ? teamById.get(team.teamId) : undefined;
+  const isWinner = Boolean(winnerTeamId && resolved?.id === winnerTeamId);
+  return `
+    <div class="diagram-team ${resolved ? "resolved" : "unresolved"} ${isWinner ? "winner-team" : ""}">
+      ${renderFlag(resolved)}
+      <span>${resolved?.name ?? source}</span>
+      <em>${source}</em>
+    </div>
+  `;
+}
+
+function renderBracketFixtureTable(projection: ProjectedMatch[]) {
+  const matches = projection
+    .filter((match) => bracketRounds.includes(match.stage))
+    .sort((left, right) => left.matchNumber - right.matchNumber);
+
+  return `
+    <section class="bracket-fixture-panel" aria-labelledby="bracket-fixture-heading">
+      <div class="bracket-fixture-heading">
+        <h3 id="bracket-fixture-heading">Bracket Fixtures</h3>
+        <span>${matches.length} matches</span>
+      </div>
+      <div class="bracket-fixture-table">
+        <div class="bracket-fixture-row header">
+          <span>Match</span>
+          <span>Fixture</span>
+          <span>Teams</span>
+          <span>Kickoff</span>
+          <span>Venue</span>
+          <span>Prediction</span>
+        </div>
+        ${matches.map(renderBracketFixtureRow).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderBracketFixtureRow(match: ProjectedMatch) {
+  const fixture = fixtureById.get(match.fixtureId);
+  const venue = venueById.get(match.venueId);
+  const score = fixture ? fixture.result ?? predictions[fixture.id] : undefined;
+
+  return `
+    <div class="bracket-fixture-row">
+      <span class="bracket-fixture-match">${match.fixtureId}</span>
+      <span>${formatStage(match.stage)}</span>
+      <span class="bracket-fixture-teams">
+        <span>${renderBracketTableTeam(match.home, match.homeSource)} <strong>${score?.home ?? "-"}</strong></span>
+        <span>${renderBracketTableTeam(match.away, match.awaySource)} <strong>${score?.away ?? "-"}</strong></span>
+      </span>
+      <span>${formatFixtureKickoff(match)}</span>
+      <span>${venue ? `${venue.name}, ${venue.city}` : "Venue TBD"}</span>
+      <span>${fixture ? renderFixtureControls(fixture) : ""}</span>
+    </div>
+  `;
+}
+
+function renderBracketTableTeam(team: QualifiedTeam, source: string) {
+  const resolved = team.teamId ? teamById.get(team.teamId) : undefined;
+  return `<span class="bracket-table-team">${renderFlag(resolved)} ${resolved?.name ?? source}</span>`;
 }
 
 function renderDrawSides(projection: ProjectedMatch[]) {

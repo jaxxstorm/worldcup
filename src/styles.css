@@ -272,6 +272,219 @@ h2 {
   padding: 24px clamp(16px, 4vw, 56px) 48px;
 }
 
+.bracket-panel,
+.bracket-fixture-panel {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid #c9d7cc;
+  border-radius: 8px;
+  background: #fbfcfa;
+}
+
+.bracket-panel {
+  margin-bottom: 18px;
+}
+
+.bracket-panel-header,
+.bracket-fixture-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.bracket-panel-header h3,
+.bracket-fixture-heading h3 {
+  margin: 0;
+  color: #17382a;
+  font-size: 18px;
+}
+
+.bracket-panel-header p {
+  margin: 4px 0 0;
+  color: #607268;
+  font-size: 14px;
+}
+
+.bracket-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding-bottom: 6px;
+}
+
+.bracket-diagram {
+  display: block;
+  min-width: 1180px;
+  width: 100%;
+  height: auto;
+}
+
+.bracket-round-labels text {
+  fill: #607268;
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.bracket-connectors path {
+  fill: none;
+  stroke: #b5c4b8;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.diagram-node {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: 100%;
+  height: 100%;
+  padding: 9px;
+  border: 1px solid #cbd8ce;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(20, 59, 43, 0.08);
+}
+
+.diagram-node.left {
+  border-left: 4px solid #b43f3f;
+}
+
+.diagram-node.right {
+  border-right: 4px solid #236f4e;
+}
+
+.diagram-node.center {
+  border-color: #143b2b;
+}
+
+.diagram-node-meta,
+.diagram-node-detail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #607268;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.diagram-node-detail {
+  display: block;
+  overflow: visible;
+  white-space: normal;
+  text-transform: none;
+}
+
+.diagram-node-teams {
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.diagram-team {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 3px 5px;
+  border-radius: 5px;
+  color: #607268;
+  background: #f8faf7;
+}
+
+.diagram-team.resolved {
+  color: #10231d;
+}
+
+.diagram-team.winner-team {
+  color: #0c5130;
+  background: #e5f3e8;
+  font-weight: 800;
+}
+
+.diagram-team span {
+  min-width: 0;
+  overflow: visible;
+  white-space: normal;
+  line-height: 1.15;
+}
+
+.diagram-team em {
+  color: #607268;
+  font-size: 10px;
+  font-style: normal;
+}
+
+.bracket-fixture-heading span {
+  color: #607268;
+  font-size: 13px;
+}
+
+.bracket-fixture-table {
+  display: grid;
+  min-width: 0;
+  overflow-x: auto;
+  border: 1px solid #d7e1d9;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.bracket-fixture-row {
+  display: grid;
+  grid-template-columns: 72px 120px minmax(220px, 1.2fr) minmax(190px, 0.8fr) minmax(220px, 1fr) 132px;
+  gap: 12px;
+  align-items: center;
+  min-width: 1040px;
+  padding: 10px 12px;
+  border-top: 1px solid #edf0ec;
+  font-size: 13px;
+}
+
+.bracket-fixture-row.header {
+  border-top: 0;
+  color: #607268;
+  background: #f8faf7;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.bracket-fixture-match {
+  color: #17382a;
+  font-weight: 800;
+}
+
+.bracket-fixture-teams {
+  display: grid;
+  gap: 5px;
+}
+
+.bracket-fixture-teams > span,
+.bracket-table-team {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.bracket-fixture-teams strong {
+  min-width: 22px;
+  text-align: right;
+}
+
+.bracket-fixture-row .prediction-controls {
+  grid-template-columns: 46px 46px;
+}
+
+.bracket-fixture-row .prediction-controls input {
+  width: 46px;
+  padding: 6px;
+}
+
 .draw-side-board {
   display: grid;
   gap: 16px;
