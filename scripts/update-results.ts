@@ -17,6 +17,45 @@ interface ResultFeed {
   results?: ResultEntry[];
 }
 
+interface FootballDataMatch {
+  utcDate?: string;
+  status?: string;
+  homeTeam?: { name?: string; shortName?: string; tla?: string };
+  awayTeam?: { name?: string; shortName?: string; tla?: string };
+  score?: { fullTime?: { home?: number | null; away?: number | null } };
+}
+
+interface FootballDataFeed {
+  matches?: FootballDataMatch[];
+}
+
+interface FifaLocalizedDescription {
+  Description?: string;
+}
+
+interface FifaTeam {
+  Score?: number | null;
+  IdCountry?: string;
+  TeamName?: FifaLocalizedDescription[];
+  Abbreviation?: string;
+  ShortClubName?: string;
+}
+
+interface FifaMatch {
+  MatchNumber?: number;
+  MatchStatus?: number;
+  ResultType?: number;
+  Date?: string;
+  Home?: FifaTeam | null;
+  Away?: FifaTeam | null;
+  HomeTeamScore?: number | null;
+  AwayTeamScore?: number | null;
+}
+
+interface FifaCalendarFeed {
+  Results?: FifaMatch[];
+}
+
 export interface MergeResult {
   data: TournamentData;
   changed: boolean;
@@ -25,8 +64,8 @@ export interface MergeResult {
 
 const outputPath = resolve("src/data/tournament.generated.json");
 
-export function mergeResultFeed(baseData: TournamentData, feed: ResultFeed | TournamentData, fallbackSource: SourceMetadata): MergeResult {
-  const incoming = extractResultEntries(feed);
+export function mergeResultFeed(baseData: TournamentData, feed: ResultFeed | TournamentData | FootballDataFeed | FifaCalendarFeed, fallbackSource: SourceMetadata): MergeResult {
+  const incoming = extractResultEntries(feed, baseData);
   const source = normalizeSource(feed, fallbackSource);
   const data = structuredClone(baseData) as TournamentData;
   let changed = false;
@@ -65,7 +104,11 @@ export function mergeResultFeed(baseData: TournamentData, feed: ResultFeed | Tou
 
 export async function loadResultSource(source: string): Promise<unknown> {
   if (/^https?:\/\//.test(source)) {
-    const response = await fetch(source);
+    const headers = new Headers();
+    const token = process.env.RESULTS_SOURCE_TOKEN ?? process.env.FOOTBALL_DATA_API_TOKEN;
+    if (token) headers.set("X-Auth-Token", token);
+
+    const response = await fetch(source, { headers });
     if (!response.ok) throw new Error(`Failed to fetch ${source}: ${response.status} ${response.statusText}`);
     return response.json();
   }
@@ -73,7 +116,7 @@ export async function loadResultSource(source: string): Promise<unknown> {
   return JSON.parse(readFileSync(resolve(source), "utf8"));
 }
 
-function extractResultEntries(feed: ResultFeed | TournamentData): ResultEntry[] {
+function extractResultEntries(feed: ResultFeed | TournamentData | FootballDataFeed | FifaCalendarFeed, baseData: TournamentData): ResultEntry[] {
   if ("results" in feed && Array.isArray(feed.results)) {
     return feed.results.filter((entry) => !entry.status || entry.status === "completed");
   }
@@ -89,10 +132,18 @@ function extractResultEntries(feed: ResultFeed | TournamentData): ResultEntry[] 
       }));
   }
 
-  throw new Error("Result source must contain a results array or normalized fixtures array");
+  if ("matches" in feed && Array.isArray(feed.matches)) {
+    return feed.matches.flatMap((match) => footballDataMatchToResult(match, baseData));
+  }
+
+  if ("Results" in feed && Array.isArray(feed.Results)) {
+    return feed.Results.flatMap((match) => fifaMatchToResult(match, baseData));
+  }
+
+  throw new Error("Result source must contain a results array, normalized fixtures array, football-data.org matches array, or FIFA calendar Results array");
 }
 
-function normalizeSource(feed: ResultFeed | TournamentData, fallback: SourceMetadata): SourceMetadata {
+function normalizeSource(feed: ResultFeed | TournamentData | FootballDataFeed | FifaCalendarFeed, fallback: SourceMetadata): SourceMetadata {
   const fromFeed = "source" in feed ? feed.source : undefined;
   const source = fromFeed ?? fallback;
   return {
@@ -109,6 +160,97 @@ function findFixture(fixtures: Fixture[], entry: ResultEntry): Fixture | undefin
   throw new Error("Result entry must include fixtureId or matchNumber");
 }
 
+function fifaMatchToResult(match: FifaMatch, data: TournamentData): ResultEntry[] {
+  if (match.ResultType !== 1 && match.MatchStatus !== 0) return [];
+
+  const home = match.HomeTeamScore ?? match.Home?.Score;
+  const away = match.AwayTeamScore ?? match.Away?.Score;
+  if (!Number.isInteger(home) || !Number.isInteger(away)) return [];
+
+  const fixture = findFixtureByFifaTeams(data, match);
+  if (!fixture) {
+    throw new Error(`No fixture found for FIFA match ${describeFifaTeam(match.Home)} vs ${describeFifaTeam(match.Away)}`);
+  }
+
+  return [{ fixtureId: fixture.id, home: home!, away: away! }];
+}
+
+function findFixtureByFifaTeams(data: TournamentData, match: FifaMatch): Fixture | undefined {
+  const homeNames = fifaTeamKeys(match.Home);
+  const awayNames = fifaTeamKeys(match.Away);
+  if (homeNames.size === 0 || awayNames.size === 0) return undefined;
+
+  return data.fixtures.find((fixture) => {
+    if (fixture.stage !== "group" || typeof fixture.home !== "string" || typeof fixture.away !== "string") return false;
+
+    const homeTeam = data.teams.find((team) => team.id === fixture.home);
+    const awayTeam = data.teams.find((team) => team.id === fixture.away);
+    return Boolean(homeTeam && awayTeam && homeNames.has(teamKey(homeTeam.name)) && awayNames.has(teamKey(awayTeam.name)));
+  });
+}
+
+function fifaTeamKeys(team: FifaTeam | null | undefined): Set<string> {
+  return new Set([
+    team?.ShortClubName,
+    team?.Abbreviation,
+    team?.IdCountry,
+    ...(team?.TeamName?.map((name) => name.Description) ?? [])
+  ].filter((value): value is string => Boolean(value)).map(teamKey));
+}
+
+function footballDataMatchToResult(match: FootballDataMatch, data: TournamentData): ResultEntry[] {
+  if (match.status !== "FINISHED" && match.status !== "AWARDED") return [];
+
+  const home = match.score?.fullTime?.home;
+  const away = match.score?.fullTime?.away;
+  if (!Number.isInteger(home) || !Number.isInteger(away)) return [];
+
+  const fixture = findFixtureByTeamsAndDate(data, match);
+  if (!fixture) {
+    throw new Error(`No fixture found for football-data.org match ${match.homeTeam?.name ?? "unknown"} vs ${match.awayTeam?.name ?? "unknown"}`);
+  }
+
+  return [{ fixtureId: fixture.id, home: home!, away: away! }];
+}
+
+function findFixtureByTeamsAndDate(data: TournamentData, match: FootballDataMatch): Fixture | undefined {
+  const homeNames = footballTeamKeys(match.homeTeam);
+  const awayNames = footballTeamKeys(match.awayTeam);
+  const matchDate = match.utcDate?.slice(0, 10);
+
+  return data.fixtures.find((fixture) => {
+    if (fixture.stage !== "group" || typeof fixture.home !== "string" || typeof fixture.away !== "string") return false;
+    if (matchDate && fixture.date.slice(0, 10) !== matchDate) return false;
+
+    const homeTeam = data.teams.find((team) => team.id === fixture.home);
+    const awayTeam = data.teams.find((team) => team.id === fixture.away);
+    return Boolean(homeTeam && awayTeam && homeNames.has(teamKey(homeTeam.name)) && awayNames.has(teamKey(awayTeam.name)));
+  });
+}
+
+function footballTeamKeys(team: FootballDataMatch["homeTeam"]): Set<string> {
+  return new Set([team?.name, team?.shortName, team?.tla].filter((value): value is string => Boolean(value)).map(teamKey));
+}
+
+function teamKey(value: string): string {
+  const normalized = value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/gi, "")
+    .toLowerCase();
+
+  return TEAM_KEY_ALIASES[normalized] ?? normalized;
+}
+
+const TEAM_KEY_ALIASES: Record<string, string> = {
+  congodr: "drcongo",
+  iriran: "iran",
+  korea: "southkorea",
+  korearepublic: "southkorea",
+  usa: "unitedstates"
+};
+
 function appendSource(sources: SourceMetadata[], source: SourceMetadata): SourceMetadata[] {
   if (sources.some((candidate) => candidate.url === source.url && candidate.name === source.name)) return sources;
   return [...sources, source];
@@ -122,6 +264,10 @@ function describeEntry(entry: ResultEntry): string {
   return entry.fixtureId ? `fixtureId=${entry.fixtureId}` : `matchNumber=${entry.matchNumber ?? "unknown"}`;
 }
 
+function describeFifaTeam(team: FifaTeam | null | undefined): string {
+  return team?.ShortClubName ?? team?.TeamName?.find((name) => name.Description)?.Description ?? team?.Abbreviation ?? "unknown";
+}
+
 function assertValid(data: TournamentData) {
   const issues = validateTournamentData(data);
   if (issues.length === 0) return;
@@ -131,17 +277,21 @@ function assertValid(data: TournamentData) {
 }
 
 async function main() {
-  const sourceUrl = process.env.RESULTS_SOURCE_URL ?? process.argv[2];
+  const sourceUrl = process.env.RESULTS_SOURCE_URL ?? process.argv[2] ?? "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023";
   if (!sourceUrl) {
     console.log("RESULTS_SOURCE_URL is not configured; skipping result refresh.");
     return;
   }
+  if (sourceUrl.includes("api.football-data.org") && !process.env.RESULTS_SOURCE_TOKEN && !process.env.FOOTBALL_DATA_API_TOKEN) {
+    console.log("Football-data.org source requires FOOTBALL_DATA_API_TOKEN; skipping result refresh.");
+    return;
+  }
 
   const source: SourceMetadata = {
-    name: process.env.RESULTS_SOURCE_NAME ?? "Configured World Cup result feed",
+    name: process.env.RESULTS_SOURCE_NAME ?? "FIFA World Cup 2026 match calendar API",
     url: sourceUrl,
     accessedAt: new Date().toISOString(),
-    notes: process.env.RESULTS_SOURCE_NOTES ?? "Used by scheduled result refresh."
+    notes: process.env.RESULTS_SOURCE_NOTES ?? "Official FIFA calendar endpoint used by scheduled result refresh."
   };
 
   const currentData = JSON.parse(readFileSync(outputPath, "utf8")) as TournamentData;

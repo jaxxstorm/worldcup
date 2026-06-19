@@ -67,4 +67,62 @@ describe("result refresh", () => {
     expect(result.imported).toBe(1);
     expect(result.data.fixtures.find((fixture) => fixture.id === openFixture.id)!.result).toEqual({ home: 3, away: 0 });
   });
+
+  it("can merge completed football-data.org matches by team and fixture date", () => {
+    const openFixture = tournamentData.fixtures.find((fixture) => fixture.status === "scheduled" && typeof fixture.home === "string" && typeof fixture.away === "string")!;
+    const homeTeam = tournamentData.teams.find((team) => team.id === openFixture.home)!;
+    const awayTeam = tournamentData.teams.find((team) => team.id === openFixture.away)!;
+
+    const result = mergeResultFeed(tournamentData, {
+      matches: [{
+        utcDate: openFixture.date,
+        status: "FINISHED",
+        homeTeam: { name: homeTeam.name },
+        awayTeam: { name: awayTeam.name },
+        score: { fullTime: { home: 4, away: 2 } }
+      }]
+    }, source);
+
+    expect(result.changed).toBe(true);
+    expect(result.imported).toBe(1);
+    expect(result.data.fixtures.find((fixture) => fixture.id === openFixture.id)!.result).toEqual({ home: 4, away: 2 });
+  });
+
+  it("can merge completed FIFA calendar matches by team pairing", () => {
+    const openFixture = tournamentData.fixtures.find((fixture) => fixture.status === "scheduled" && typeof fixture.home === "string" && typeof fixture.away === "string")!;
+
+    const result = mergeResultFeed(tournamentData, {
+      Results: [{
+        MatchNumber: openFixture.matchNumber,
+        MatchStatus: 0,
+        ResultType: 1,
+        Home: { ShortClubName: tournamentData.teams.find((team) => team.id === openFixture.home)!.name },
+        Away: { ShortClubName: tournamentData.teams.find((team) => team.id === openFixture.away)!.name },
+        HomeTeamScore: 2,
+        AwayTeamScore: 0
+      }]
+    }, source);
+
+    expect(result.changed).toBe(true);
+    expect(result.imported).toBe(1);
+    expect(result.data.fixtures.find((fixture) => fixture.id === openFixture.id)!.result).toEqual({ home: 2, away: 0 });
+  });
+
+  it("ignores FIFA calendar matches that do not have a final result", () => {
+    const openFixture = tournamentData.fixtures.find((fixture) => fixture.status === "scheduled")!;
+
+    const result = mergeResultFeed(tournamentData, {
+      Results: [{
+        MatchNumber: openFixture.matchNumber,
+        MatchStatus: 1,
+        ResultType: 0,
+        HomeTeamScore: null,
+        AwayTeamScore: null
+      }]
+    }, source);
+
+    expect(result.changed).toBe(false);
+    expect(result.imported).toBe(0);
+    expect(result.data).toEqual(tournamentData);
+  });
 });

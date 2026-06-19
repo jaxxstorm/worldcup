@@ -52,7 +52,7 @@ describe("bracket projection", () => {
   it("selects the eight best third-place groups from completed projected standings", () => {
     const standings = calculateGroupStandings(tournamentData, groupPredictionSet());
 
-    expect(bestThirdPlacedGroups(standings)).toEqual(["F", "B", "G", "C", "K", "H", "J", "D"]);
+    expect(bestThirdPlacedGroups(standings)).toEqual(["F", "G", "C", "K", "H", "A", "B", "J"]);
   });
 
   it("resolves round-of-32 third-place placeholders once all best third-place groups are knowable", () => {
@@ -61,13 +61,13 @@ describe("bracket projection", () => {
 
     expect(thirdPlaceMatches.map((match) => [match.fixtureId, match.away.slot, match.away.teamId])).toEqual([
       ["m074", "3F", "netherlands"],
-      ["m075", "3B", "canada"],
-      ["m078", "3G", "egypt"],
-      ["m080", "3C", "morocco"],
-      ["m082", "3K", "portugal"],
-      ["m084", "3H", "spain"],
-      ["m087", "3J", "austria"],
-      ["m088", "3D", "australia"]
+      ["m075", "3G", "egypt"],
+      ["m078", "3C", "morocco"],
+      ["m080", "3K", "portugal"],
+      ["m082", "3H", "spain"],
+      ["m084", "3A", "south-africa"],
+      ["m087", "3B", "bosnia"],
+      ["m088", "3J", "austria"]
     ]);
   });
 
@@ -75,7 +75,7 @@ describe("bracket projection", () => {
     const projection = projectTournament(tournamentData, {});
     const thirdPlaceMatches = projection.filter((match) => match.stage === "round-of-32" && match.awaySource.includes("/"));
 
-    expect(bestThirdPlacedGroups(calculateGroupStandings(tournamentData, {}))).toEqual(["F", "G", "C", "K", "B", "H", "A", "E"]);
+    expect(bestThirdPlacedGroups(calculateGroupStandings(tournamentData, {}))).toEqual(["F", "G", "C", "K", "H", "A", "B", "E"]);
     expect(thirdPlaceMatches.every((match) => match.away.teamId && match.away.slot.startsWith("3"))).toBe(true);
   });
 

@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "0 */4 * * *"
   workflow_dispatch:
+    inputs:
+      results_source_url:
+        description: "Optional result feed URL. Defaults to FIFA's public World Cup 2026 calendar API."
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -27,9 +32,11 @@ jobs:
       - name: Refresh generated tournament data
         run: npm run update-results
         env:
-          RESULTS_SOURCE_URL: ${{ secrets.RESULTS_SOURCE_URL || vars.RESULTS_SOURCE_URL }}
-          RESULTS_SOURCE_NAME: ${{ vars.RESULTS_SOURCE_NAME }}
-          RESULTS_SOURCE_NOTES: ${{ vars.RESULTS_SOURCE_NOTES }}
+          RESULTS_SOURCE_URL: ${{ inputs.results_source_url || secrets.RESULTS_SOURCE_URL || vars.RESULTS_SOURCE_URL || 'https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023' }}
+          RESULTS_SOURCE_NAME: ${{ vars.RESULTS_SOURCE_NAME || 'FIFA World Cup 2026 match calendar API' }}
+          RESULTS_SOURCE_NOTES: ${{ vars.RESULTS_SOURCE_NOTES || 'Official FIFA calendar endpoint used by scheduled result refresh.' }}
+          RESULTS_SOURCE_TOKEN: ${{ secrets.RESULTS_SOURCE_TOKEN }}
+          FOOTBALL_DATA_API_TOKEN: ${{ secrets.FOOTBALL_DATA_API_TOKEN }}
       - name: Check for data changes
         id: changes
         run: |

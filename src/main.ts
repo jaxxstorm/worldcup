@@ -6,7 +6,7 @@ import { drawSidesForProjection, projectTournament } from "./engine/knockout";
 import { interpretPredictionInput, isEditableFixture, setPrediction } from "./engine/predictions";
 import { calculateGroupStandings } from "./engine/standings";
 import { loadPredictions, savePredictions } from "./storage/session";
-import type { Fixture, MatchStage, PredictionMap, ProjectedMatch, QualifiedTeam, TeamRef } from "./types";
+import type { Fixture, MatchStage, PredictionMap, ProjectedMatch, QualifiedTeam, Team, TeamRef } from "./types";
 
 const validationIssues = validateTournamentData(tournamentData);
 if (validationIssues.length > 0) {
@@ -83,7 +83,7 @@ function renderFixtures() {
   const visibleFixtures = orderFixturesChronologically(
     tournamentData.fixtures.filter((fixture) => fixture.stage === "group" || fixture.stage === "round-of-32")
   );
-  const fixtureGroups = groupFixturesByDisplayDate(visibleFixtures, venueById);
+  const fixtureGroups = groupFixturesByDisplayDate(visibleFixtures);
 
   return fixtureGroups
     .map((group) => `
@@ -113,7 +113,7 @@ function renderFixture(fixture: Fixture) {
         </div>
         <div class="fixture-meta">
           <span>${fixture.stage.replaceAll("-", " ")}</span>
-          <span>${formatFixtureKickoff(fixture, venue)}</span>
+          <span>${formatFixtureKickoff(fixture)}</span>
           <span>${venue ? `${venue.name}, ${venue.city}, ${venue.country}` : "Venue TBD"}</span>
         </div>
       </div>
@@ -125,10 +125,9 @@ function renderFixture(fixture: Fixture) {
 function renderFixtureTeam(teamRef: TeamRef, score?: number) {
   const team = typeof teamRef === "string" ? teamById.get(teamRef) : undefined;
   const label = team ? team.name : typeof teamRef === "string" ? teamRef : teamRef.label;
-  const flag = team?.flag ?? "◇";
   return `
     <div class="team-line">
-      <span class="flag">${flag}</span>
+      ${renderFlag(team)}
       <span>${label}</span>
       <span class="score">${score ?? "-"}</span>
     </div>
@@ -159,7 +158,7 @@ function renderStandings() {
           return `
             <div class="standing-row">
               <span>${row.rank}</span>
-              <span class="team-cell">${team?.flag ?? ""} ${team?.name ?? row.teamId}</span>
+              <span class="team-cell">${renderFlag(team)} ${team?.name ?? row.teamId}</span>
               <span>${row.played}</span>
               <span>${row.won}</span>
               <span>${row.drawn}</span>
@@ -244,7 +243,7 @@ function renderDrawMatch(match: ProjectedMatch) {
         </div>
       </div>
       <div class="draw-match-meta">
-        <span>${formatFixtureKickoff(match, venue)}</span>
+        <span>${formatFixtureKickoff(match)}</span>
         <span>${venue ? `${venue.name}, ${venue.city}, ${venue.country}` : "Venue TBD"}</span>
       </div>
     </article>
@@ -256,7 +255,7 @@ function renderDrawParticipant(team: QualifiedTeam, source = team.slot) {
   return `
     <div class="draw-team ${resolved ? "resolved" : "unresolved"}">
       <span class="draw-team-identity">
-        <span class="flag">${resolved?.flag ?? "◇"}</span>
+        ${renderFlag(resolved)}
         <span class="draw-team-name">${resolved?.name ?? source}</span>
       </span>
       <span class="slot-label">${source}</span>
@@ -279,7 +278,7 @@ function renderBracketMatch(match: ProjectedMatch) {
   const venue = venueById.get(match.venueId);
   return `
     <article class="bracket-match">
-      <div class="knockout-round">${match.fixtureId} · ${formatFixtureKickoff(match, venue)}</div>
+      <div class="knockout-round">${match.fixtureId} · ${formatFixtureKickoff(match)}</div>
       <div class="bracket-participants">
         ${renderBracketParticipant(match.home, match.homeSource)}
         ${renderBracketParticipant(match.away, match.awaySource)}
@@ -292,15 +291,75 @@ function renderBracketMatch(match: ProjectedMatch) {
 
 function renderBracketParticipant(team: QualifiedTeam, source = team.slot) {
   const resolved = team.teamId ? teamById.get(team.teamId) : undefined;
-  const label = resolved ? `${resolved.flag} ${resolved.name}` : source;
+  const label = resolved ? `${renderFlag(resolved)} ${resolved.name}` : source;
   const sourceLabel = resolved ? `<span class="slot-label">${source}</span>` : "";
   return `<span class="bracket-team ${resolved ? "resolved" : "unresolved"}">${label}${sourceLabel}</span>`;
 }
 
 function renderQualifiedTeam(team: QualifiedTeam) {
   const resolved = team.teamId ? teamById.get(team.teamId) : undefined;
-  return `${resolved?.flag ?? ""} ${resolved?.name ?? team.label}`;
+  return resolved ? `${renderFlag(resolved)} ${resolved.name}` : team.label;
 }
+
+function renderFlag(team?: Team) {
+  if (!team) return `<span class="flag placeholder" aria-hidden="true">◇</span>`;
+
+  const code = flagImageCodes[team.id];
+  if (!code) return `<span class="flag" role="img" aria-label="${team.name} flag">${team.flag}</span>`;
+
+  return `<img class="flag flag-img" src="https://flagcdn.com/w40/${code}.png" srcset="https://flagcdn.com/w80/${code}.png 2x" alt="${team.name} flag" loading="lazy" />`;
+}
+
+const flagImageCodes: Record<string, string> = {
+  algeria: "dz",
+  argentina: "ar",
+  australia: "au",
+  austria: "at",
+  belgium: "be",
+  bosnia: "ba",
+  brazil: "br",
+  canada: "ca",
+  "cape-verde": "cv",
+  colombia: "co",
+  "cote-divoire": "ci",
+  croatia: "hr",
+  curacao: "cw",
+  czechia: "cz",
+  "dr-congo": "cd",
+  ecuador: "ec",
+  egypt: "eg",
+  england: "gb-eng",
+  france: "fr",
+  germany: "de",
+  ghana: "gh",
+  haiti: "ht",
+  iran: "ir",
+  iraq: "iq",
+  japan: "jp",
+  jordan: "jo",
+  mexico: "mx",
+  morocco: "ma",
+  netherlands: "nl",
+  "new-zealand": "nz",
+  norway: "no",
+  panama: "pa",
+  paraguay: "py",
+  portugal: "pt",
+  qatar: "qa",
+  "saudi-arabia": "sa",
+  scotland: "gb-sct",
+  senegal: "sn",
+  "south-africa": "za",
+  "south-korea": "kr",
+  spain: "es",
+  sweden: "se",
+  switzerland: "ch",
+  tunisia: "tn",
+  turkiye: "tr",
+  "united-states": "us",
+  uruguay: "uy",
+  uzbekistan: "uz"
+};
 
 function formatStage(stage: MatchStage) {
   return stage.replaceAll("-", " ");
