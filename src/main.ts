@@ -150,7 +150,7 @@ function renderStatLeaderboard(leaderboard: StatLeaderboard) {
 
 function renderThirdPlaceTable() {
   const standings = calculateGroupStandings(tournamentData, predictions);
-  const rows = thirdPlaceRankings(standings);
+  const rows = thirdPlaceRankings(standings, tournamentData);
 
   return `
     <div class="third-place-table">
@@ -162,6 +162,7 @@ function renderThirdPlaceTable() {
         <span>GD</span>
         <span>GF</span>
         <span>Pts</span>
+        <span>FP</span>
         <span>Status</span>
       </div>
       ${rows.map(renderThirdPlaceRow).join("")}
@@ -180,6 +181,7 @@ function renderThirdPlaceRow(row: ThirdPlaceStandingRow) {
       <span>${row.goalDifference}</span>
       <span>${row.goalsFor}</span>
       <span>${row.points}</span>
+      <span>${row.fairPlayPoints ?? "-"}</span>
       <span>${row.qualifies ? "Qualifies" : "Outside"}</span>
     </div>
   `;

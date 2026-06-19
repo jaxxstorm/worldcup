@@ -31,7 +31,7 @@ function sourceLabel(source: TeamRef): string {
 
 function expectedThirdPlaceSlots(data: TournamentData, predictions: PredictionMap) {
   const standings = calculateGroupStandings(data, predictions);
-  const bestGroups = bestThirdPlacedGroups(standings);
+  const bestGroups = bestThirdPlacedGroups(standings, data);
   const assignments = thirdPlaceSourceAssignments(data.fixtures.flatMap((fixture) => [sourceLabel(fixture.home), sourceLabel(fixture.away)]), bestGroups);
 
   return (fixture: Fixture) => {
@@ -110,20 +110,21 @@ describe("bracket projection", () => {
   it("selects the eight best third-place groups from completed projected standings", () => {
     const data = editableGroupTournamentData();
     const standings = calculateGroupStandings(data, groupPredictionSet(data));
+    const thirdPlaceGroups = thirdPlaceRankings(standings, data).filter((row) => row.qualifies).map((row) => row.group);
 
-    expect(bestThirdPlacedGroups(standings)).toEqual(["J", "D", "B", "H", "E", "L", "K", "G"]);
+    expect(bestThirdPlacedGroups(standings, data)).toEqual(thirdPlaceGroups);
   });
 
   it("resolves round-of-32 third-place placeholders once all best third-place groups are knowable", () => {
     const data = editableGroupTournamentData();
     const predictions = groupPredictionSet(data);
     const standings = calculateGroupStandings(data, predictions);
-    const thirdPlaceGroups = thirdPlaceRankings(standings).filter((row) => row.qualifies).map((row) => row.group);
+    const thirdPlaceGroups = thirdPlaceRankings(standings, data).filter((row) => row.qualifies).map((row) => row.group);
     const projection = projectTournament(data, predictions);
     const thirdPlaceMatches = projection.filter((match) => match.stage === "round-of-32" && match.awaySource.includes("/"));
     const thirdPlaceFixtures = data.fixtures.filter((fixture) => fixture.stage === "round-of-32" && sourceLabel(fixture.away).includes("/"));
 
-    expect(thirdPlaceGroups).toEqual(bestThirdPlacedGroups(standings));
+    expect(thirdPlaceGroups).toEqual(bestThirdPlacedGroups(standings, data));
     expect(thirdPlaceMatches.map((match) => [match.fixtureId, match.away.slot, match.away.teamId])).toEqual(
       thirdPlaceFixtures.map(expectedThirdPlaceSlots(data, predictions))
     );

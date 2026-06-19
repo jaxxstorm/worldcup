@@ -8,7 +8,10 @@ export function calculateGroupStandings(data: TournamentData, predictions: Predi
 
   for (const team of data.teams) {
     if (!team.group) continue;
-    groups[team.group].push(emptyRow(team.id));
+    groups[team.group].push({
+      ...emptyRow(team.id),
+      fairPlayPoints: team.fairPlayPoints
+    });
   }
 
   for (const fixture of data.fixtures.filter((match) => match.stage === "group")) {
@@ -26,15 +29,14 @@ export function calculateGroupStandings(data: TournamentData, predictions: Predi
   }
 
   for (const group of Object.keys(groups) as GroupId[]) {
-    groups[group] = groups[group]
-      .sort((left, right) => sortRows(left, right))
+    groups[group] = rankGroupRows(groups[group], data, predictions, group)
       .map((row, index) => ({ ...row, rank: index + 1 }));
   }
 
   return groups;
 }
 
-export function groupQualifiers(standings: Record<GroupId, StandingRow[]>) {
+export function groupQualifiers(standings: Record<GroupId, StandingRow[]>, data?: TournamentData) {
   const qualifiers = new Map<string, TeamId | undefined>();
 
   for (const [group, rows] of Object.entries(standings) as Array<[GroupId, StandingRow[]]>) {
@@ -42,27 +44,27 @@ export function groupQualifiers(standings: Record<GroupId, StandingRow[]>) {
     qualifiers.set(`2${group}`, rows[1]?.teamId);
   }
 
-  bestThirdPlacedGroups(standings).forEach((group) => {
+  bestThirdPlacedGroups(standings, data).forEach((group) => {
     qualifiers.set(`3${group}`, standings[group][2]?.teamId);
   });
 
   return qualifiers;
 }
 
-export function bestThirdPlacedGroups(standings: Record<GroupId, StandingRow[]>): GroupId[] {
-  return thirdPlaceRankings(standings)
+export function bestThirdPlacedGroups(standings: Record<GroupId, StandingRow[]>, data?: TournamentData): GroupId[] {
+  return thirdPlaceRankings(standings, data)
     .slice(0, 8)
     .map((row) => row.group);
 }
 
-export function thirdPlaceRankings(standings: Record<GroupId, StandingRow[]>): ThirdPlaceStandingRow[] {
+export function thirdPlaceRankings(standings: Record<GroupId, StandingRow[]>, data?: TournamentData): ThirdPlaceStandingRow[] {
   return (Object.entries(standings) as Array<[GroupId, StandingRow[]]>)
     .flatMap(([group, rows]) => {
       const row = rows[2];
       return row ? [{ group, row }] : [];
     })
     .sort((left, right) => {
-      const comparison = sortRows(left.row, right.row);
+      const comparison = compareOverallRows(left.row, right.row, data);
       return comparison || left.group.localeCompare(right.group);
     })
     .map((entry, index) => ({
@@ -101,6 +103,7 @@ function emptyRow(teamId: TeamId): StandingRow {
     goalsAgainst: 0,
     goalDifference: 0,
     points: 0,
+    fairPlayPoints: undefined,
     rank: 0
   };
 }
@@ -122,11 +125,89 @@ function applyResult(row: StandingRow, goalsFor: number, goalsAgainst: number) {
   }
 }
 
-function sortRows(left: StandingRow, right: StandingRow) {
+function rankGroupRows(rows: StandingRow[], data: TournamentData, predictions: PredictionMap, group: GroupId): StandingRow[] {
+  const pointGroups = partitionEqual(rows.sort((left, right) => right.points - left.points), (left, right) => left.points === right.points);
+  return pointGroups.flatMap((pointGroup) => resolveTiedRows(pointGroup, data, predictions, group));
+}
+
+function resolveTiedRows(rows: StandingRow[], data: TournamentData, predictions: PredictionMap, group: GroupId): StandingRow[] {
+  if (rows.length < 2) return rows;
+
+  const headToHeadRows = headToHeadStandings(rows, data, predictions, group);
+  const ranked = [...rows].sort((left, right) => compareHeadToHeadRows(headToHeadRows.get(left.teamId)!, headToHeadRows.get(right.teamId)!));
+  const stillTied = partitionEqual(ranked, (left, right) => compareHeadToHeadRows(headToHeadRows.get(left.teamId)!, headToHeadRows.get(right.teamId)!) === 0);
+
+  if (stillTied.length === 1 && stillTied[0].length === rows.length) {
+    return ranked.sort((left, right) => compareOverallRows(left, right, data));
+  }
+
+  return stillTied.flatMap((tiedRows) => tiedRows.length === 1 ? tiedRows : resolveTiedRows(tiedRows, data, predictions, group));
+}
+
+function partitionEqual<T>(items: T[], isEqual: (left: T, right: T) => boolean): T[][] {
+  return items.reduce<T[][]>((groups, item) => {
+    const current = groups.at(-1);
+    if (!current || !isEqual(current[0], item)) groups.push([item]);
+    else current.push(item);
+    return groups;
+  }, []);
+}
+
+function headToHeadStandings(rows: StandingRow[], data: TournamentData, predictions: PredictionMap, group: GroupId) {
+  const teamIds = new Set(rows.map((row) => row.teamId));
+  const standings = new Map(rows.map((row) => [row.teamId, emptyRow(row.teamId)]));
+
+  for (const fixture of data.fixtures.filter((match) => match.group === group)) {
+    if (typeof fixture.home !== "string" || typeof fixture.away !== "string") continue;
+    if (!teamIds.has(fixture.home) || !teamIds.has(fixture.away)) continue;
+
+    const score = getAppliedScore(fixture, predictions);
+    if (!score) continue;
+
+    applyResult(standings.get(fixture.home)!, score.home, score.away);
+    applyResult(standings.get(fixture.away)!, score.away, score.home);
+  }
+
+  return standings;
+}
+
+function compareHeadToHeadRows(left: StandingRow, right: StandingRow) {
+  return (
+    right.points - left.points ||
+    right.goalDifference - left.goalDifference ||
+    right.goalsFor - left.goalsFor
+  );
+}
+
+function compareOverallRows(left: StandingRow, right: StandingRow, data?: TournamentData) {
+  const fairPlay = data ? compareFairPlay(left.teamId, right.teamId, data) : 0;
+  const ranking = data ? compareFifaRanking(left.teamId, right.teamId, data) : 0;
+  const drawOrder = data ? compareTeamOrder(left.teamId, right.teamId, data) : left.teamId.localeCompare(right.teamId);
+
   return (
     right.points - left.points ||
     right.goalDifference - left.goalDifference ||
     right.goalsFor - left.goalsFor ||
-    left.teamId.localeCompare(right.teamId)
+    fairPlay ||
+    ranking ||
+    drawOrder
   );
+}
+
+function compareFairPlay(leftTeamId: TeamId, rightTeamId: TeamId, data: TournamentData) {
+  const left = data.teams.find((team) => team.id === leftTeamId)?.fairPlayPoints;
+  const right = data.teams.find((team) => team.id === rightTeamId)?.fairPlayPoints;
+  if (!Number.isFinite(left) || !Number.isFinite(right)) return 0;
+  return left! - right!;
+}
+
+function compareFifaRanking(leftTeamId: TeamId, rightTeamId: TeamId, data: TournamentData) {
+  const left = data.teams.find((team) => team.id === leftTeamId)?.fifaRanking;
+  const right = data.teams.find((team) => team.id === rightTeamId)?.fifaRanking;
+  if (!left || !right) return 0;
+  return left - right;
+}
+
+function compareTeamOrder(leftTeamId: TeamId, rightTeamId: TeamId, data: TournamentData) {
+  return data.teams.findIndex((team) => team.id === leftTeamId) - data.teams.findIndex((team) => team.id === rightTeamId);
 }

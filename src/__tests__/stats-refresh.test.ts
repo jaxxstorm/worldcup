@@ -82,4 +82,25 @@ describe("stats refresh", () => {
       detail: "Unmatched Team"
     });
   });
+
+  it("normalizes fair-play penalty points from discipline data", () => {
+    const result = mergeStatsFeed(tournamentData, {
+      fairPlay: [
+        {
+          team: { name: "Spain", tla: "ESP" },
+          yellowCards: 2,
+          secondYellowCards: 1,
+          redCards: 1
+        },
+        {
+          teamId: "cape-verde",
+          fairPlayPoints: 1
+        }
+      ]
+    }, source);
+
+    expect(result.changed).toBe(true);
+    expect(result.data.teams.find((team) => team.id === "spain")?.fairPlayPoints).toBe(9);
+    expect(result.data.teams.find((team) => team.id === "cape-verde")?.fairPlayPoints).toBe(1);
+  });
 });

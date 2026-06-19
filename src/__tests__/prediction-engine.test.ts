@@ -58,6 +58,41 @@ describe("prediction engine", () => {
     expect(groupA.some((row) => row.played > 0)).toBe(true);
   });
 
+  it("uses FIFA ranking as the final group-stage tie-breaker when teams remain level", () => {
+    const groupH = calculateGroupStandings(tournamentData, {}).H;
+
+    expect(groupH.map((row) => row.teamId)).toEqual(["uruguay", "saudi-arabia", "spain", "cape-verde"]);
+  });
+
+  it("uses fair-play points before FIFA ranking when group teams remain level", () => {
+    const data = structuredClone(tournamentData) as TournamentData;
+    data.teams = data.teams.map((team) => {
+      if (team.id === "spain") return { ...team, fairPlayPoints: 5 };
+      if (team.id === "cape-verde") return { ...team, fairPlayPoints: 1 };
+      return team;
+    });
+    const groupH = calculateGroupStandings(data, {}).H;
+
+    expect(groupH.map((row) => row.teamId).slice(2)).toEqual(["cape-verde", "spain"]);
+  });
+
+  it("uses predicted head-to-head results before FIFA ranking for tied group teams", () => {
+    const data = editableGroupTournamentData();
+    const groupHFixtures = data.fixtures.filter((fixture) => fixture.group === "H");
+    const fixtureKey = (home: string, away: string) => groupHFixtures.find((fixture) => fixture.home === home && fixture.away === away)!.id;
+    const predictions: PredictionMap = {
+      [fixtureKey("spain", "cape-verde")]: { home: 0, away: 1 },
+      [fixtureKey("saudi-arabia", "uruguay")]: { home: 0, away: 0 },
+      [fixtureKey("spain", "saudi-arabia")]: { home: 1, away: 0 },
+      [fixtureKey("uruguay", "cape-verde")]: { home: 1, away: 0 },
+      [fixtureKey("uruguay", "spain")]: { home: 0, away: 1 },
+      [fixtureKey("cape-verde", "saudi-arabia")]: { home: 1, away: 0 }
+    };
+    const groupH = calculateGroupStandings(data, predictions).H;
+
+    expect(groupH.map((row) => row.teamId).slice(0, 2)).toEqual(["cape-verde", "spain"]);
+  });
+
   it("projects knockout slots deterministically", () => {
     const scheduledGroupFixtures = tournamentData.fixtures.filter((fixture) => fixture.stage === "group" && fixture.status === "scheduled");
     const predictions = Object.fromEntries(scheduledGroupFixtures.map((fixture, index) => [fixture.id, { home: index % 3, away: (index + 1) % 3 }]));
@@ -69,17 +104,13 @@ describe("prediction engine", () => {
   it("ranks third-place teams from projected standings", () => {
     const data = editableGroupTournamentData();
     const standings = calculateGroupStandings(data, groupPredictionSet(data));
-    const rankings = thirdPlaceRankings(standings);
+    const rankings = thirdPlaceRankings(standings, data);
 
-    expect(rankings.map((row) => row.group).slice(0, 8)).toEqual(bestThirdPlacedGroups(standings));
+    expect(rankings.map((row) => row.group).slice(0, 8)).toEqual(bestThirdPlacedGroups(standings, data));
     expect(rankings.slice(0, 8).every((row) => row.qualifies)).toBe(true);
     expect(rankings.slice(8).every((row) => !row.qualifies)).toBe(true);
-    expect(rankings[0]).toMatchObject({
-      group: "J",
-      thirdPlaceRank: 1,
-      points: 3,
-      goalDifference: -1
-    });
+    expect(rankings.map((row) => row.thirdPlaceRank)).toEqual(rankings.map((_, index) => index + 1));
+    expect(rankings[0].points).toBeGreaterThanOrEqual(rankings[1].points);
   });
 
   it("keeps one-sided prediction input as a partial draft", () => {

@@ -568,10 +568,10 @@ h2 {
 
 .third-place-row {
   display: grid;
-  grid-template-columns: 36px 54px minmax(180px, 1fr) repeat(4, 44px) minmax(86px, auto);
+  grid-template-columns: 36px 54px minmax(180px, 1fr) repeat(5, 44px) minmax(86px, auto);
   gap: 10px;
   align-items: center;
-  min-width: 720px;
+  min-width: 780px;
   padding: 9px 12px;
   border-top: 1px solid #edf0ec;
   font-size: 13px;

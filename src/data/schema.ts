@@ -21,6 +21,9 @@ export function validateTournamentData(data: TournamentData): ValidationIssue[] 
     if (!team.name || !team.fifaCode || !team.flag) {
       issues.push({ path: `teams.${index}`, message: "team name, fifaCode, and flag are required" });
     }
+    if (team.fairPlayPoints !== undefined && (!Number.isFinite(team.fairPlayPoints) || team.fairPlayPoints < 0)) {
+      issues.push({ path: `teams.${index}.fairPlayPoints`, message: "fair play points must be a non-negative number" });
+    }
   });
 
   data.venues.forEach((venue, index) => {

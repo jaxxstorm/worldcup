@@ -12,8 +12,27 @@ interface FootballDataScorer {
   penalties?: number | null;
 }
 
+interface FootballDataTeamRef {
+  name?: string;
+  shortName?: string;
+  tla?: string;
+}
+
+interface FootballDataFairPlayEntry {
+  team?: FootballDataTeamRef;
+  teamId?: string;
+  yellowCards?: number | null;
+  secondYellowCards?: number | null;
+  yellowRedCards?: number | null;
+  redCards?: number | null;
+  fairPlayPoints?: number | null;
+  points?: number | null;
+}
+
 interface FootballDataScorersFeed {
   scorers?: FootballDataScorer[];
+  fairPlay?: FootballDataFairPlayEntry[];
+  discipline?: FootballDataFairPlayEntry[];
 }
 
 export interface StatsMergeResult {
@@ -26,8 +45,10 @@ const outputPath = resolve("src/data/tournament.generated.json");
 
 export function mergeStatsFeed(baseData: TournamentData, feed: FootballDataScorersFeed, source: SourceMetadata): StatsMergeResult {
   const data = structuredClone(baseData) as TournamentData;
-  const statLeaderboards = buildStatLeaderboards(data, feed, source);
-  const changed = JSON.stringify(data.statLeaderboards ?? []) !== JSON.stringify(statLeaderboards);
+  const statLeaderboards = feed.scorers ? buildStatLeaderboards(data, feed, source) : data.statLeaderboards ?? [];
+  const statLeaderboardsChanged = JSON.stringify(data.statLeaderboards ?? []) !== JSON.stringify(statLeaderboards);
+  const fairPlayChanged = mergeFairPlayData(data, feed);
+  const changed = statLeaderboardsChanged || fairPlayChanged;
 
   if (!changed) return { data, changed: false, imported: 0 };
 
@@ -39,7 +60,7 @@ export function mergeStatsFeed(baseData: TournamentData, feed: FootballDataScore
   return {
     data,
     changed,
-    imported: statLeaderboards.reduce((count, leaderboard) => count + leaderboard.entries.length, 0)
+    imported: (statLeaderboardsChanged ? statLeaderboards.reduce((count, leaderboard) => count + leaderboard.entries.length, 0) : 0) + (fairPlayChanged ? data.teams.filter((team) => Number.isFinite(team.fairPlayPoints)).length : 0)
   };
 }
 
@@ -68,6 +89,35 @@ function buildStatLeaderboards(data: TournamentData, feed: FootballDataScorersFe
     buildLeaderboard(data, scorers, source, "assists", "Top Assists", "Assists", (scorer) => scorer.assists, 10),
     buildLeaderboard(data, scorers, source, "penalties", "Penalty Goals", "Pens", (scorer) => scorer.penalties, 10)
   ];
+}
+
+function mergeFairPlayData(data: TournamentData, feed: FootballDataScorersFeed): boolean {
+  const entries = feed.fairPlay ?? feed.discipline ?? [];
+  let changed = false;
+
+  for (const entry of entries) {
+    const team = entry.teamId ? data.teams.find((candidate) => candidate.id === entry.teamId) : findTeam(data.teams, entry.team);
+    if (!team) continue;
+
+    const points = fairPlayPoints(entry);
+    if (!Number.isFinite(points) || points < 0) continue;
+    if (team.fairPlayPoints === points) continue;
+
+    team.fairPlayPoints = points;
+    changed = true;
+  }
+
+  return changed;
+}
+
+function fairPlayPoints(entry: FootballDataFairPlayEntry): number {
+  const explicit = entry.fairPlayPoints ?? entry.points;
+  if (Number.isFinite(explicit)) return explicit!;
+
+  const yellowCards = entry.yellowCards ?? 0;
+  const secondYellowCards = entry.secondYellowCards ?? entry.yellowRedCards ?? 0;
+  const redCards = entry.redCards ?? 0;
+  return yellowCards + (secondYellowCards * 3) + (redCards * 4);
 }
 
 function buildLeaderboard(
@@ -101,7 +151,7 @@ function buildLeaderboard(
   return { id, label, valueLabel, source, entries };
 }
 
-function findTeam(teams: Team[], incoming: FootballDataScorer["team"]): Team | undefined {
+function findTeam(teams: Team[], incoming: FootballDataScorer["team"] | FootballDataTeamRef | undefined): Team | undefined {
   const keys = new Set([incoming?.name, incoming?.shortName, incoming?.tla].filter((value): value is string => Boolean(value)).map(teamKey));
   if (keys.size === 0) return undefined;
 

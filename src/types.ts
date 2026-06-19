@@ -46,6 +46,8 @@ export interface Team {
   fifaCode: string;
   group?: GroupId;
   flag: string;
+  fifaRanking?: number;
+  fairPlayPoints?: number;
 }
 
 export interface TeamPlaceholder {
@@ -123,6 +125,7 @@ export interface StandingRow {
   goalsAgainst: number;
   goalDifference: number;
   points: number;
+  fairPlayPoints?: number;
   rank: number;
 }
 

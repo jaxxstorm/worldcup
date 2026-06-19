@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-19T15:39:43.785Z",
+  "generatedAt": "2026-06-19T23:51:45.298Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -235,28 +235,32 @@
       "name": "Spain",
       "fifaCode": "S",
       "group": "H",
-      "flag": "🇪🇸"
+      "flag": "🇪🇸",
+      "fifaRanking": 1
     },
     {
       "id": "cape-verde",
       "name": "Cabo Verde",
       "fifaCode": "CV",
       "group": "H",
-      "flag": "🇨🇻"
+      "flag": "🇨🇻",
+      "fifaRanking": 68
     },
     {
       "id": "saudi-arabia",
       "name": "Saudi Arabia",
       "fifaCode": "SA",
       "group": "H",
-      "flag": "🇸🇦"
+      "flag": "🇸🇦",
+      "fifaRanking": 60
     },
     {
       "id": "uruguay",
       "name": "Uruguay",
       "fifaCode": "U",
       "group": "H",
-      "flag": "🇺🇾"
+      "flag": "🇺🇾",
+      "fifaRanking": 16
     },
     {
       "id": "france",
@@ -883,7 +887,17 @@
       "venueId": "lumen-field",
       "home": "united-states",
       "away": "australia",
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 2,
+        "away": 0
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-19T23:51:39.898Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m022",
@@ -2127,7 +2141,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-19T15:35:57.639Z",
+        "accessedAt": "2026-06-19T23:51:45.298Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2182,24 +2196,24 @@
         },
         {
           "rank": 8,
+          "player": "Ismael Saibari",
+          "teamId": "morocco",
+          "value": 2,
+          "detail": "Morocco"
+        },
+        {
+          "rank": 9,
           "player": "Johan Manzambi",
           "teamId": "switzerland",
           "value": 2,
           "detail": "Switzerland"
         },
         {
-          "rank": 9,
+          "rank": 10,
           "player": "Kai Havertz",
           "teamId": "germany",
           "value": 2,
           "detail": "Germany"
-        },
-        {
-          "rank": 10,
-          "player": "Kylian Mbappé",
-          "teamId": "france",
-          "value": 2,
-          "detail": "France"
         }
       ]
     },
@@ -2210,7 +2224,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-19T15:35:57.639Z",
+        "accessedAt": "2026-06-19T23:51:45.298Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2286,7 +2300,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-19T15:35:57.639Z",
+        "accessedAt": "2026-06-19T23:51:45.298Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [

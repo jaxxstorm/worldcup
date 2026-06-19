@@ -57,6 +57,13 @@ const groups: Record<GroupId, Array<[string, string, string]>> = {
   L: [["england", "England", "🏴"], ["croatia", "Croatia", "🇭🇷"], ["ghana", "Ghana", "🇬🇭"], ["panama", "Panama", "🇵🇦"]]
 };
 
+const fifaRankings: Partial<Record<string, number>> = {
+  spain: 1,
+  uruguay: 16,
+  "saudi-arabia": 60,
+  "cape-verde": 68
+};
+
 const teams: Team[] = Object.entries(groups).flatMap(([group, entries]) =>
   entries.map(([id, name, flag]) => ({
     id,
@@ -68,7 +75,8 @@ const teams: Team[] = Object.entries(groups).flatMap(([group, entries]) =>
       .slice(0, 3)
       .toUpperCase(),
     group: group as GroupId,
-    flag
+    flag,
+    fifaRanking: fifaRankings[id]
   }))
 );
 

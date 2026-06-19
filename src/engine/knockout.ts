@@ -12,8 +12,8 @@ export interface DrawSide {
 
 export function projectTournament(data: TournamentData, predictions: PredictionMap): ProjectedMatch[] {
   const standings = calculateGroupStandings(data, predictions);
-  const qualifiers = groupQualifiers(standings);
-  const thirdPlaceAssignments = thirdPlaceSourceAssignments(data.fixtures.flatMap((fixture) => [labelFor(fixture.home), labelFor(fixture.away)]), bestThirdPlacedGroups(standings));
+  const qualifiers = groupQualifiers(standings, data);
+  const thirdPlaceAssignments = thirdPlaceSourceAssignments(data.fixtures.flatMap((fixture) => [labelFor(fixture.home), labelFor(fixture.away)]), bestThirdPlacedGroups(standings, data));
   const winners = new Map<string, QualifiedTeam>();
   const losers = new Map<string, QualifiedTeam>();
   const projected: ProjectedMatch[] = [];
