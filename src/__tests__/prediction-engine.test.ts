@@ -2,8 +2,29 @@ import { describe, expect, it } from "vitest";
 import { tournamentData } from "../data/tournament";
 import { projectTournament } from "../engine/knockout";
 import { interpretPredictionInput, isEditableFixture, sanitizePredictions, setPrediction } from "../engine/predictions";
-import { calculateGroupStandings } from "../engine/standings";
-import type { PredictionMap } from "../types";
+import { bestThirdPlacedGroups, calculateGroupStandings, thirdPlaceRankings } from "../engine/standings";
+import type { PredictionMap, TournamentData } from "../types";
+
+function editableGroupTournamentData(): TournamentData {
+  const data = structuredClone(tournamentData) as TournamentData;
+
+  for (const fixture of data.fixtures) {
+    if (fixture.stage !== "group") continue;
+    fixture.status = "scheduled";
+    delete fixture.result;
+    delete fixture.sourceResult;
+  }
+
+  return data;
+}
+
+function groupPredictionSet(data: TournamentData): PredictionMap {
+  return Object.fromEntries(
+    data.fixtures
+      .filter((fixture) => fixture.stage === "group")
+      .map((fixture) => [fixture.id, { home: 1, away: 0 }])
+  );
+}
 
 describe("prediction engine", () => {
   it("prevents predictions from overriding completed fixtures", () => {
@@ -43,6 +64,22 @@ describe("prediction engine", () => {
 
     expect(projectTournament(tournamentData, predictions)).toEqual(projectTournament(tournamentData, predictions));
     expect(projectTournament(tournamentData, predictions).some((match) => match.stage === "round-of-32" && match.home.teamId)).toBe(true);
+  });
+
+  it("ranks third-place teams from projected standings", () => {
+    const data = editableGroupTournamentData();
+    const standings = calculateGroupStandings(data, groupPredictionSet(data));
+    const rankings = thirdPlaceRankings(standings);
+
+    expect(rankings.map((row) => row.group).slice(0, 8)).toEqual(bestThirdPlacedGroups(standings));
+    expect(rankings.slice(0, 8).every((row) => row.qualifies)).toBe(true);
+    expect(rankings.slice(8).every((row) => !row.qualifies)).toBe(true);
+    expect(rankings[0]).toMatchObject({
+      group: "J",
+      thirdPlaceRank: 1,
+      points: 3,
+      goalDifference: -1
+    });
   });
 
   it("keeps one-sided prediction input as a partial draft", () => {

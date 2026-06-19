@@ -56,6 +56,28 @@ export function validateTournamentData(data: TournamentData): ValidationIssue[] 
     if (!slot.homeSource || !slot.awaySource) issues.push({ path: `knockoutSlots.${index}`, message: "slot sources are required" });
   });
 
+  data.statLeaderboards?.forEach((leaderboard, leaderboardIndex) => {
+    const path = `statLeaderboards.${leaderboardIndex}`;
+    if (!leaderboard.id || !leaderboard.label || !leaderboard.valueLabel) {
+      issues.push({ path, message: "leaderboard id, label, and value label are required" });
+    }
+    if (!leaderboard.source?.name || !leaderboard.source.url || !leaderboard.source.accessedAt || !leaderboard.source.notes) {
+      issues.push({ path: `${path}.source`, message: "leaderboard source metadata is required" });
+    }
+    if (!Array.isArray(leaderboard.entries)) {
+      issues.push({ path: `${path}.entries`, message: "leaderboard entries must be an array" });
+      return;
+    }
+
+    leaderboard.entries.forEach((entry, entryIndex) => {
+      const entryPath = `${path}.entries.${entryIndex}`;
+      if (!Number.isInteger(entry.rank) || entry.rank < 1) issues.push({ path: `${entryPath}.rank`, message: "entry rank must be a positive integer" });
+      if (!entry.player) issues.push({ path: `${entryPath}.player`, message: "entry player is required" });
+      if (!Number.isFinite(entry.value)) issues.push({ path: `${entryPath}.value`, message: "entry value must be numeric" });
+      if (entry.teamId && !teamIds.has(entry.teamId)) issues.push({ path: `${entryPath}.teamId`, message: "entry team reference must exist" });
+    });
+  });
+
   return issues;
 }
 
@@ -82,6 +104,7 @@ export const tournamentJsonSchema = {
     teams: { type: "array" },
     venues: { type: "array" },
     fixtures: { type: "array" },
-    knockoutSlots: { type: "array" }
+    knockoutSlots: { type: "array" },
+    statLeaderboards: { type: "array" }
   }
 } as const;

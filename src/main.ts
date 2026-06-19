@@ -5,9 +5,9 @@ import { buildBracketLayout, type BracketLayout, type BracketNode } from "./engi
 import { formatFixtureKickoff, groupFixturesByDisplayDate, orderFixturesChronologically } from "./engine/fixtures";
 import { drawSidesForProjection, projectTournament } from "./engine/knockout";
 import { interpretPredictionInput, isEditableFixture, setPrediction } from "./engine/predictions";
-import { calculateGroupStandings } from "./engine/standings";
+import { calculateGroupStandings, thirdPlaceRankings } from "./engine/standings";
 import { loadPredictions, savePredictions } from "./storage/session";
-import type { Fixture, MatchStage, PredictionMap, ProjectedMatch, QualifiedTeam, Score, Team, TeamRef } from "./types";
+import type { Fixture, MatchStage, PredictionMap, ProjectedMatch, QualifiedTeam, Score, StatLeaderboard, Team, TeamRef, ThirdPlaceStandingRow } from "./types";
 
 const validationIssues = validateTournamentData(tournamentData);
 if (validationIssues.length > 0) {
@@ -20,7 +20,7 @@ if (!app) throw new Error("App root missing");
 
 const appRoot = app;
 let predictions: PredictionMap = loadPredictions(tournamentData);
-let activeView: "main" | "bracket" = "main";
+let activeView: "main" | "bracket" | "stats" = "main";
 
 const bracketRounds: MatchStage[] = ["round-of-32", "round-of-16", "quarter-final", "semi-final", "third-place", "final"];
 const fixtureById = new Map(tournamentData.fixtures.map((fixture) => [fixture.id, fixture]));
@@ -38,15 +38,16 @@ function render() {
       </header>
       <nav class="view-tabs" aria-label="Views">
         <button class="${activeView === "main" ? "active" : ""}" type="button" data-view="main">Fixtures</button>
-        <button class="${activeView === "bracket" ? "active" : ""}" type="button" data-view="bracket">Bracket</button>
+        <button class="${activeView === "bracket" ? "active" : ""}" type="button" data-view="bracket">Knockout Stages</button>
+        <button class="${activeView === "stats" ? "active" : ""}" type="button" data-view="stats">Stats</button>
       </nav>
-      ${activeView === "main" ? renderMainView(projection) : renderBracketView(projection)}
+      ${renderActiveView(activeView, projection)}
     </main>
   `;
 
   appRoot.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((button) => {
     button.addEventListener("click", () => {
-      activeView = button.dataset.view === "bracket" ? "bracket" : "main";
+      activeView = parseActiveView(button.dataset.view);
       render();
     });
   });
@@ -54,6 +55,17 @@ function render() {
   appRoot.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-prediction]").forEach((input) => {
     input.addEventListener(input instanceof HTMLSelectElement ? "change" : "input", handlePredictionInput);
   });
+}
+
+function parseActiveView(view: string | undefined): typeof activeView {
+  if (view === "bracket" || view === "stats") return view;
+  return "main";
+}
+
+function renderActiveView(view: typeof activeView, projection: ProjectedMatch[]) {
+  if (view === "bracket") return renderBracketView(projection);
+  if (view === "stats") return renderStatsView();
+  return renderMainView(projection);
 }
 
 function renderMainView(projection: ProjectedMatch[]) {
@@ -77,6 +89,98 @@ function renderMainView(projection: ProjectedMatch[]) {
           <div class="knockout-list">${renderKnockout(projection)}</div>
         </section>
       </div>
+    </div>
+  `;
+}
+
+function renderStatsView() {
+  return `
+    <div class="stats-page">
+      <section>
+        <h2>Stats</h2>
+        <p class="section-note">Player leaderboards use normalized football-data.org scorer data bundled into the static app.</p>
+        <section class="stats-panel" aria-labelledby="player-stats-heading">
+          <div class="stats-panel-heading">
+            <h3 id="player-stats-heading">Player Leaders</h3>
+            <span>${tournamentData.statLeaderboards?.length ?? 0} boards</span>
+          </div>
+          ${renderStatLeaderboards(tournamentData.statLeaderboards ?? [])}
+        </section>
+      </section>
+    </div>
+  `;
+}
+
+function renderStatLeaderboards(leaderboards: StatLeaderboard[]) {
+  if (leaderboards.length === 0) return `<p class="empty-state">No player stat leaderboards are available yet.</p>`;
+
+  return `
+    <div class="leaderboard-grid">
+      ${leaderboards.map(renderStatLeaderboard).join("")}
+    </div>
+  `;
+}
+
+function renderStatLeaderboard(leaderboard: StatLeaderboard) {
+  return `
+    <article class="leaderboard-card">
+      <div class="leaderboard-card-heading">
+        <h4>${leaderboard.label}</h4>
+        <span>${leaderboard.valueLabel}</span>
+      </div>
+      ${leaderboard.entries.length > 0 ? `
+        <div class="leaderboard-list">
+          ${leaderboard.entries.map((entry) => {
+            const team = entry.teamId ? teamById.get(entry.teamId) : undefined;
+            return `
+              <div class="leaderboard-row">
+                <span>${entry.rank}</span>
+                <span class="leaderboard-player">${entry.player}<em>${team?.name ?? entry.detail ?? ""}</em></span>
+                <span class="team-cell">${renderFlag(team)}</span>
+                <strong>${entry.value}</strong>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      ` : `<p class="empty-state">No verified ${leaderboard.label.toLowerCase()} entries have been normalized yet.</p>`}
+      <a class="stats-source-link" href="${leaderboard.source.url}" target="_blank" rel="noreferrer">${leaderboard.source.name}</a>
+    </article>
+  `;
+}
+
+function renderThirdPlaceTable() {
+  const standings = calculateGroupStandings(tournamentData, predictions);
+  const rows = thirdPlaceRankings(standings);
+
+  return `
+    <div class="third-place-table">
+      <div class="third-place-row header">
+        <span>#</span>
+        <span>Group</span>
+        <span>Team</span>
+        <span>P</span>
+        <span>GD</span>
+        <span>GF</span>
+        <span>Pts</span>
+        <span>Status</span>
+      </div>
+      ${rows.map(renderThirdPlaceRow).join("")}
+    </div>
+  `;
+}
+
+function renderThirdPlaceRow(row: ThirdPlaceStandingRow) {
+  const team = teamById.get(row.teamId);
+  return `
+    <div class="third-place-row ${row.qualifies ? "qualifies" : ""}">
+      <span>${row.thirdPlaceRank}</span>
+      <span>${row.group}</span>
+      <span class="team-cell">${renderFlag(team)} ${team?.name ?? row.teamId}</span>
+      <span>${row.played}</span>
+      <span>${row.goalDifference}</span>
+      <span>${row.goalsFor}</span>
+      <span>${row.points}</span>
+      <span>${row.qualifies ? "Qualifies" : "Outside"}</span>
     </div>
   `;
 }
@@ -213,12 +317,28 @@ function renderBracketView(projection: ProjectedMatch[]) {
   return `
     <div class="bracket-page">
       <section>
-        <h2>Bracket</h2>
+        <h2>Knockout Stages</h2>
         <p class="section-note">If we started today: projected from the current tables, real results, and your active predictions.</p>
         ${renderBracketPanel(projection)}
+        ${renderKnockoutQualificationPanel()}
         ${renderBracketFixtureTable(projection)}
       </section>
     </div>
+  `;
+}
+
+function renderKnockoutQualificationPanel() {
+  return `
+    <section class="stats-panel knockout-qualification-panel" aria-labelledby="knockout-qualification-heading">
+      <div class="stats-panel-heading">
+        <div>
+          <h3 id="knockout-qualification-heading">Knockout Qualification</h3>
+          <p>Best third-place teams calculated from real results and your predictions.</p>
+        </div>
+        <span>Top 8 qualify</span>
+      </div>
+      ${renderThirdPlaceTable()}
+    </section>
   `;
 }
 

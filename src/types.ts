@@ -24,6 +24,22 @@ export interface SourceMetadata {
   notes: string;
 }
 
+export interface StatLeaderboardEntry {
+  rank: number;
+  player: string;
+  teamId?: TeamId;
+  value: number;
+  detail?: string;
+}
+
+export interface StatLeaderboard {
+  id: string;
+  label: string;
+  valueLabel: string;
+  source: SourceMetadata;
+  entries: StatLeaderboardEntry[];
+}
+
 export interface Team {
   id: TeamId;
   name: string;
@@ -87,6 +103,7 @@ export interface TournamentData {
   venues: Venue[];
   fixtures: Fixture[];
   knockoutSlots: KnockoutSlot[];
+  statLeaderboards?: StatLeaderboard[];
 }
 
 export interface Prediction {
@@ -107,6 +124,12 @@ export interface StandingRow {
   goalDifference: number;
   points: number;
   rank: number;
+}
+
+export interface ThirdPlaceStandingRow extends StandingRow {
+  group: GroupId;
+  thirdPlaceRank: number;
+  qualifies: boolean;
 }
 
 export interface QualifiedTeam {

@@ -12,7 +12,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "normalize-data": "tsx scripts/normalize-tournament-data.ts",
-    "update-results": "tsx scripts/update-results.ts"
+    "update-results": "tsx scripts/update-results.ts",
+    "update-stats": "tsx scripts/update-stats.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.3",

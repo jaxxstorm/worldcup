@@ -37,6 +37,14 @@ jobs:
           RESULTS_SOURCE_NOTES: ${{ vars.RESULTS_SOURCE_NOTES || 'Official FIFA calendar endpoint used by scheduled result refresh.' }}
           RESULTS_SOURCE_TOKEN: ${{ secrets.RESULTS_SOURCE_TOKEN }}
           FOOTBALL_DATA_API_TOKEN: ${{ secrets.FOOTBALL_DATA_API_TOKEN }}
+      - name: Refresh generated tournament stats
+        run: npm run update-stats
+        env:
+          STATS_SOURCE_URL: ${{ vars.STATS_SOURCE_URL || 'https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100' }}
+          STATS_SOURCE_NAME: ${{ vars.STATS_SOURCE_NAME || 'football-data.org World Cup scorers API' }}
+          STATS_SOURCE_NOTES: ${{ vars.STATS_SOURCE_NOTES || 'football-data.org scorers endpoint normalized into static tournament stat leaderboards.' }}
+          STATS_SOURCE_TOKEN: ${{ secrets.STATS_SOURCE_TOKEN }}
+          FOOTBALL_DATA_API_TOKEN: ${{ secrets.FOOTBALL_DATA_API_TOKEN }}
       - name: Check for data changes
         id: changes
         run: |

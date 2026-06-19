@@ -1,4 +1,4 @@
-import type { GroupId, PredictionMap, StandingRow, TeamId, TournamentData } from "../types";
+import type { GroupId, PredictionMap, StandingRow, TeamId, ThirdPlaceStandingRow, TournamentData } from "../types";
 import { getAppliedScore } from "./predictions";
 
 export function calculateGroupStandings(data: TournamentData, predictions: PredictionMap): Record<GroupId, StandingRow[]> {
@@ -50,6 +50,12 @@ export function groupQualifiers(standings: Record<GroupId, StandingRow[]>) {
 }
 
 export function bestThirdPlacedGroups(standings: Record<GroupId, StandingRow[]>): GroupId[] {
+  return thirdPlaceRankings(standings)
+    .slice(0, 8)
+    .map((row) => row.group);
+}
+
+export function thirdPlaceRankings(standings: Record<GroupId, StandingRow[]>): ThirdPlaceStandingRow[] {
   return (Object.entries(standings) as Array<[GroupId, StandingRow[]]>)
     .flatMap(([group, rows]) => {
       const row = rows[2];
@@ -59,8 +65,12 @@ export function bestThirdPlacedGroups(standings: Record<GroupId, StandingRow[]>)
       const comparison = sortRows(left.row, right.row);
       return comparison || left.group.localeCompare(right.group);
     })
-    .slice(0, 8)
-    .map((entry) => entry.group);
+    .map((entry, index) => ({
+      ...entry.row,
+      group: entry.group,
+      thirdPlaceRank: index + 1,
+      qualifies: index < 8
+    }));
 }
 
 export function thirdPlaceSourceAssignments(sources: string[], bestThirdGroups: GroupId[]): Map<string, string> {

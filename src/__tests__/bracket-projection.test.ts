@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { tournamentData } from "../data/tournament";
 import { projectTournament } from "../engine/knockout";
-import { bestThirdPlacedGroups, calculateGroupStandings, thirdPlaceSourceAssignments } from "../engine/standings";
+import { bestThirdPlacedGroups, calculateGroupStandings, thirdPlaceRankings, thirdPlaceSourceAssignments } from "../engine/standings";
 import type { Fixture, GroupId, PredictionMap, TeamRef, TournamentData } from "../types";
 
 function groupPredictionSet(data = tournamentData): PredictionMap {
@@ -117,10 +117,13 @@ describe("bracket projection", () => {
   it("resolves round-of-32 third-place placeholders once all best third-place groups are knowable", () => {
     const data = editableGroupTournamentData();
     const predictions = groupPredictionSet(data);
+    const standings = calculateGroupStandings(data, predictions);
+    const thirdPlaceGroups = thirdPlaceRankings(standings).filter((row) => row.qualifies).map((row) => row.group);
     const projection = projectTournament(data, predictions);
     const thirdPlaceMatches = projection.filter((match) => match.stage === "round-of-32" && match.awaySource.includes("/"));
     const thirdPlaceFixtures = data.fixtures.filter((fixture) => fixture.stage === "round-of-32" && sourceLabel(fixture.away).includes("/"));
 
+    expect(thirdPlaceGroups).toEqual(bestThirdPlacedGroups(standings));
     expect(thirdPlaceMatches.map((match) => [match.fixtureId, match.away.slot, match.away.teamId])).toEqual(
       thirdPlaceFixtures.map(expectedThirdPlaceSlots(data, predictions))
     );

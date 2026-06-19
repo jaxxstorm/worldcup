@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { tournamentData } from "../data/tournament";
 import { validateTournamentData } from "../data/schema";
+import type { TournamentData } from "../types";
 
 describe("tournament data", () => {
   it("validates the normalized tournament dataset", () => {
@@ -10,6 +11,31 @@ describe("tournament data", () => {
   it("includes source metadata, venue locations, and venue timezones", () => {
     expect(tournamentData.sources.length).toBeGreaterThan(0);
     expect(tournamentData.venues.every((venue) => venue.name && venue.city && venue.country && venue.timeZone)).toBe(true);
+  });
+
+  it("accepts optional stat leaderboards and validates present entries", () => {
+    const withoutLeaderboards = structuredClone(tournamentData) as TournamentData;
+    delete withoutLeaderboards.statLeaderboards;
+    expect(validateTournamentData(withoutLeaderboards)).toEqual([]);
+
+    expect(tournamentData.statLeaderboards?.map((leaderboard) => leaderboard.id)).toEqual(["goals", "assists", "penalties"]);
+    expect(validateTournamentData(tournamentData)).toEqual([]);
+  });
+
+  it("rejects stat leaderboard entries that reference unknown teams", () => {
+    const withBadEntry = structuredClone(tournamentData) as TournamentData;
+    withBadEntry.statLeaderboards = [{
+      id: "goals",
+      label: "Top Goal Scorers",
+      valueLabel: "Goals",
+      source: tournamentData.sources[0],
+      entries: [{ rank: 1, player: "Example Player", teamId: "missing-team", value: 2 }]
+    }];
+
+    expect(validateTournamentData(withBadEntry)).toContainEqual({
+      path: "statLeaderboards.0.entries.0.teamId",
+      message: "entry team reference must exist"
+    });
   });
 
   it("uses the FIFA group-stage schedule cadence in browser-local date buckets", () => {

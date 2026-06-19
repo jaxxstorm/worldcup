@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-19T14:51:45.145Z",
+  "generatedAt": "2026-06-19T15:39:43.785Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -21,9 +21,15 @@
       "notes": "Used for completed group-stage scores through the article update on June 18, 2026."
     },
     {
+      "name": "football-data.org World Cup scorers API",
+      "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
+      "accessedAt": "2026-06-19T15:35:57.639Z",
+      "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
+    },
+    {
       "name": "FIFA World Cup 2026 match calendar API",
       "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
-      "accessedAt": "2026-06-19T14:51:45.145Z",
+      "accessedAt": "2026-06-19T15:39:43.785Z",
       "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
     }
   ],
@@ -587,7 +593,7 @@
       "sourceResult": {
         "name": "FIFA World Cup 2026 match calendar API",
         "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
-        "accessedAt": "2026-06-19T14:51:45.145Z",
+        "accessedAt": "2026-06-19T15:39:43.785Z",
         "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
       }
     },
@@ -608,7 +614,7 @@
       "sourceResult": {
         "name": "FIFA World Cup 2026 match calendar API",
         "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
-        "accessedAt": "2026-06-19T14:51:45.145Z",
+        "accessedAt": "2026-06-19T15:39:43.785Z",
         "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
       }
     },
@@ -693,7 +699,7 @@
       "sourceResult": {
         "name": "FIFA World Cup 2026 match calendar API",
         "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
-        "accessedAt": "2026-06-19T14:51:45.145Z",
+        "accessedAt": "2026-06-19T15:39:43.785Z",
         "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
       }
     },
@@ -714,7 +720,7 @@
       "sourceResult": {
         "name": "FIFA World Cup 2026 match calendar API",
         "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
-        "accessedAt": "2026-06-19T14:51:45.145Z",
+        "accessedAt": "2026-06-19T15:39:43.785Z",
         "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
       }
     },
@@ -2111,6 +2117,222 @@
         "label": "Winner m102"
       },
       "status": "scheduled"
+    }
+  ],
+  "statLeaderboards": [
+    {
+      "id": "goals",
+      "label": "Top Goal Scorers",
+      "valueLabel": "Goals",
+      "source": {
+        "name": "football-data.org World Cup scorers API",
+        "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
+        "accessedAt": "2026-06-19T15:35:57.639Z",
+        "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
+      },
+      "entries": [
+        {
+          "rank": 1,
+          "player": "Jonathan David",
+          "teamId": "canada",
+          "value": 3,
+          "detail": "Canada"
+        },
+        {
+          "rank": 2,
+          "player": "Lionel Messi",
+          "teamId": "argentina",
+          "value": 3,
+          "detail": "Argentina"
+        },
+        {
+          "rank": 3,
+          "player": "Cyle Larin",
+          "teamId": "canada",
+          "value": 2,
+          "detail": "Canada"
+        },
+        {
+          "rank": 4,
+          "player": "Elijah Just",
+          "teamId": "new-zealand",
+          "value": 2,
+          "detail": "New Zealand"
+        },
+        {
+          "rank": 5,
+          "player": "Erling Haaland",
+          "teamId": "norway",
+          "value": 2,
+          "detail": "Norway"
+        },
+        {
+          "rank": 6,
+          "player": "Folarin Balogun",
+          "teamId": "united-states",
+          "value": 2,
+          "detail": "United States"
+        },
+        {
+          "rank": 7,
+          "player": "Harry Kane",
+          "teamId": "england",
+          "value": 2,
+          "detail": "England"
+        },
+        {
+          "rank": 8,
+          "player": "Johan Manzambi",
+          "teamId": "switzerland",
+          "value": 2,
+          "detail": "Switzerland"
+        },
+        {
+          "rank": 9,
+          "player": "Kai Havertz",
+          "teamId": "germany",
+          "value": 2,
+          "detail": "Germany"
+        },
+        {
+          "rank": 10,
+          "player": "Kylian Mbappé",
+          "teamId": "france",
+          "value": 2,
+          "detail": "France"
+        }
+      ]
+    },
+    {
+      "id": "assists",
+      "label": "Top Assists",
+      "valueLabel": "Assists",
+      "source": {
+        "name": "football-data.org World Cup scorers API",
+        "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
+        "accessedAt": "2026-06-19T15:35:57.639Z",
+        "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
+      },
+      "entries": [
+        {
+          "rank": 1,
+          "player": "Alexander Isak",
+          "teamId": "sweden",
+          "value": 2,
+          "detail": "Sweden"
+        },
+        {
+          "rank": 2,
+          "player": "Deniz Undav",
+          "teamId": "germany",
+          "value": 2,
+          "detail": "Germany"
+        },
+        {
+          "rank": 3,
+          "player": "Breel Embolo",
+          "teamId": "switzerland",
+          "value": 1,
+          "detail": "Switzerland"
+        },
+        {
+          "rank": 4,
+          "player": "In-beom Hwang",
+          "teamId": "south-korea",
+          "value": 1,
+          "detail": "South Korea"
+        },
+        {
+          "rank": 5,
+          "player": "Luis Díaz",
+          "teamId": "colombia",
+          "value": 1,
+          "detail": "Colombia"
+        },
+        {
+          "rank": 6,
+          "player": "Nathaniel Brown",
+          "teamId": "germany",
+          "value": 1,
+          "detail": "Germany"
+        },
+        {
+          "rank": 7,
+          "player": "Ramin Rezaeian",
+          "teamId": "iran",
+          "value": 1,
+          "detail": "Iran"
+        },
+        {
+          "rank": 8,
+          "player": "Ruben Vargas",
+          "teamId": "switzerland",
+          "value": 1,
+          "detail": "Switzerland"
+        },
+        {
+          "rank": 9,
+          "player": "Viktor Gyökeres",
+          "teamId": "sweden",
+          "value": 1,
+          "detail": "Sweden"
+        }
+      ]
+    },
+    {
+      "id": "penalties",
+      "label": "Penalty Goals",
+      "valueLabel": "Pens",
+      "source": {
+        "name": "football-data.org World Cup scorers API",
+        "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
+        "accessedAt": "2026-06-19T15:35:57.639Z",
+        "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
+      },
+      "entries": [
+        {
+          "rank": 1,
+          "player": "Breel Embolo",
+          "teamId": "switzerland",
+          "value": 1,
+          "detail": "Switzerland"
+        },
+        {
+          "rank": 2,
+          "player": "Granit Xhaka",
+          "teamId": "switzerland",
+          "value": 1,
+          "detail": "Switzerland"
+        },
+        {
+          "rank": 3,
+          "player": "Harry Kane",
+          "teamId": "england",
+          "value": 1,
+          "detail": "England"
+        },
+        {
+          "rank": 4,
+          "player": "Kai Havertz",
+          "teamId": "germany",
+          "value": 1,
+          "detail": "Germany"
+        },
+        {
+          "rank": 5,
+          "player": "Marko Arnautovic",
+          "teamId": "austria",
+          "value": 1,
+          "detail": "Austria"
+        },
+        {
+          "rank": 6,
+          "player": "Teboho Mokoena",
+          "teamId": "south-africa",
+          "value": 1,
+          "detail": "South Africa"
+        }
+      ]
     }
   ],
   "knockoutSlots": [
