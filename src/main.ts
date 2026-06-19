@@ -7,7 +7,7 @@ import { drawSidesForProjection, projectTournament } from "./engine/knockout";
 import { interpretPredictionInput, isEditableFixture, setPrediction } from "./engine/predictions";
 import { calculateGroupStandings } from "./engine/standings";
 import { loadPredictions, savePredictions } from "./storage/session";
-import type { Fixture, MatchStage, PredictionMap, ProjectedMatch, QualifiedTeam, Team, TeamRef } from "./types";
+import type { Fixture, MatchStage, PredictionMap, ProjectedMatch, QualifiedTeam, Score, Team, TeamRef } from "./types";
 
 const validationIssues = validateTournamentData(tournamentData);
 if (validationIssues.length > 0) {
@@ -51,8 +51,8 @@ function render() {
     });
   });
 
-  appRoot.querySelectorAll<HTMLInputElement>("[data-prediction]").forEach((input) => {
-    input.addEventListener("input", handlePredictionInput);
+  appRoot.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-prediction]").forEach((input) => {
+    input.addEventListener(input instanceof HTMLSelectElement ? "change" : "input", handlePredictionInput);
   });
 }
 
@@ -117,6 +117,7 @@ function renderFixture(fixture: Fixture) {
           <span>${fixture.stage.replaceAll("-", " ")}</span>
           <span>${formatFixtureKickoff(fixture)}</span>
           <span>${venue ? `${venue.name}, ${venue.city}, ${venue.country}` : "Venue TBD"}</span>
+          ${score ? renderScoreDecision(score) : ""}
         </div>
       </div>
       ${renderFixtureControls(fixture)}
@@ -140,11 +141,31 @@ function renderFixtureControls(fixture: Fixture) {
   if (!isEditableFixture(fixture)) return `<div class="fixed-result">Final</div>`;
 
   const score = predictions[fixture.id];
+  const isKnockout = fixture.stage !== "group";
   return `
-    <div class="prediction-controls">
+    <div class="prediction-controls ${isKnockout ? "knockout-prediction-controls" : ""}">
       <input data-prediction="${fixture.id}" data-side="home" min="0" max="99" type="number" inputmode="numeric" value="${score?.home ?? ""}" aria-label="Home score prediction" />
       <input data-prediction="${fixture.id}" data-side="away" min="0" max="99" type="number" inputmode="numeric" value="${score?.away ?? ""}" aria-label="Away score prediction" />
+      ${isKnockout ? renderKnockoutDecisionControls(fixture, score) : ""}
     </div>
+  `;
+}
+
+function renderKnockoutDecisionControls(fixture: Fixture, score?: Score) {
+  if (score?.home === undefined || score.away === undefined || score.home !== score.away) return "";
+
+  return `
+    <select data-prediction="${fixture.id}" data-side="decision" aria-label="Knockout decision method">
+      <option value="aet" ${score?.decision === "aet" ? "selected" : ""}>AET</option>
+      <option value="penalties" ${score?.decision === "penalties" ? "selected" : ""}>Pens</option>
+    </select>
+    ${score?.decision === "penalties" ? `
+      <select data-prediction="${fixture.id}" data-side="winner" aria-label="Penalty winner">
+        <option value="" ${!score?.winner ? "selected" : ""}>Penalty winner</option>
+        <option value="home" ${score?.winner === "home" ? "selected" : ""}>Home advances</option>
+        <option value="away" ${score?.winner === "away" ? "selected" : ""}>Away advances</option>
+      </select>
+    ` : ""}
   `;
 }
 
@@ -267,7 +288,7 @@ function renderBracketNodeContent(match: ProjectedMatch) {
       ${renderDiagramTeam(match.home, match.homeSource, match.winner?.teamId)}
       ${renderDiagramTeam(match.away, match.awaySource, match.winner?.teamId)}
     </div>
-    <div class="diagram-node-detail">${formatFixtureKickoff(match)} · ${venue ? `${venue.city}` : "Venue TBD"}</div>
+    <div class="diagram-node-detail" title="${formatFixtureKickoff(match)} · ${venue ? `${venue.city}` : "Venue TBD"}">${formatBracketDiagramKickoff(match)} · ${venue ? venue.city : "Venue TBD"}</div>
   `;
 }
 
@@ -321,9 +342,10 @@ function renderBracketFixtureRow(match: ProjectedMatch) {
       <span class="bracket-fixture-teams">
         <span>${renderBracketTableTeam(match.home, match.homeSource)} <strong>${score?.home ?? "-"}</strong></span>
         <span>${renderBracketTableTeam(match.away, match.awaySource)} <strong>${score?.away ?? "-"}</strong></span>
+        ${score ? renderScoreDecision(score) : ""}
       </span>
-      <span>${formatFixtureKickoff(match)}</span>
-      <span>${venue ? `${venue.name}, ${venue.city}` : "Venue TBD"}</span>
+      <span class="bracket-fixture-kickoff" title="${formatFixtureKickoff(match)}">${formatFixtureKickoff(match)}</span>
+      <span class="bracket-fixture-venue" title="${venue ? `${venue.name}, ${venue.city}` : "Venue TBD"}">${venue ? `${venue.name}, ${venue.city}` : "Venue TBD"}</span>
       <span>${fixture ? renderFixtureControls(fixture) : ""}</span>
     </div>
   `;
@@ -499,17 +521,22 @@ function formatStage(stage: MatchStage) {
 }
 
 function handlePredictionInput(event: Event) {
-  const input = event.currentTarget as HTMLInputElement;
+  const input = event.currentTarget as HTMLInputElement | HTMLSelectElement;
   const fixtureId = input.dataset.prediction;
   if (!fixtureId) return;
 
   const fixture = tournamentData.fixtures.find((candidate) => candidate.id === fixtureId);
   if (!fixture || !isEditableFixture(fixture)) return;
 
-  const controls = Array.from(appRoot.querySelectorAll<HTMLInputElement>(`[data-prediction="${fixtureId}"]`));
+  const controls = Array.from(appRoot.querySelectorAll<HTMLInputElement | HTMLSelectElement>(`[data-prediction="${fixtureId}"]`));
   const home = controls.find((control) => control.dataset.side === "home")?.value;
   const away = controls.find((control) => control.dataset.side === "away")?.value;
-  const decision = interpretPredictionInput(home, away, Boolean(predictions[fixtureId]));
+  const homeScore = home === undefined || home === "" ? undefined : Number(home);
+  const awayScore = away === undefined || away === "" ? undefined : Number(away);
+  const tiedScore = Number.isInteger(homeScore) && Number.isInteger(awayScore) && homeScore === awayScore;
+  const method = tiedScore ? controls.find((control) => control.dataset.side === "decision")?.value : "regular";
+  const winner = method === "penalties" ? controls.find((control) => control.dataset.side === "winner")?.value : "";
+  const decision = interpretPredictionInput(home, away, Boolean(predictions[fixtureId]), method, winner, fixture.stage !== "group");
 
   if (decision.kind === "partial") return;
 
@@ -523,7 +550,7 @@ function handlePredictionInput(event: Event) {
   renderPreservingPredictionInput(input);
 }
 
-function renderPreservingPredictionInput(input: HTMLInputElement) {
+function renderPreservingPredictionInput(input: HTMLInputElement | HTMLSelectElement) {
   const fixtureId = input.dataset.prediction;
   const side = input.dataset.side;
   const scrollX = window.scrollX;
@@ -532,13 +559,29 @@ function renderPreservingPredictionInput(input: HTMLInputElement) {
   render();
 
   if (fixtureId && side) {
-    const restoredInput = Array.from(appRoot.querySelectorAll<HTMLInputElement>("[data-prediction]")).find(
+    const restoredInput = Array.from(appRoot.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-prediction]")).find(
       (candidate) => candidate.dataset.prediction === fixtureId && candidate.dataset.side === side
     );
     restoredInput?.focus({ preventScroll: true });
   }
 
   window.scrollTo(scrollX, scrollY);
+}
+
+function renderScoreDecision(score: Score) {
+  if (score.decision === "penalties") return `<span class="score-decision">Pens</span>`;
+  if (score.decision === "aet") return `<span class="score-decision">AET</span>`;
+  return "";
+}
+
+function formatBracketDiagramKickoff(match: Pick<ProjectedMatch, "date">) {
+  const date = new Date(match.date);
+
+  if (Number.isNaN(date.getTime())) {
+    return "TBD";
+  }
+
+  return date.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
 render();

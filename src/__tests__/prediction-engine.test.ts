@@ -54,6 +54,20 @@ describe("prediction engine", () => {
     expect(interpretPredictionInput("2", "1")).toEqual({ kind: "complete", score: { home: 2, away: 1 } });
   });
 
+  it("marks tied knockout predictions as after extra time before penalties are selected", () => {
+    expect(interpretPredictionInput("1", "1", false, "regular", "", true)).toEqual({
+      kind: "complete",
+      score: { home: 1, away: 1, decision: "aet" }
+    });
+  });
+
+  it("stores a knockout penalty winner when penalties decide a tied prediction", () => {
+    expect(interpretPredictionInput("1", "1", false, "penalties", "away", true)).toEqual({
+      kind: "complete",
+      score: { home: 1, away: 1, decision: "penalties", winner: "away" }
+    });
+  });
+
   it("interprets empty prediction input values as cleared", () => {
     expect(interpretPredictionInput("", "")).toEqual({ kind: "cleared" });
   });

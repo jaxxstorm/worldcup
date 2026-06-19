@@ -53,6 +53,8 @@ export interface Venue {
 export interface Score {
   home: number;
   away: number;
+  decision?: "regular" | "aet" | "penalties";
+  winner?: "home" | "away";
 }
 
 export interface Fixture {

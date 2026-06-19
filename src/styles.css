@@ -14,7 +14,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -218,11 +219,26 @@ h2 {
   gap: 8px;
 }
 
-.prediction-controls input {
+.prediction-controls input,
+.prediction-controls select {
   width: 54px;
   padding: 8px;
   border: 1px solid #b9c8bd;
   border-radius: 6px;
+  background: #fff;
+}
+
+.knockout-prediction-controls {
+  grid-template-columns: 54px 54px minmax(84px, auto);
+}
+
+.knockout-prediction-controls select {
+  width: auto;
+  min-width: 84px;
+}
+
+.knockout-prediction-controls select[data-side="winner"] {
+  grid-column: 1 / -1;
 }
 
 .fixed-result {
@@ -340,6 +356,7 @@ h2 {
   grid-template-rows: auto minmax(0, 1fr) auto;
   width: 100%;
   height: 100%;
+  overflow: hidden;
   padding: 9px;
   border: 1px solid #cbd8ce;
   border-radius: 8px;
@@ -365,15 +382,24 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  min-width: 0;
   color: #607268;
   font-size: 11px;
   text-transform: uppercase;
 }
 
+.diagram-node-meta span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .diagram-node-detail {
   display: block;
-  overflow: visible;
-  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   text-transform: none;
 }
 
@@ -386,9 +412,10 @@ h2 {
 
 .diagram-team {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) auto;
+  grid-template-columns: 28px minmax(0, 1fr) minmax(24px, auto);
   align-items: center;
   gap: 6px;
+  min-width: 0;
   min-height: 34px;
   padding: 3px 5px;
   border-radius: 5px;
@@ -408,12 +435,17 @@ h2 {
 
 .diagram-team span {
   min-width: 0;
-  overflow: visible;
-  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   line-height: 1.15;
 }
 
 .diagram-team em {
+  max-width: 52px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: #607268;
   font-size: 10px;
   font-style: normal;
@@ -435,7 +467,7 @@ h2 {
 
 .bracket-fixture-row {
   display: grid;
-  grid-template-columns: 72px 120px minmax(220px, 1.2fr) minmax(190px, 0.8fr) minmax(220px, 1fr) 132px;
+  grid-template-columns: 72px 120px minmax(220px, 1.2fr) minmax(190px, 0.8fr) minmax(220px, 1fr) minmax(180px, auto);
   gap: 12px;
   align-items: center;
   min-width: 1040px;
@@ -471,6 +503,18 @@ h2 {
   min-width: 0;
 }
 
+.bracket-table-team,
+.bracket-fixture-kickoff,
+.bracket-fixture-venue {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bracket-table-team {
+  max-width: 100%;
+}
+
 .bracket-fixture-teams strong {
   min-width: 22px;
   text-align: right;
@@ -480,9 +524,32 @@ h2 {
   grid-template-columns: 46px 46px;
 }
 
-.bracket-fixture-row .prediction-controls input {
+.bracket-fixture-row .prediction-controls input,
+.bracket-fixture-row .prediction-controls select {
   width: 46px;
   padding: 6px;
+}
+
+.bracket-fixture-row .knockout-prediction-controls {
+  grid-template-columns: 46px 46px minmax(76px, auto);
+}
+
+.bracket-fixture-row .knockout-prediction-controls select {
+  width: auto;
+  min-width: 76px;
+}
+
+.score-decision {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #18402e;
+  background: #e5f3e8;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .draw-side-board {

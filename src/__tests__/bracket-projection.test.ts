@@ -49,6 +49,35 @@ describe("bracket projection", () => {
     expect(roundOf16Match?.home.teamId).toBe(roundOf32Match.home.teamId);
   });
 
+  it("uses penalty winners to advance tied knockout predictions", () => {
+    const basePredictions = groupPredictionSet();
+    const firstProjection = projectTournament(tournamentData, basePredictions);
+    const roundOf32Match = firstProjection.find((match) => match.fixtureId === "m073")!;
+    const knockoutPredictions = {
+      ...basePredictions,
+      m073: { home: 1, away: 1, decision: "penalties", winner: "away" } as const
+    };
+
+    const nextProjection = projectTournament(tournamentData, knockoutPredictions);
+    const roundOf16Match = nextProjection.find((match) => match.fixtureId === "m089");
+
+    expect(roundOf16Match?.home.teamId).toBe(roundOf32Match.away.teamId);
+  });
+
+  it("does not advance a tied knockout prediction before a penalty winner is selected", () => {
+    const basePredictions = groupPredictionSet();
+    const knockoutPredictions = {
+      ...basePredictions,
+      m073: { home: 1, away: 1, decision: "aet" } as const
+    };
+
+    const nextProjection = projectTournament(tournamentData, knockoutPredictions);
+    const roundOf16Match = nextProjection.find((match) => match.fixtureId === "m089");
+
+    expect(roundOf16Match?.home.teamId).toBeUndefined();
+    expect(roundOf16Match?.home.label).toBe("Winner m073");
+  });
+
   it("selects the eight best third-place groups from completed projected standings", () => {
     const standings = calculateGroupStandings(tournamentData, groupPredictionSet());
 

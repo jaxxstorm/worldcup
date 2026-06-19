@@ -9,6 +9,8 @@ interface ResultEntry {
   matchNumber?: number;
   home: number;
   away: number;
+  decision?: Score["decision"];
+  winner?: Score["winner"];
   status?: string;
 }
 
@@ -78,7 +80,7 @@ export function mergeResultFeed(baseData: TournamentData, feed: ResultFeed | Tou
       throw new Error(`Invalid score for fixture ${fixture.id}`);
     }
 
-    const incomingScore = { home: entry.home, away: entry.away };
+    const incomingScore = normalizeIncomingScore(fixture, entry);
     if (fixture.status === "completed") {
       if (!fixture.result || !sameScore(fixture.result, incomingScore)) {
         throw new Error(`Incoming result conflicts with completed fixture ${fixture.id}`);
@@ -128,7 +130,9 @@ function extractResultEntries(feed: ResultFeed | TournamentData | FootballDataFe
         fixtureId: fixture.id,
         matchNumber: fixture.matchNumber,
         home: fixture.result!.home,
-        away: fixture.result!.away
+        away: fixture.result!.away,
+        decision: fixture.result!.decision,
+        winner: fixture.result!.winner
       }));
   }
 
@@ -257,7 +261,41 @@ function appendSource(sources: SourceMetadata[], source: SourceMetadata): Source
 }
 
 function sameScore(left: Score, right: Score): boolean {
-  return left.home === right.home && left.away === right.away;
+  return left.home === right.home && left.away === right.away && left.decision === right.decision && left.winner === right.winner;
+}
+
+function normalizeIncomingScore(fixture: Fixture, entry: ResultEntry): Score {
+  const score: Score = {
+    home: entry.home,
+    away: entry.away,
+    ...(entry.decision && entry.decision !== "regular" ? { decision: entry.decision } : {}),
+    ...(entry.winner ? { winner: entry.winner } : {})
+  };
+
+  if (fixture.stage === "group") {
+    if (score.decision || score.winner) throw new Error(`Group result ${fixture.id} cannot include knockout tiebreakers`);
+    return score;
+  }
+
+  if (score.decision && score.decision !== "aet" && score.decision !== "penalties") {
+    throw new Error(`Invalid knockout decision for fixture ${fixture.id}`);
+  }
+  if (score.winner && score.winner !== "home" && score.winner !== "away") {
+    throw new Error(`Invalid knockout winner for fixture ${fixture.id}`);
+  }
+  if (score.home === score.away && (score.decision !== "penalties" || !score.winner)) {
+    throw new Error(`Tied knockout result ${fixture.id} must include penalties and a winner`);
+  }
+  if (score.home !== score.away && score.decision === "penalties") {
+    throw new Error(`Penalty result ${fixture.id} must have a tied score`);
+  }
+
+  return {
+    home: score.home,
+    away: score.away,
+    ...(score.decision ? { decision: score.decision } : {}),
+    ...(score.decision === "penalties" && score.winner ? { winner: score.winner } : {})
+  };
 }
 
 function describeEntry(entry: ResultEntry): string {

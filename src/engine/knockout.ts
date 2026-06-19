@@ -1,4 +1,4 @@
-import type { MatchStage, PredictionMap, ProjectedMatch, QualifiedTeam, TournamentData } from "../types";
+import type { MatchStage, PredictionMap, ProjectedMatch, QualifiedTeam, Score, TournamentData } from "../types";
 import { getAppliedScore } from "./predictions";
 import { bestThirdPlacedGroups, calculateGroupStandings, groupQualifiers, thirdPlaceSourceAssignments } from "./standings";
 
@@ -23,8 +23,8 @@ export function projectTournament(data: TournamentData, predictions: PredictionM
       const home = resolveSource(labelFor(fixture.home), qualifiers, winners, losers, thirdPlaceAssignments);
       const away = resolveSource(labelFor(fixture.away), qualifiers, winners, losers, thirdPlaceAssignments);
       const score = getAppliedScore(fixture, predictions);
-      const winner = score ? pickWinner(home, away, score.home, score.away) : undefined;
-      const loser = score ? pickWinner(away, home, score.away, score.home) : undefined;
+      const winner = score ? pickWinner(home, away, score) : undefined;
+      const loser = score ? pickLoser(home, away, score) : undefined;
 
       if (winner) winners.set(fixture.id, winner);
       if (loser) losers.set(fixture.id, loser);
@@ -85,9 +85,18 @@ export function drawSidesForProjection(projection: ProjectedMatch[]): DrawSide[]
   ];
 }
 
-function pickWinner(home: QualifiedTeam, away: QualifiedTeam, homeScore: number, awayScore: number) {
-  if (homeScore === awayScore) return undefined;
-  return homeScore > awayScore ? home : away;
+function pickWinner(home: QualifiedTeam, away: QualifiedTeam, score: Score) {
+  if (score.home > score.away) return home;
+  if (score.away > score.home) return away;
+  if (score.winner === "home") return home;
+  if (score.winner === "away") return away;
+  return undefined;
+}
+
+function pickLoser(home: QualifiedTeam, away: QualifiedTeam, score: Score) {
+  const winner = pickWinner(home, away, score);
+  if (!winner) return undefined;
+  return winner === home ? away : home;
 }
 
 function labelFor(value: unknown): string {

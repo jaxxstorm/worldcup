@@ -32,11 +32,21 @@ export function validateTournamentData(data: TournamentData): ValidationIssue[] 
   });
 
   data.fixtures.forEach((fixture, index) => {
+    const result = fixture.result;
     if (fixtureIds.has(fixture.id)) issues.push({ path: `fixtures.${index}.id`, message: "fixture id must be unique" });
     fixtureIds.add(fixture.id);
     if (!venueIds.has(fixture.venueId)) issues.push({ path: `fixtures.${index}.venueId`, message: "fixture venue must exist" });
     if (fixture.stage === "group" && !fixture.group) issues.push({ path: `fixtures.${index}.group`, message: "group fixture must include group" });
-    if (fixture.status === "completed" && !fixture.result) issues.push({ path: `fixtures.${index}.result`, message: "completed fixture must include result" });
+    if (fixture.status === "completed" && !result) issues.push({ path: `fixtures.${index}.result`, message: "completed fixture must include result" });
+    if (fixture.stage === "group" && result && (result.decision || result.winner)) {
+      issues.push({ path: `fixtures.${index}.result`, message: "group result must not include knockout tiebreakers" });
+    }
+    if (fixture.stage !== "group" && fixture.status === "completed" && result && result.home === result.away && result.decision !== "penalties") {
+      issues.push({ path: `fixtures.${index}.result`, message: "tied completed knockout result must be decided by penalties" });
+    }
+    if (fixture.stage !== "group" && fixture.status === "completed" && result?.decision === "penalties" && !result.winner) {
+      issues.push({ path: `fixtures.${index}.result.winner`, message: "penalty result must include a winner" });
+    }
     validateTeamRef(data, fixture.home, `fixtures.${index}.home`, issues);
     validateTeamRef(data, fixture.away, `fixtures.${index}.away`, issues);
   });

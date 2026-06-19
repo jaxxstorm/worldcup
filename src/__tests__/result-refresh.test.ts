@@ -27,6 +27,29 @@ describe("result refresh", () => {
     expect(result.data.generatedAt).toBe(source.accessedAt);
   });
 
+  it("merges a tied knockout result with penalties and winner", () => {
+    const openFixture = tournamentData.fixtures.find((fixture) => fixture.stage === "round-of-32" && fixture.status === "scheduled")!;
+    const result = mergeResultFeed(tournamentData, {
+      results: [{ fixtureId: openFixture.id, home: 1, away: 1, decision: "penalties", winner: "home" }]
+    }, source);
+
+    expect(result.changed).toBe(true);
+    expect(result.data.fixtures.find((fixture) => fixture.id === openFixture.id)!.result).toEqual({
+      home: 1,
+      away: 1,
+      decision: "penalties",
+      winner: "home"
+    });
+  });
+
+  it("rejects a tied knockout result without a penalty winner", () => {
+    const openFixture = tournamentData.fixtures.find((fixture) => fixture.stage === "round-of-32" && fixture.status === "scheduled")!;
+
+    expect(() => mergeResultFeed(tournamentData, {
+      results: [{ fixtureId: openFixture.id, home: 1, away: 1, decision: "aet" }]
+    }, source)).toThrow(`Tied knockout result ${openFixture.id} must include penalties and a winner`);
+  });
+
   it("does not change data when a feed repeats an existing completed result", () => {
     const completedFixture = tournamentData.fixtures.find((fixture) => fixture.status === "completed" && fixture.result)!;
     const result = mergeResultFeed(tournamentData, {
