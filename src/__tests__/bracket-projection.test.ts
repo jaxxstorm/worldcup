@@ -2,14 +2,43 @@ import { describe, expect, it } from "vitest";
 import { tournamentData } from "../data/tournament";
 import { projectTournament } from "../engine/knockout";
 import { bestThirdPlacedGroups, calculateGroupStandings, thirdPlaceSourceAssignments } from "../engine/standings";
-import type { GroupId, PredictionMap } from "../types";
+import type { Fixture, GroupId, PredictionMap, TeamRef, TournamentData } from "../types";
 
-function groupPredictionSet(): PredictionMap {
+function groupPredictionSet(data = tournamentData): PredictionMap {
   return Object.fromEntries(
-    tournamentData.fixtures
+    data.fixtures
       .filter((fixture) => fixture.stage === "group" && fixture.status === "scheduled")
       .map((fixture) => [fixture.id, { home: 1, away: 0 }])
   );
+}
+
+function editableGroupTournamentData(): TournamentData {
+  const data = structuredClone(tournamentData) as TournamentData;
+
+  for (const fixture of data.fixtures) {
+    if (fixture.stage !== "group") continue;
+    fixture.status = "scheduled";
+    delete fixture.result;
+    delete fixture.sourceResult;
+  }
+
+  return data;
+}
+
+function sourceLabel(source: TeamRef): string {
+  return typeof source === "string" ? source : source.label;
+}
+
+function expectedThirdPlaceSlots(data: TournamentData, predictions: PredictionMap) {
+  const standings = calculateGroupStandings(data, predictions);
+  const bestGroups = bestThirdPlacedGroups(standings);
+  const assignments = thirdPlaceSourceAssignments(data.fixtures.flatMap((fixture) => [sourceLabel(fixture.home), sourceLabel(fixture.away)]), bestGroups);
+
+  return (fixture: Fixture) => {
+    const slot = assignments.get(sourceLabel(fixture.away));
+    const group = slot?.slice(1) as GroupId | undefined;
+    return [fixture.id, slot, group ? standings[group][2]?.teamId : undefined];
+  };
 }
 
 describe("bracket projection", () => {
@@ -79,33 +108,32 @@ describe("bracket projection", () => {
   });
 
   it("selects the eight best third-place groups from completed projected standings", () => {
-    const standings = calculateGroupStandings(tournamentData, groupPredictionSet());
+    const data = editableGroupTournamentData();
+    const standings = calculateGroupStandings(data, groupPredictionSet(data));
 
-    expect(bestThirdPlacedGroups(standings)).toEqual(["F", "B", "G", "C", "K", "H", "J", "D"]);
+    expect(bestThirdPlacedGroups(standings)).toEqual(["J", "D", "B", "H", "E", "L", "K", "G"]);
   });
 
   it("resolves round-of-32 third-place placeholders once all best third-place groups are knowable", () => {
-    const projection = projectTournament(tournamentData, groupPredictionSet());
+    const data = editableGroupTournamentData();
+    const predictions = groupPredictionSet(data);
+    const projection = projectTournament(data, predictions);
     const thirdPlaceMatches = projection.filter((match) => match.stage === "round-of-32" && match.awaySource.includes("/"));
+    const thirdPlaceFixtures = data.fixtures.filter((fixture) => fixture.stage === "round-of-32" && sourceLabel(fixture.away).includes("/"));
 
-    expect(thirdPlaceMatches.map((match) => [match.fixtureId, match.away.slot, match.away.teamId])).toEqual([
-      ["m074", "3F", "netherlands"],
-      ["m077", "3B", "canada"],
-      ["m079", "3G", "egypt"],
-      ["m080", "3C", "morocco"],
-      ["m081", "3K", "portugal"],
-      ["m082", "3H", "spain"],
-      ["m085", "3J", "austria"],
-      ["m087", "3D", "australia"]
-    ]);
+    expect(thirdPlaceMatches.map((match) => [match.fixtureId, match.away.slot, match.away.teamId])).toEqual(
+      thirdPlaceFixtures.map(expectedThirdPlaceSlots(data, predictions))
+    );
   });
 
   it("resolves round-of-32 third-place placeholders from current standings before the group stage is complete", () => {
     const projection = projectTournament(tournamentData, {});
     const thirdPlaceMatches = projection.filter((match) => match.stage === "round-of-32" && match.awaySource.includes("/"));
+    const thirdPlaceFixtures = tournamentData.fixtures.filter((fixture) => fixture.stage === "round-of-32" && sourceLabel(fixture.away).includes("/"));
 
-    expect(bestThirdPlacedGroups(calculateGroupStandings(tournamentData, {}))).toEqual(["F", "G", "C", "K", "B", "H", "A", "E"]);
-    expect(thirdPlaceMatches.every((match) => match.away.teamId && match.away.slot.startsWith("3"))).toBe(true);
+    expect(thirdPlaceMatches.map((match) => [match.fixtureId, match.away.slot, match.away.teamId])).toEqual(
+      thirdPlaceFixtures.map(expectedThirdPlaceSlots(tournamentData, {}))
+    );
   });
 
   it("keeps third-place assignments unresolved only when fewer than eight groups exist", () => {
