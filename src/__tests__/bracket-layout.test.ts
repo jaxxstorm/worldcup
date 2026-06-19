@@ -17,7 +17,7 @@ describe("bracket layout", () => {
 
     expect(layout.connectors).toContainEqual(expect.objectContaining({
       fromFixtureId: "m073",
-      toFixtureId: "m089"
+      toFixtureId: "m090"
     }));
     expect(layout.connectors).toContainEqual(expect.objectContaining({
       fromFixtureId: "m101",

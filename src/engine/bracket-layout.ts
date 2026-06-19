@@ -32,17 +32,17 @@ const centerX = 1062;
 const rightColumns = [2136, 1868, 1600, 1330];
 
 const sideRounds = [
-  { start: 73, end: 80, column: 0 },
-  { start: 89, end: 92, column: 1 },
-  { start: 97, end: 98, column: 2 },
-  { start: 101, end: 101, column: 3 }
+  { matches: [74, 77, 73, 75, 83, 84, 81, 82], column: 0 },
+  { matches: [89, 90, 93, 94], column: 1 },
+  { matches: [97, 98], column: 2 },
+  { matches: [101], column: 3 }
 ];
 
 const rightRounds = [
-  { start: 81, end: 88, column: 0 },
-  { start: 93, end: 96, column: 1 },
-  { start: 99, end: 100, column: 2 },
-  { start: 102, end: 102, column: 3 }
+  { matches: [76, 78, 79, 80, 86, 88, 85, 87], column: 0 },
+  { matches: [91, 92, 95, 96], column: 1 },
+  { matches: [99, 100], column: 2 },
+  { matches: [102], column: 3 }
 ];
 
 export function buildBracketLayout(projection: ProjectedMatch[]): BracketLayout {
@@ -76,14 +76,14 @@ function buildSideNodes(
   const yByMatchNumber = new Map<number, number>();
 
   for (const round of rounds) {
-    for (let matchNumber = round.start; matchNumber <= round.end; matchNumber += 1) {
+    for (const [index, matchNumber] of round.matches.entries()) {
       const match = matchByNumber.get(matchNumber);
       if (!match) continue;
 
       const childNumbers = sourceMatchNumbers(match);
       const y = childNumbers.length > 0 && childNumbers.every((child) => yByMatchNumber.has(child))
         ? average(childNumbers.map((child) => yByMatchNumber.get(child)!))
-        : top + (matchNumber - round.start) * (nodeHeight + rowGap);
+        : top + index * (nodeHeight + rowGap);
 
       yByMatchNumber.set(matchNumber, y);
       nodes.push({

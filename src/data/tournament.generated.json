@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-19T03:53:42.773Z",
+  "generatedAt": "2026-06-18T00:00:00.000Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -19,12 +19,6 @@
       "url": "https://www.sbnation.com/soccer/1117513/world-cup-schedule-2026-how-to-watch-every-match-scores-and-more",
       "accessedAt": "2026-06-18T00:00:00.000Z",
       "notes": "Used for completed group-stage scores through the article update on June 18, 2026."
-    },
-    {
-      "name": "FIFA World Cup 2026 match calendar API",
-      "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
-      "accessedAt": "2026-06-19T03:53:42.773Z",
-      "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
     }
   ],
   "teams": [
@@ -579,17 +573,7 @@
       "venueId": "estadio-akron",
       "home": "mexico",
       "away": "south-korea",
-      "status": "completed",
-      "result": {
-        "home": 1,
-        "away": 0
-      },
-      "sourceResult": {
-        "name": "FIFA World Cup 2026 match calendar API",
-        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
-        "accessedAt": "2026-06-19T03:53:42.773Z",
-        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
-      }
+      "status": "scheduled"
     },
     {
       "id": "m004",
@@ -600,17 +584,7 @@
       "venueId": "mercedes-benz-stadium",
       "home": "czechia",
       "away": "south-africa",
-      "status": "completed",
-      "result": {
-        "home": 1,
-        "away": 1
-      },
-      "sourceResult": {
-        "name": "FIFA World Cup 2026 match calendar API",
-        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
-        "accessedAt": "2026-06-19T03:53:42.773Z",
-        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
-      }
+      "status": "scheduled"
     },
     {
       "id": "m005",
@@ -685,17 +659,7 @@
       "venueId": "bc-place",
       "home": "canada",
       "away": "qatar",
-      "status": "completed",
-      "result": {
-        "home": 6,
-        "away": 0
-      },
-      "sourceResult": {
-        "name": "FIFA World Cup 2026 match calendar API",
-        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
-        "accessedAt": "2026-06-19T03:53:42.773Z",
-        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
-      }
+      "status": "scheduled"
     },
     {
       "id": "m010",
@@ -706,17 +670,7 @@
       "venueId": "sofi-stadium",
       "home": "switzerland",
       "away": "bosnia",
-      "status": "completed",
-      "result": {
-        "home": 4,
-        "away": 1
-      },
-      "sourceResult": {
-        "name": "FIFA World Cup 2026 match calendar API",
-        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
-        "accessedAt": "2026-06-19T03:53:42.773Z",
-        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
-      }
+      "status": "scheduled"
     },
     {
       "id": "m011",
@@ -1605,10 +1559,42 @@
       "matchNumber": 73,
       "stage": "round-of-32",
       "date": "2026-06-28T19:00:00Z",
-      "venueId": "estadio-azteca",
+      "venueId": "sofi-stadium",
       "home": {
         "kind": "placeholder",
-        "label": "1A"
+        "label": "2A"
+      },
+      "away": {
+        "kind": "placeholder",
+        "label": "2B"
+      },
+      "status": "scheduled"
+    },
+    {
+      "id": "m074",
+      "matchNumber": 74,
+      "stage": "round-of-32",
+      "date": "2026-06-29T20:30:00Z",
+      "venueId": "gillette-stadium",
+      "home": {
+        "kind": "placeholder",
+        "label": "1E"
+      },
+      "away": {
+        "kind": "placeholder",
+        "label": "3A/B/C/D/F"
+      },
+      "status": "scheduled"
+    },
+    {
+      "id": "m075",
+      "matchNumber": 75,
+      "stage": "round-of-32",
+      "date": "2026-06-30T01:00:00Z",
+      "venueId": "estadio-bbva",
+      "home": {
+        "kind": "placeholder",
+        "label": "1F"
       },
       "away": {
         "kind": "placeholder",
@@ -1617,46 +1603,14 @@
       "status": "scheduled"
     },
     {
-      "id": "m074",
-      "matchNumber": 74,
-      "stage": "round-of-32",
-      "date": "2026-06-28T19:00:00Z",
-      "venueId": "bmo-field",
-      "home": {
-        "kind": "placeholder",
-        "label": "1B"
-      },
-      "away": {
-        "kind": "placeholder",
-        "label": "3A/B/C"
-      },
-      "status": "scheduled"
-    },
-    {
-      "id": "m075",
-      "matchNumber": 75,
-      "stage": "round-of-32",
-      "date": "2026-06-28T19:00:00Z",
-      "venueId": "sofi-stadium",
-      "home": {
-        "kind": "placeholder",
-        "label": "1C"
-      },
-      "away": {
-        "kind": "placeholder",
-        "label": "3D/E/F"
-      },
-      "status": "scheduled"
-    },
-    {
       "id": "m076",
       "matchNumber": 76,
       "stage": "round-of-32",
-      "date": "2026-06-28T19:00:00Z",
-      "venueId": "metlife-stadium",
+      "date": "2026-06-29T17:00:00Z",
+      "venueId": "nrg-stadium",
       "home": {
         "kind": "placeholder",
-        "label": "1D"
+        "label": "1C"
       },
       "away": {
         "kind": "placeholder",
@@ -1668,15 +1622,15 @@
       "id": "m077",
       "matchNumber": 77,
       "stage": "round-of-32",
-      "date": "2026-06-28T19:00:00Z",
-      "venueId": "at-and-t-stadium",
+      "date": "2026-06-30T21:00:00Z",
+      "venueId": "metlife-stadium",
       "home": {
         "kind": "placeholder",
-        "label": "1E"
+        "label": "1I"
       },
       "away": {
         "kind": "placeholder",
-        "label": "2G"
+        "label": "3C/D/F/G/H"
       },
       "status": "scheduled"
     },
@@ -1684,27 +1638,11 @@
       "id": "m078",
       "matchNumber": 78,
       "stage": "round-of-32",
-      "date": "2026-06-28T19:00:00Z",
-      "venueId": "mercedes-benz-stadium",
+      "date": "2026-06-30T17:00:00Z",
+      "venueId": "at-and-t-stadium",
       "home": {
         "kind": "placeholder",
-        "label": "1F"
-      },
-      "away": {
-        "kind": "placeholder",
-        "label": "3H/I/J"
-      },
-      "status": "scheduled"
-    },
-    {
-      "id": "m079",
-      "matchNumber": 79,
-      "stage": "round-of-32",
-      "date": "2026-06-28T19:00:00Z",
-      "venueId": "hard-rock-stadium",
-      "home": {
-        "kind": "placeholder",
-        "label": "1G"
+        "label": "2E"
       },
       "away": {
         "kind": "placeholder",
@@ -1713,18 +1651,34 @@
       "status": "scheduled"
     },
     {
-      "id": "m080",
-      "matchNumber": 80,
+      "id": "m079",
+      "matchNumber": 79,
       "stage": "round-of-32",
-      "date": "2026-06-28T19:00:00Z",
-      "venueId": "lumen-field",
+      "date": "2026-07-01T01:00:00Z",
+      "venueId": "estadio-azteca",
       "home": {
         "kind": "placeholder",
-        "label": "1H"
+        "label": "1A"
       },
       "away": {
         "kind": "placeholder",
-        "label": "3K/L/A"
+        "label": "3C/E/F/H/I"
+      },
+      "status": "scheduled"
+    },
+    {
+      "id": "m080",
+      "matchNumber": 80,
+      "stage": "round-of-32",
+      "date": "2026-07-01T16:00:00Z",
+      "venueId": "mercedes-benz-stadium",
+      "home": {
+        "kind": "placeholder",
+        "label": "1L"
+      },
+      "away": {
+        "kind": "placeholder",
+        "label": "3E/H/I/J/K"
       },
       "status": "scheduled"
     },
@@ -1732,15 +1686,15 @@
       "id": "m081",
       "matchNumber": 81,
       "stage": "round-of-32",
-      "date": "2026-06-28T19:00:00Z",
-      "venueId": "bc-place",
+      "date": "2026-07-02T00:00:00Z",
+      "venueId": "levi-stadium",
       "home": {
         "kind": "placeholder",
-        "label": "1I"
+        "label": "1D"
       },
       "away": {
         "kind": "placeholder",
-        "label": "2K"
+        "label": "3B/E/F/I/J"
       },
       "status": "scheduled"
     },
@@ -1748,15 +1702,15 @@
       "id": "m082",
       "matchNumber": 82,
       "stage": "round-of-32",
-      "date": "2026-06-28T19:00:00Z",
-      "venueId": "estadio-bbva",
+      "date": "2026-07-01T20:00:00Z",
+      "venueId": "lumen-field",
       "home": {
         "kind": "placeholder",
-        "label": "1J"
+        "label": "1G"
       },
       "away": {
         "kind": "placeholder",
-        "label": "3B/C/D"
+        "label": "3A/E/H/I/J"
       },
       "status": "scheduled"
     },
@@ -1764,15 +1718,15 @@
       "id": "m083",
       "matchNumber": 83,
       "stage": "round-of-32",
-      "date": "2026-06-28T19:00:00Z",
-      "venueId": "estadio-akron",
+      "date": "2026-07-02T23:00:00Z",
+      "venueId": "bmo-field",
       "home": {
         "kind": "placeholder",
-        "label": "1K"
+        "label": "2K"
       },
       "away": {
         "kind": "placeholder",
-        "label": "2A"
+        "label": "2L"
       },
       "status": "scheduled"
     },
@@ -1780,15 +1734,15 @@
       "id": "m084",
       "matchNumber": 84,
       "stage": "round-of-32",
-      "date": "2026-06-28T19:00:00Z",
-      "venueId": "gillette-stadium",
+      "date": "2026-07-02T19:00:00Z",
+      "venueId": "sofi-stadium",
       "home": {
         "kind": "placeholder",
-        "label": "1L"
+        "label": "1H"
       },
       "away": {
         "kind": "placeholder",
-        "label": "3E/F/G"
+        "label": "2J"
       },
       "status": "scheduled"
     },
@@ -1796,15 +1750,15 @@
       "id": "m085",
       "matchNumber": 85,
       "stage": "round-of-32",
-      "date": "2026-06-28T19:00:00Z",
-      "venueId": "levi-stadium",
+      "date": "2026-07-03T03:00:00Z",
+      "venueId": "bc-place",
       "home": {
         "kind": "placeholder",
-        "label": "2B"
+        "label": "1B"
       },
       "away": {
         "kind": "placeholder",
-        "label": "2D"
+        "label": "3E/F/G/I/J"
       },
       "status": "scheduled"
     },
@@ -1812,11 +1766,11 @@
       "id": "m086",
       "matchNumber": 86,
       "stage": "round-of-32",
-      "date": "2026-06-28T19:00:00Z",
-      "venueId": "lincoln-financial-field",
+      "date": "2026-07-03T22:00:00Z",
+      "venueId": "hard-rock-stadium",
       "home": {
         "kind": "placeholder",
-        "label": "2E"
+        "label": "1J"
       },
       "away": {
         "kind": "placeholder",
@@ -1828,15 +1782,15 @@
       "id": "m087",
       "matchNumber": 87,
       "stage": "round-of-32",
-      "date": "2026-06-28T19:00:00Z",
-      "venueId": "nrg-stadium",
+      "date": "2026-07-04T01:30:00Z",
+      "venueId": "arrowhead-stadium",
       "home": {
         "kind": "placeholder",
-        "label": "2J"
+        "label": "1K"
       },
       "away": {
         "kind": "placeholder",
-        "label": "3I/J/K"
+        "label": "3D/E/I/J/L"
       },
       "status": "scheduled"
     },
@@ -1844,15 +1798,15 @@
       "id": "m088",
       "matchNumber": 88,
       "stage": "round-of-32",
-      "date": "2026-06-28T19:00:00Z",
-      "venueId": "arrowhead-stadium",
+      "date": "2026-07-03T18:00:00Z",
+      "venueId": "at-and-t-stadium",
       "home": {
         "kind": "placeholder",
-        "label": "2L"
+        "label": "2D"
       },
       "away": {
         "kind": "placeholder",
-        "label": "3L/A/B"
+        "label": "2G"
       },
       "status": "scheduled"
     },
@@ -1860,15 +1814,15 @@
       "id": "m089",
       "matchNumber": 89,
       "stage": "round-of-16",
-      "date": "2026-07-04T19:00:00Z",
-      "venueId": "mercedes-benz-stadium",
+      "date": "2026-07-04T21:00:00Z",
+      "venueId": "lincoln-financial-field",
       "home": {
         "kind": "placeholder",
-        "label": "Winner m073"
+        "label": "Winner m074"
       },
       "away": {
         "kind": "placeholder",
-        "label": "Winner m074"
+        "label": "Winner m077"
       },
       "status": "scheduled"
     },
@@ -1876,15 +1830,15 @@
       "id": "m090",
       "matchNumber": 90,
       "stage": "round-of-16",
-      "date": "2026-07-04T19:00:00Z",
-      "venueId": "hard-rock-stadium",
+      "date": "2026-07-04T17:00:00Z",
+      "venueId": "nrg-stadium",
       "home": {
         "kind": "placeholder",
-        "label": "Winner m075"
+        "label": "Winner m073"
       },
       "away": {
         "kind": "placeholder",
-        "label": "Winner m076"
+        "label": "Winner m075"
       },
       "status": "scheduled"
     },
@@ -1892,11 +1846,11 @@
       "id": "m091",
       "matchNumber": 91,
       "stage": "round-of-16",
-      "date": "2026-07-04T19:00:00Z",
-      "venueId": "lumen-field",
+      "date": "2026-07-05T20:00:00Z",
+      "venueId": "metlife-stadium",
       "home": {
         "kind": "placeholder",
-        "label": "Winner m077"
+        "label": "Winner m076"
       },
       "away": {
         "kind": "placeholder",
@@ -1908,8 +1862,8 @@
       "id": "m092",
       "matchNumber": 92,
       "stage": "round-of-16",
-      "date": "2026-07-04T19:00:00Z",
-      "venueId": "bc-place",
+      "date": "2026-07-06T00:00:00Z",
+      "venueId": "estadio-azteca",
       "home": {
         "kind": "placeholder",
         "label": "Winner m079"
@@ -1924,24 +1878,8 @@
       "id": "m093",
       "matchNumber": 93,
       "stage": "round-of-16",
-      "date": "2026-07-04T19:00:00Z",
-      "venueId": "estadio-bbva",
-      "home": {
-        "kind": "placeholder",
-        "label": "Winner m081"
-      },
-      "away": {
-        "kind": "placeholder",
-        "label": "Winner m082"
-      },
-      "status": "scheduled"
-    },
-    {
-      "id": "m094",
-      "matchNumber": 94,
-      "stage": "round-of-16",
-      "date": "2026-07-04T19:00:00Z",
-      "venueId": "estadio-akron",
+      "date": "2026-07-06T19:00:00Z",
+      "venueId": "at-and-t-stadium",
       "home": {
         "kind": "placeholder",
         "label": "Winner m083"
@@ -1953,30 +1891,30 @@
       "status": "scheduled"
     },
     {
-      "id": "m095",
-      "matchNumber": 95,
+      "id": "m094",
+      "matchNumber": 94,
       "stage": "round-of-16",
-      "date": "2026-07-04T19:00:00Z",
-      "venueId": "gillette-stadium",
+      "date": "2026-07-07T00:00:00Z",
+      "venueId": "lumen-field",
       "home": {
         "kind": "placeholder",
-        "label": "Winner m085"
+        "label": "Winner m081"
       },
       "away": {
         "kind": "placeholder",
-        "label": "Winner m086"
+        "label": "Winner m082"
       },
       "status": "scheduled"
     },
     {
-      "id": "m096",
-      "matchNumber": 96,
+      "id": "m095",
+      "matchNumber": 95,
       "stage": "round-of-16",
-      "date": "2026-07-04T19:00:00Z",
-      "venueId": "levi-stadium",
+      "date": "2026-07-07T16:00:00Z",
+      "venueId": "mercedes-benz-stadium",
       "home": {
         "kind": "placeholder",
-        "label": "Winner m087"
+        "label": "Winner m086"
       },
       "away": {
         "kind": "placeholder",
@@ -1985,11 +1923,27 @@
       "status": "scheduled"
     },
     {
+      "id": "m096",
+      "matchNumber": 96,
+      "stage": "round-of-16",
+      "date": "2026-07-07T20:00:00Z",
+      "venueId": "bc-place",
+      "home": {
+        "kind": "placeholder",
+        "label": "Winner m085"
+      },
+      "away": {
+        "kind": "placeholder",
+        "label": "Winner m087"
+      },
+      "status": "scheduled"
+    },
+    {
       "id": "m097",
       "matchNumber": 97,
       "stage": "quarter-final",
-      "date": "2026-07-09T19:00:00Z",
-      "venueId": "estadio-bbva",
+      "date": "2026-07-09T20:00:00Z",
+      "venueId": "gillette-stadium",
       "home": {
         "kind": "placeholder",
         "label": "Winner m089"
@@ -2004,24 +1958,8 @@
       "id": "m098",
       "matchNumber": 98,
       "stage": "quarter-final",
-      "date": "2026-07-09T19:00:00Z",
-      "venueId": "estadio-akron",
-      "home": {
-        "kind": "placeholder",
-        "label": "Winner m091"
-      },
-      "away": {
-        "kind": "placeholder",
-        "label": "Winner m092"
-      },
-      "status": "scheduled"
-    },
-    {
-      "id": "m099",
-      "matchNumber": 99,
-      "stage": "quarter-final",
-      "date": "2026-07-09T19:00:00Z",
-      "venueId": "gillette-stadium",
+      "date": "2026-07-10T19:00:00Z",
+      "venueId": "sofi-stadium",
       "home": {
         "kind": "placeholder",
         "label": "Winner m093"
@@ -2033,11 +1971,27 @@
       "status": "scheduled"
     },
     {
+      "id": "m099",
+      "matchNumber": 99,
+      "stage": "quarter-final",
+      "date": "2026-07-11T21:00:00Z",
+      "venueId": "hard-rock-stadium",
+      "home": {
+        "kind": "placeholder",
+        "label": "Winner m091"
+      },
+      "away": {
+        "kind": "placeholder",
+        "label": "Winner m092"
+      },
+      "status": "scheduled"
+    },
+    {
       "id": "m100",
       "matchNumber": 100,
       "stage": "quarter-final",
-      "date": "2026-07-09T19:00:00Z",
-      "venueId": "levi-stadium",
+      "date": "2026-07-12T01:00:00Z",
+      "venueId": "arrowhead-stadium",
       "home": {
         "kind": "placeholder",
         "label": "Winner m095"
@@ -2053,7 +2007,7 @@
       "matchNumber": 101,
       "stage": "semi-final",
       "date": "2026-07-14T19:00:00Z",
-      "venueId": "levi-stadium",
+      "venueId": "at-and-t-stadium",
       "home": {
         "kind": "placeholder",
         "label": "Winner m097"
@@ -2068,8 +2022,8 @@
       "id": "m102",
       "matchNumber": 102,
       "stage": "semi-final",
-      "date": "2026-07-14T19:00:00Z",
-      "venueId": "lincoln-financial-field",
+      "date": "2026-07-15T19:00:00Z",
+      "venueId": "mercedes-benz-stadium",
       "home": {
         "kind": "placeholder",
         "label": "Winner m099"
@@ -2084,7 +2038,7 @@
       "id": "m103",
       "matchNumber": 103,
       "stage": "third-place",
-      "date": "2026-07-18T19:00:00Z",
+      "date": "2026-07-18T21:00:00Z",
       "venueId": "hard-rock-stadium",
       "home": {
         "kind": "placeholder",
@@ -2118,133 +2072,133 @@
       "id": "slot-m073",
       "round": "round-of-32",
       "fixtureId": "m073",
-      "homeSource": "1A",
-      "awaySource": "2C"
+      "homeSource": "2A",
+      "awaySource": "2B"
     },
     {
       "id": "slot-m074",
       "round": "round-of-32",
       "fixtureId": "m074",
-      "homeSource": "1B",
-      "awaySource": "3A/B/C"
+      "homeSource": "1E",
+      "awaySource": "3A/B/C/D/F"
     },
     {
       "id": "slot-m075",
       "round": "round-of-32",
       "fixtureId": "m075",
-      "homeSource": "1C",
-      "awaySource": "3D/E/F"
+      "homeSource": "1F",
+      "awaySource": "2C"
     },
     {
       "id": "slot-m076",
       "round": "round-of-32",
       "fixtureId": "m076",
-      "homeSource": "1D",
+      "homeSource": "1C",
       "awaySource": "2F"
     },
     {
       "id": "slot-m077",
       "round": "round-of-32",
       "fixtureId": "m077",
-      "homeSource": "1E",
-      "awaySource": "2G"
+      "homeSource": "1I",
+      "awaySource": "3C/D/F/G/H"
     },
     {
       "id": "slot-m078",
       "round": "round-of-32",
       "fixtureId": "m078",
-      "homeSource": "1F",
-      "awaySource": "3H/I/J"
+      "homeSource": "2E",
+      "awaySource": "2I"
     },
     {
       "id": "slot-m079",
       "round": "round-of-32",
       "fixtureId": "m079",
-      "homeSource": "1G",
-      "awaySource": "2I"
+      "homeSource": "1A",
+      "awaySource": "3C/E/F/H/I"
     },
     {
       "id": "slot-m080",
       "round": "round-of-32",
       "fixtureId": "m080",
-      "homeSource": "1H",
-      "awaySource": "3K/L/A"
+      "homeSource": "1L",
+      "awaySource": "3E/H/I/J/K"
     },
     {
       "id": "slot-m081",
       "round": "round-of-32",
       "fixtureId": "m081",
-      "homeSource": "1I",
-      "awaySource": "2K"
+      "homeSource": "1D",
+      "awaySource": "3B/E/F/I/J"
     },
     {
       "id": "slot-m082",
       "round": "round-of-32",
       "fixtureId": "m082",
-      "homeSource": "1J",
-      "awaySource": "3B/C/D"
+      "homeSource": "1G",
+      "awaySource": "3A/E/H/I/J"
     },
     {
       "id": "slot-m083",
       "round": "round-of-32",
       "fixtureId": "m083",
-      "homeSource": "1K",
-      "awaySource": "2A"
+      "homeSource": "2K",
+      "awaySource": "2L"
     },
     {
       "id": "slot-m084",
       "round": "round-of-32",
       "fixtureId": "m084",
-      "homeSource": "1L",
-      "awaySource": "3E/F/G"
+      "homeSource": "1H",
+      "awaySource": "2J"
     },
     {
       "id": "slot-m085",
       "round": "round-of-32",
       "fixtureId": "m085",
-      "homeSource": "2B",
-      "awaySource": "2D"
+      "homeSource": "1B",
+      "awaySource": "3E/F/G/I/J"
     },
     {
       "id": "slot-m086",
       "round": "round-of-32",
       "fixtureId": "m086",
-      "homeSource": "2E",
+      "homeSource": "1J",
       "awaySource": "2H"
     },
     {
       "id": "slot-m087",
       "round": "round-of-32",
       "fixtureId": "m087",
-      "homeSource": "2J",
-      "awaySource": "3I/J/K"
+      "homeSource": "1K",
+      "awaySource": "3D/E/I/J/L"
     },
     {
       "id": "slot-m088",
       "round": "round-of-32",
       "fixtureId": "m088",
-      "homeSource": "2L",
-      "awaySource": "3L/A/B"
+      "homeSource": "2D",
+      "awaySource": "2G"
     },
     {
       "id": "slot-m089",
       "round": "round-of-16",
       "fixtureId": "m089",
-      "homeSource": "Winner m073",
-      "awaySource": "Winner m074"
+      "homeSource": "Winner m074",
+      "awaySource": "Winner m077"
     },
     {
       "id": "slot-m090",
       "round": "round-of-16",
       "fixtureId": "m090",
-      "homeSource": "Winner m075",
-      "awaySource": "Winner m076"
+      "homeSource": "Winner m073",
+      "awaySource": "Winner m075"
     },
     {
       "id": "slot-m091",
       "round": "round-of-16",
       "fixtureId": "m091",
-      "homeSource": "Winner m077",
+      "homeSource": "Winner m076",
       "awaySource": "Winner m078"
     },
     {
@@ -2258,29 +2212,29 @@
       "id": "slot-m093",
       "round": "round-of-16",
       "fixtureId": "m093",
-      "homeSource": "Winner m081",
-      "awaySource": "Winner m082"
+      "homeSource": "Winner m083",
+      "awaySource": "Winner m084"
     },
     {
       "id": "slot-m094",
       "round": "round-of-16",
       "fixtureId": "m094",
-      "homeSource": "Winner m083",
-      "awaySource": "Winner m084"
+      "homeSource": "Winner m081",
+      "awaySource": "Winner m082"
     },
     {
       "id": "slot-m095",
       "round": "round-of-16",
       "fixtureId": "m095",
-      "homeSource": "Winner m085",
-      "awaySource": "Winner m086"
+      "homeSource": "Winner m086",
+      "awaySource": "Winner m088"
     },
     {
       "id": "slot-m096",
       "round": "round-of-16",
       "fixtureId": "m096",
-      "homeSource": "Winner m087",
-      "awaySource": "Winner m088"
+      "homeSource": "Winner m085",
+      "awaySource": "Winner m087"
     },
     {
       "id": "slot-m097",
@@ -2293,15 +2247,15 @@
       "id": "slot-m098",
       "round": "quarter-final",
       "fixtureId": "m098",
-      "homeSource": "Winner m091",
-      "awaySource": "Winner m092"
+      "homeSource": "Winner m093",
+      "awaySource": "Winner m094"
     },
     {
       "id": "slot-m099",
       "round": "quarter-final",
       "fixtureId": "m099",
-      "homeSource": "Winner m093",
-      "awaySource": "Winner m094"
+      "homeSource": "Winner m091",
+      "awaySource": "Winner m092"
     },
     {
       "id": "slot-m100",

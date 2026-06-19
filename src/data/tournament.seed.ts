@@ -72,7 +72,6 @@ const teams: Team[] = Object.entries(groups).flatMap(([group, entries]) =>
   }))
 );
 
-const venueCycle = venues.map((venue) => venue.id);
 const groupFixtureDetails: Record<string, { date: string; venueId: string }> = {
   m001: { date: "2026-06-11T19:00:00Z", venueId: "estadio-azteca" },
   m002: { date: "2026-06-12T02:00:00Z", venueId: "estadio-akron" },
@@ -232,31 +231,38 @@ function knockoutFixture(matchNumber: number, stage: Fixture["stage"], homeSourc
   };
 }
 
-const roundOf32Sources = [
-  ["1A", "2C"],
-  ["1B", "3A/B/C"],
-  ["1C", "3D/E/F"],
-  ["1D", "2F"],
-  ["1E", "2G"],
-  ["1F", "3H/I/J"],
-  ["1G", "2I"],
-  ["1H", "3K/L/A"],
-  ["1I", "2K"],
-  ["1J", "3B/C/D"],
-  ["1K", "2A"],
-  ["1L", "3E/F/G"],
-  ["2B", "2D"],
-  ["2E", "2H"],
-  ["2J", "3I/J/K"],
-  ["2L", "3L/A/B"]
-];
-
 const knockoutFixtures = [
-  ...roundOf32Sources.map(([home, away], index) => knockoutFixture(73 + index, "round-of-32", home, away, "2026-06-28T19:00:00Z", venueCycle[index % venueCycle.length])),
-  ...Array.from({ length: 8 }, (_, index) => knockoutFixture(89 + index, "round-of-16", `Winner m${String(73 + index * 2).padStart(3, "0")}`, `Winner m${String(74 + index * 2).padStart(3, "0")}`, "2026-07-04T19:00:00Z", venueCycle[(index + 5) % venueCycle.length])),
-  ...Array.from({ length: 4 }, (_, index) => knockoutFixture(97 + index, "quarter-final", `Winner m${String(89 + index * 2).padStart(3, "0")}`, `Winner m${String(90 + index * 2).padStart(3, "0")}`, "2026-07-09T19:00:00Z", venueCycle[(index + 9) % venueCycle.length])),
-  ...Array.from({ length: 2 }, (_, index) => knockoutFixture(101 + index, "semi-final", `Winner m${String(97 + index * 2).padStart(3, "0")}`, `Winner m${String(98 + index * 2).padStart(3, "0")}`, "2026-07-14T19:00:00Z", venueCycle[(index + 12) % venueCycle.length])),
-  knockoutFixture(103, "third-place", "Loser m101", "Loser m102", "2026-07-18T19:00:00Z", "hard-rock-stadium"),
+  knockoutFixture(73, "round-of-32", "2A", "2B", "2026-06-28T19:00:00Z", "sofi-stadium"),
+  knockoutFixture(74, "round-of-32", "1E", "3A/B/C/D/F", "2026-06-29T20:30:00Z", "gillette-stadium"),
+  knockoutFixture(75, "round-of-32", "1F", "2C", "2026-06-30T01:00:00Z", "estadio-bbva"),
+  knockoutFixture(76, "round-of-32", "1C", "2F", "2026-06-29T17:00:00Z", "nrg-stadium"),
+  knockoutFixture(77, "round-of-32", "1I", "3C/D/F/G/H", "2026-06-30T21:00:00Z", "metlife-stadium"),
+  knockoutFixture(78, "round-of-32", "2E", "2I", "2026-06-30T17:00:00Z", "at-and-t-stadium"),
+  knockoutFixture(79, "round-of-32", "1A", "3C/E/F/H/I", "2026-07-01T01:00:00Z", "estadio-azteca"),
+  knockoutFixture(80, "round-of-32", "1L", "3E/H/I/J/K", "2026-07-01T16:00:00Z", "mercedes-benz-stadium"),
+  knockoutFixture(81, "round-of-32", "1D", "3B/E/F/I/J", "2026-07-02T00:00:00Z", "levi-stadium"),
+  knockoutFixture(82, "round-of-32", "1G", "3A/E/H/I/J", "2026-07-01T20:00:00Z", "lumen-field"),
+  knockoutFixture(83, "round-of-32", "2K", "2L", "2026-07-02T23:00:00Z", "bmo-field"),
+  knockoutFixture(84, "round-of-32", "1H", "2J", "2026-07-02T19:00:00Z", "sofi-stadium"),
+  knockoutFixture(85, "round-of-32", "1B", "3E/F/G/I/J", "2026-07-03T03:00:00Z", "bc-place"),
+  knockoutFixture(86, "round-of-32", "1J", "2H", "2026-07-03T22:00:00Z", "hard-rock-stadium"),
+  knockoutFixture(87, "round-of-32", "1K", "3D/E/I/J/L", "2026-07-04T01:30:00Z", "arrowhead-stadium"),
+  knockoutFixture(88, "round-of-32", "2D", "2G", "2026-07-03T18:00:00Z", "at-and-t-stadium"),
+  knockoutFixture(89, "round-of-16", "Winner m074", "Winner m077", "2026-07-04T21:00:00Z", "lincoln-financial-field"),
+  knockoutFixture(90, "round-of-16", "Winner m073", "Winner m075", "2026-07-04T17:00:00Z", "nrg-stadium"),
+  knockoutFixture(91, "round-of-16", "Winner m076", "Winner m078", "2026-07-05T20:00:00Z", "metlife-stadium"),
+  knockoutFixture(92, "round-of-16", "Winner m079", "Winner m080", "2026-07-06T00:00:00Z", "estadio-azteca"),
+  knockoutFixture(93, "round-of-16", "Winner m083", "Winner m084", "2026-07-06T19:00:00Z", "at-and-t-stadium"),
+  knockoutFixture(94, "round-of-16", "Winner m081", "Winner m082", "2026-07-07T00:00:00Z", "lumen-field"),
+  knockoutFixture(95, "round-of-16", "Winner m086", "Winner m088", "2026-07-07T16:00:00Z", "mercedes-benz-stadium"),
+  knockoutFixture(96, "round-of-16", "Winner m085", "Winner m087", "2026-07-07T20:00:00Z", "bc-place"),
+  knockoutFixture(97, "quarter-final", "Winner m089", "Winner m090", "2026-07-09T20:00:00Z", "gillette-stadium"),
+  knockoutFixture(98, "quarter-final", "Winner m093", "Winner m094", "2026-07-10T19:00:00Z", "sofi-stadium"),
+  knockoutFixture(99, "quarter-final", "Winner m091", "Winner m092", "2026-07-11T21:00:00Z", "hard-rock-stadium"),
+  knockoutFixture(100, "quarter-final", "Winner m095", "Winner m096", "2026-07-12T01:00:00Z", "arrowhead-stadium"),
+  knockoutFixture(101, "semi-final", "Winner m097", "Winner m098", "2026-07-14T19:00:00Z", "at-and-t-stadium"),
+  knockoutFixture(102, "semi-final", "Winner m099", "Winner m100", "2026-07-15T19:00:00Z", "mercedes-benz-stadium"),
+  knockoutFixture(103, "third-place", "Loser m101", "Loser m102", "2026-07-18T21:00:00Z", "hard-rock-stadium"),
   knockoutFixture(104, "final", "Winner m101", "Winner m102", "2026-07-19T19:00:00Z", "metlife-stadium")
 ];
 
