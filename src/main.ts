@@ -1,7 +1,7 @@
 import "./styles.css";
 import { tournamentData, teamById, venueById } from "./data/tournament";
 import { validateTournamentData } from "./data/schema";
-import { groupFixturesByDisplayDate, orderFixturesChronologically } from "./engine/fixtures";
+import { formatFixtureKickoff, groupFixturesByDisplayDate, orderFixturesChronologically } from "./engine/fixtures";
 import { drawSidesForProjection, projectTournament } from "./engine/knockout";
 import { interpretPredictionInput, isEditableFixture, setPrediction } from "./engine/predictions";
 import { calculateGroupStandings } from "./engine/standings";
@@ -83,7 +83,7 @@ function renderFixtures() {
   const visibleFixtures = orderFixturesChronologically(
     tournamentData.fixtures.filter((fixture) => fixture.stage === "group" || fixture.stage === "round-of-32")
   );
-  const fixtureGroups = groupFixturesByDisplayDate(visibleFixtures);
+  const fixtureGroups = groupFixturesByDisplayDate(visibleFixtures, venueById);
 
   return fixtureGroups
     .map((group) => `
@@ -113,23 +113,13 @@ function renderFixture(fixture: Fixture) {
         </div>
         <div class="fixture-meta">
           <span>${fixture.stage.replaceAll("-", " ")}</span>
-          <span>${formatFixtureKickoff(fixture)}</span>
+          <span>${formatFixtureKickoff(fixture, venue)}</span>
           <span>${venue ? `${venue.name}, ${venue.city}, ${venue.country}` : "Venue TBD"}</span>
         </div>
       </div>
       ${renderFixtureControls(fixture)}
     </article>
   `;
-}
-
-function formatFixtureKickoff(fixture: Fixture) {
-  const date = new Date(fixture.date);
-
-  if (Number.isNaN(date.getTime())) {
-    return "Kickoff TBD";
-  }
-
-  return date.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
 }
 
 function renderFixtureTeam(teamRef: TeamRef, score?: number) {
@@ -254,7 +244,7 @@ function renderDrawMatch(match: ProjectedMatch) {
         </div>
       </div>
       <div class="draw-match-meta">
-        <span>${new Date(match.date).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</span>
+        <span>${formatFixtureKickoff(match, venue)}</span>
         <span>${venue ? `${venue.name}, ${venue.city}, ${venue.country}` : "Venue TBD"}</span>
       </div>
     </article>
@@ -289,7 +279,7 @@ function renderBracketMatch(match: ProjectedMatch) {
   const venue = venueById.get(match.venueId);
   return `
     <article class="bracket-match">
-      <div class="knockout-round">${match.fixtureId} · ${new Date(match.date).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</div>
+      <div class="knockout-round">${match.fixtureId} · ${formatFixtureKickoff(match, venue)}</div>
       <div class="bracket-participants">
         ${renderBracketParticipant(match.home, match.homeSource)}
         ${renderBracketParticipant(match.away, match.awaySource)}

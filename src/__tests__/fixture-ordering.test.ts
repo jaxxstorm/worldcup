@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { groupFixturesByDisplayDate, orderFixturesChronologically } from "../engine/fixtures";
-import type { Fixture } from "../types";
+import { formatFixtureKickoff, groupFixturesByDisplayDate, orderFixturesChronologically } from "../engine/fixtures";
+import type { Fixture, Venue } from "../types";
 
 function fixture(matchNumber: number, date: string): Fixture {
   return {
@@ -15,6 +15,15 @@ function fixture(matchNumber: number, date: string): Fixture {
     status: "scheduled"
   };
 }
+
+const easternVenue: Venue = {
+  id: "east",
+  name: "East Stadium",
+  city: "Miami",
+  region: "Florida",
+  country: "United States",
+  timeZone: "America/New_York"
+};
 
 describe("orderFixturesChronologically", () => {
   it("orders fixtures by kickoff date from earliest to latest", () => {
@@ -113,5 +122,25 @@ describe("groupFixturesByDisplayDate", () => {
         fixtures: [expect.objectContaining({ matchNumber: 1 })]
       })
     ]);
+  });
+
+  it("groups fixtures by the venue-local date when venue timezone is available", () => {
+    const venues = new Map<string, Venue>([[easternVenue.id, easternVenue]]);
+    const lateUtcFixture = { ...fixture(1, "2026-06-19T03:30:00Z"), venueId: easternVenue.id };
+    const groups = groupFixturesByDisplayDate([lateUtcFixture], venues);
+
+    expect(groups[0].key).toBe("2026-06-18");
+    expect(groups[0].label).toBe("Thursday, June 18, 2026");
+  });
+});
+
+describe("formatFixtureKickoff", () => {
+  it("formats kickoff time in the venue timezone", () => {
+    expect(formatFixtureKickoff(fixture(1, "2026-06-18T19:00:00Z"), easternVenue)).toContain("3:00 PM");
+    expect(formatFixtureKickoff(fixture(1, "2026-06-18T19:00:00Z"), easternVenue)).toContain("EDT");
+  });
+
+  it("falls back cleanly for invalid kickoff dates", () => {
+    expect(formatFixtureKickoff(fixture(1, "not-a-date"), easternVenue)).toBe("Kickoff TBD");
   });
 });

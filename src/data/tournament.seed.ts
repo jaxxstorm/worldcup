@@ -24,22 +24,22 @@ const sources: SourceMetadata[] = [
 ];
 
 const venues: Venue[] = [
-  { id: "estadio-azteca", name: "Estadio Azteca", city: "Mexico City", region: "CDMX", country: "Mexico", latitude: 19.3029, longitude: -99.1505 },
-  { id: "bmo-field", name: "BMO Field", city: "Toronto", region: "Ontario", country: "Canada", latitude: 43.6332, longitude: -79.4186 },
-  { id: "sofi-stadium", name: "SoFi Stadium", city: "Los Angeles", region: "California", country: "United States", latitude: 33.9535, longitude: -118.3392 },
-  { id: "metlife-stadium", name: "MetLife Stadium", city: "New York/New Jersey", region: "New Jersey", country: "United States", latitude: 40.8135, longitude: -74.0745 },
-  { id: "at-and-t-stadium", name: "AT&T Stadium", city: "Dallas", region: "Texas", country: "United States", latitude: 32.7473, longitude: -97.0945 },
-  { id: "mercedes-benz-stadium", name: "Mercedes-Benz Stadium", city: "Atlanta", region: "Georgia", country: "United States", latitude: 33.7554, longitude: -84.4008 },
-  { id: "hard-rock-stadium", name: "Hard Rock Stadium", city: "Miami", region: "Florida", country: "United States", latitude: 25.958, longitude: -80.2389 },
-  { id: "lumen-field", name: "Lumen Field", city: "Seattle", region: "Washington", country: "United States", latitude: 47.5952, longitude: -122.3316 },
-  { id: "bc-place", name: "BC Place", city: "Vancouver", region: "British Columbia", country: "Canada", latitude: 49.2768, longitude: -123.1119 },
-  { id: "estadio-bbva", name: "Estadio BBVA", city: "Monterrey", region: "Nuevo Leon", country: "Mexico", latitude: 25.6682, longitude: -100.2444 },
-  { id: "estadio-akron", name: "Estadio Akron", city: "Guadalajara", region: "Jalisco", country: "Mexico", latitude: 20.6817, longitude: -103.4629 },
-  { id: "gillette-stadium", name: "Gillette Stadium", city: "Boston", region: "Massachusetts", country: "United States", latitude: 42.0909, longitude: -71.2643 },
-  { id: "levi-stadium", name: "Levi's Stadium", city: "San Francisco Bay Area", region: "California", country: "United States", latitude: 37.403, longitude: -121.97 },
-  { id: "lincoln-financial-field", name: "Lincoln Financial Field", city: "Philadelphia", region: "Pennsylvania", country: "United States", latitude: 39.9008, longitude: -75.1675 },
-  { id: "nrg-stadium", name: "NRG Stadium", city: "Houston", region: "Texas", country: "United States", latitude: 29.6847, longitude: -95.4107 },
-  { id: "arrowhead-stadium", name: "Arrowhead Stadium", city: "Kansas City", region: "Missouri", country: "United States", latitude: 39.049, longitude: -94.4839 }
+  { id: "estadio-azteca", name: "Estadio Azteca", city: "Mexico City", region: "CDMX", country: "Mexico", timeZone: "America/Mexico_City", latitude: 19.3029, longitude: -99.1505 },
+  { id: "bmo-field", name: "BMO Field", city: "Toronto", region: "Ontario", country: "Canada", timeZone: "America/Toronto", latitude: 43.6332, longitude: -79.4186 },
+  { id: "sofi-stadium", name: "SoFi Stadium", city: "Los Angeles", region: "California", country: "United States", timeZone: "America/Los_Angeles", latitude: 33.9535, longitude: -118.3392 },
+  { id: "metlife-stadium", name: "MetLife Stadium", city: "New York/New Jersey", region: "New Jersey", country: "United States", timeZone: "America/New_York", latitude: 40.8135, longitude: -74.0745 },
+  { id: "at-and-t-stadium", name: "AT&T Stadium", city: "Dallas", region: "Texas", country: "United States", timeZone: "America/Chicago", latitude: 32.7473, longitude: -97.0945 },
+  { id: "mercedes-benz-stadium", name: "Mercedes-Benz Stadium", city: "Atlanta", region: "Georgia", country: "United States", timeZone: "America/New_York", latitude: 33.7554, longitude: -84.4008 },
+  { id: "hard-rock-stadium", name: "Hard Rock Stadium", city: "Miami", region: "Florida", country: "United States", timeZone: "America/New_York", latitude: 25.958, longitude: -80.2389 },
+  { id: "lumen-field", name: "Lumen Field", city: "Seattle", region: "Washington", country: "United States", timeZone: "America/Los_Angeles", latitude: 47.5952, longitude: -122.3316 },
+  { id: "bc-place", name: "BC Place", city: "Vancouver", region: "British Columbia", country: "Canada", timeZone: "America/Vancouver", latitude: 49.2768, longitude: -123.1119 },
+  { id: "estadio-bbva", name: "Estadio BBVA", city: "Monterrey", region: "Nuevo Leon", country: "Mexico", timeZone: "America/Mexico_City", latitude: 25.6682, longitude: -100.2444 },
+  { id: "estadio-akron", name: "Estadio Akron", city: "Guadalajara", region: "Jalisco", country: "Mexico", timeZone: "America/Mexico_City", latitude: 20.6817, longitude: -103.4629 },
+  { id: "gillette-stadium", name: "Gillette Stadium", city: "Boston", region: "Massachusetts", country: "United States", timeZone: "America/New_York", latitude: 42.0909, longitude: -71.2643 },
+  { id: "levi-stadium", name: "Levi's Stadium", city: "San Francisco Bay Area", region: "California", country: "United States", timeZone: "America/Los_Angeles", latitude: 37.403, longitude: -121.97 },
+  { id: "lincoln-financial-field", name: "Lincoln Financial Field", city: "Philadelphia", region: "Pennsylvania", country: "United States", timeZone: "America/New_York", latitude: 39.9008, longitude: -75.1675 },
+  { id: "nrg-stadium", name: "NRG Stadium", city: "Houston", region: "Texas", country: "United States", timeZone: "America/Chicago", latitude: 29.6847, longitude: -95.4107 },
+  { id: "arrowhead-stadium", name: "Arrowhead Stadium", city: "Kansas City", region: "Missouri", country: "United States", timeZone: "America/Chicago", latitude: 39.049, longitude: -94.4839 }
 ];
 
 const groups: Record<GroupId, Array<[string, string, string]>> = {

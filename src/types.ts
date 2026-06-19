@@ -45,6 +45,7 @@ export interface Venue {
   city: string;
   region: string;
   country: string;
+  timeZone: string;
   latitude?: number;
   longitude?: number;
 }

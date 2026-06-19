@@ -26,8 +26,8 @@ export function validateTournamentData(data: TournamentData): ValidationIssue[] 
   data.venues.forEach((venue, index) => {
     if (venueIds.has(venue.id)) issues.push({ path: `venues.${index}.id`, message: "venue id must be unique" });
     venueIds.add(venue.id);
-    if (!venue.name || !venue.city || !venue.country) {
-      issues.push({ path: `venues.${index}`, message: "venue name, city, and country are required" });
+    if (!venue.name || !venue.city || !venue.country || !venue.timeZone) {
+      issues.push({ path: `venues.${index}`, message: "venue name, city, country, and timeZone are required" });
     }
   });
 

@@ -7,9 +7,9 @@ describe("tournament data", () => {
     expect(validateTournamentData(tournamentData)).toEqual([]);
   });
 
-  it("includes source metadata and venue locations", () => {
+  it("includes source metadata, venue locations, and venue timezones", () => {
     expect(tournamentData.sources.length).toBeGreaterThan(0);
-    expect(tournamentData.venues.every((venue) => venue.name && venue.city && venue.country)).toBe(true);
+    expect(tournamentData.venues.every((venue) => venue.name && venue.city && venue.country && venue.timeZone)).toBe(true);
   });
 
   it("uses the normalized group-stage schedule cadence instead of one match from every group per day", () => {
