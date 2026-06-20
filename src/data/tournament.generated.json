@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-20T05:33:58.264Z",
+  "generatedAt": "2026-06-20T18:20:19.790Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -2189,7 +2189,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-20T05:33:58.264Z",
+        "accessedAt": "2026-06-20T18:20:19.790Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2209,59 +2209,59 @@
         },
         {
           "rank": 3,
+          "player": "Brian Brobbey",
+          "teamId": "netherlands",
+          "value": 2,
+          "detail": "Netherlands"
+        },
+        {
+          "rank": 4,
+          "player": "Cody Gakpo",
+          "teamId": "netherlands",
+          "value": 2,
+          "detail": "Netherlands"
+        },
+        {
+          "rank": 5,
           "player": "Cyle Larin",
           "teamId": "canada",
           "value": 2,
           "detail": "Canada"
         },
         {
-          "rank": 4,
+          "rank": 6,
           "player": "Elijah Just",
           "teamId": "new-zealand",
           "value": 2,
           "detail": "New Zealand"
         },
         {
-          "rank": 5,
+          "rank": 7,
           "player": "Erling Haaland",
           "teamId": "norway",
           "value": 2,
           "detail": "Norway"
         },
         {
-          "rank": 6,
+          "rank": 8,
           "player": "Folarin Balogun",
           "teamId": "united-states",
           "value": 2,
           "detail": "United States"
         },
         {
-          "rank": 7,
+          "rank": 9,
           "player": "Harry Kane",
           "teamId": "england",
           "value": 2,
           "detail": "England"
         },
         {
-          "rank": 8,
+          "rank": 10,
           "player": "Ismael Saibari",
           "teamId": "morocco",
           "value": 2,
           "detail": "Morocco"
-        },
-        {
-          "rank": 9,
-          "player": "Johan Manzambi",
-          "teamId": "switzerland",
-          "value": 2,
-          "detail": "Switzerland"
-        },
-        {
-          "rank": 10,
-          "player": "Kai Havertz",
-          "teamId": "germany",
-          "value": 2,
-          "detail": "Germany"
         }
       ]
     },
@@ -2272,7 +2272,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-20T05:33:58.264Z",
+        "accessedAt": "2026-06-20T18:20:19.790Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2306,45 +2306,45 @@
         },
         {
           "rank": 5,
+          "player": "Cody Gakpo",
+          "teamId": "netherlands",
+          "value": 1,
+          "detail": "Netherlands"
+        },
+        {
+          "rank": 6,
+          "player": "Crysencio Summerville",
+          "teamId": "netherlands",
+          "value": 1,
+          "detail": "Netherlands"
+        },
+        {
+          "rank": 7,
           "player": "In-beom Hwang",
           "teamId": "south-korea",
           "value": 1,
           "detail": "South Korea"
         },
         {
-          "rank": 6,
+          "rank": 8,
           "player": "Luis Díaz",
           "teamId": "colombia",
           "value": 1,
           "detail": "Colombia"
         },
         {
-          "rank": 7,
+          "rank": 9,
           "player": "Nathaniel Brown",
           "teamId": "germany",
           "value": 1,
           "detail": "Germany"
         },
         {
-          "rank": 8,
+          "rank": 10,
           "player": "Ramin Rezaeian",
           "teamId": "iran",
           "value": 1,
           "detail": "Iran"
-        },
-        {
-          "rank": 9,
-          "player": "Ruben Vargas",
-          "teamId": "switzerland",
-          "value": 1,
-          "detail": "Switzerland"
-        },
-        {
-          "rank": 10,
-          "player": "Viktor Gyökeres",
-          "teamId": "sweden",
-          "value": 1,
-          "detail": "Sweden"
         }
       ]
     },
@@ -2355,7 +2355,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-20T05:33:58.264Z",
+        "accessedAt": "2026-06-20T18:20:19.790Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
