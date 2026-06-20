@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-20T20:34:46.354Z",
+  "generatedAt": "2026-06-20T23:13:06.802Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -1031,7 +1031,17 @@
       "venueId": "bmo-field",
       "home": "germany",
       "away": "cote-divoire",
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 2,
+        "away": 1
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-20T23:13:06.120Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m028",
@@ -2199,79 +2209,79 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-20T20:34:46.354Z",
+        "accessedAt": "2026-06-20T23:13:06.802Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
         {
           "rank": 1,
+          "player": "Deniz Undav",
+          "teamId": "germany",
+          "value": 3,
+          "detail": "Germany"
+        },
+        {
+          "rank": 2,
           "player": "Jonathan David",
           "teamId": "canada",
           "value": 3,
           "detail": "Canada"
         },
         {
-          "rank": 2,
+          "rank": 3,
           "player": "Lionel Messi",
           "teamId": "argentina",
           "value": 3,
           "detail": "Argentina"
         },
         {
-          "rank": 3,
+          "rank": 4,
           "player": "Brian Brobbey",
           "teamId": "netherlands",
           "value": 2,
           "detail": "Netherlands"
         },
         {
-          "rank": 4,
+          "rank": 5,
           "player": "Cody Gakpo",
           "teamId": "netherlands",
           "value": 2,
           "detail": "Netherlands"
         },
         {
-          "rank": 5,
+          "rank": 6,
           "player": "Cyle Larin",
           "teamId": "canada",
           "value": 2,
           "detail": "Canada"
         },
         {
-          "rank": 6,
+          "rank": 7,
           "player": "Elijah Just",
           "teamId": "new-zealand",
           "value": 2,
           "detail": "New Zealand"
         },
         {
-          "rank": 7,
+          "rank": 8,
           "player": "Erling Haaland",
           "teamId": "norway",
           "value": 2,
           "detail": "Norway"
         },
         {
-          "rank": 8,
+          "rank": 9,
           "player": "Folarin Balogun",
           "teamId": "united-states",
           "value": 2,
           "detail": "United States"
         },
         {
-          "rank": 9,
+          "rank": 10,
           "player": "Harry Kane",
           "teamId": "england",
           "value": 2,
           "detail": "England"
-        },
-        {
-          "rank": 10,
-          "player": "Ismael Saibari",
-          "teamId": "morocco",
-          "value": 2,
-          "detail": "Morocco"
         }
       ]
     },
@@ -2282,7 +2292,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-20T20:34:46.354Z",
+        "accessedAt": "2026-06-20T23:13:06.802Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2330,31 +2340,31 @@
         },
         {
           "rank": 7,
+          "player": "Felix Kalu Nmecha",
+          "teamId": "germany",
+          "value": 1,
+          "detail": "Germany"
+        },
+        {
+          "rank": 8,
           "player": "In-beom Hwang",
           "teamId": "south-korea",
           "value": 1,
           "detail": "South Korea"
         },
         {
-          "rank": 8,
+          "rank": 9,
           "player": "Luis Díaz",
           "teamId": "colombia",
           "value": 1,
           "detail": "Colombia"
         },
         {
-          "rank": 9,
+          "rank": 10,
           "player": "Nathaniel Brown",
           "teamId": "germany",
           "value": 1,
           "detail": "Germany"
-        },
-        {
-          "rank": 10,
-          "player": "Ramin Rezaeian",
-          "teamId": "iran",
-          "value": 1,
-          "detail": "Iran"
         }
       ]
     },
@@ -2365,7 +2375,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-20T20:34:46.354Z",
+        "accessedAt": "2026-06-20T23:13:06.802Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
