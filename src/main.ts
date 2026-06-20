@@ -220,7 +220,7 @@ function renderFixture(fixture: Fixture) {
           ${renderFixtureTeam(fixture.away, score?.away)}
         </div>
         <div class="fixture-meta">
-          <span>${fixture.stage.replaceAll("-", " ")}</span>
+          <span>${fixtureStageLabel(fixture)}</span>
           <span>${formatFixtureKickoff(fixture)}</span>
           <span>${venue ? `${venue.name}, ${venue.city}, ${venue.country}` : "Venue TBD"}</span>
           ${score ? renderScoreDecision(score) : ""}
@@ -229,6 +229,10 @@ function renderFixture(fixture: Fixture) {
       ${renderFixtureControls(fixture)}
     </article>
   `;
+}
+
+function fixtureStageLabel(fixture: Fixture) {
+  return fixture.stage === "group" && fixture.group ? `Group ${fixture.group}` : fixture.stage.replaceAll("-", " ");
 }
 
 function renderFixtureTeam(teamRef: TeamRef, score?: number) {

@@ -170,10 +170,16 @@ h2 {
 }
 
 .fixture-meta,
-.team-line,
 .standing-row,
 .knockout-row {
   display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.team-line {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
 }
@@ -207,8 +213,8 @@ h2 {
 }
 
 .score {
-  min-width: 56px;
-  text-align: center;
+  min-width: 32px;
+  text-align: right;
   font-weight: 700;
 }
 
