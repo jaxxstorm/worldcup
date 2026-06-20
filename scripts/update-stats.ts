@@ -66,7 +66,7 @@ export function mergeStatsFeed(baseData: TournamentData, feed: FootballDataScore
 
 export async function loadStatsSource(source: string): Promise<unknown> {
   if (/^https?:\/\//.test(source)) {
-    const token = process.env.STATS_SOURCE_TOKEN ?? process.env.FOOTBALL_DATA_API_TOKEN;
+    const token = firstEnvValue("STATS_SOURCE_TOKEN", "FOOTBALL_DATA_API_TOKEN");
     if (!token && source.includes("api.football-data.org")) {
       throw new Error("Football-data.org stats source requires FOOTBALL_DATA_API_TOKEN or STATS_SOURCE_TOKEN.");
     }
@@ -80,6 +80,10 @@ export async function loadStatsSource(source: string): Promise<unknown> {
   }
 
   return JSON.parse(readFileSync(resolve(source), "utf8"));
+}
+
+function firstEnvValue(...keys: string[]): string | undefined {
+  return keys.map((key) => process.env[key]?.trim()).find((value): value is string => Boolean(value));
 }
 
 function buildStatLeaderboards(data: TournamentData, feed: FootballDataScorersFeed, source: SourceMetadata): StatLeaderboard[] {

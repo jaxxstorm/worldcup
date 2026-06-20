@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { mergeStatsFeed } from "../../scripts/update-stats";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { loadStatsSource, mergeStatsFeed } from "../../scripts/update-stats";
 import { tournamentData } from "../data/tournament";
 import type { SourceMetadata } from "../types";
 
@@ -11,6 +11,25 @@ const source: SourceMetadata = {
 };
 
 describe("stats refresh", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    delete process.env.STATS_SOURCE_TOKEN;
+    delete process.env.FOOTBALL_DATA_API_TOKEN;
+  });
+
+  it("falls back to FOOTBALL_DATA_API_TOKEN when STATS_SOURCE_TOKEN is blank", async () => {
+    process.env.STATS_SOURCE_TOKEN = "";
+    process.env.FOOTBALL_DATA_API_TOKEN = "football-data-token";
+    const fetchMock = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
+      expect(init?.headers instanceof Headers ? init.headers.get("X-Auth-Token") : undefined).toBe("football-data-token");
+      return new Response(JSON.stringify({ scorers: [] }), { status: 200 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(loadStatsSource("https://api.football-data.org/v4/competitions/WC/scorers")).resolves.toEqual({ scorers: [] });
+    expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
   it("normalizes football-data.org scorers into tournament leaderboards", () => {
     const result = mergeStatsFeed(tournamentData, {
       scorers: [

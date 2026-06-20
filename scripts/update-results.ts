@@ -107,7 +107,7 @@ export function mergeResultFeed(baseData: TournamentData, feed: ResultFeed | Tou
 export async function loadResultSource(source: string): Promise<unknown> {
   if (/^https?:\/\//.test(source)) {
     const headers = new Headers();
-    const token = process.env.RESULTS_SOURCE_TOKEN ?? process.env.FOOTBALL_DATA_API_TOKEN;
+    const token = firstEnvValue("RESULTS_SOURCE_TOKEN", "FOOTBALL_DATA_API_TOKEN");
     if (token) headers.set("X-Auth-Token", token);
 
     const response = await fetch(source, { headers });
@@ -116,6 +116,10 @@ export async function loadResultSource(source: string): Promise<unknown> {
   }
 
   return JSON.parse(readFileSync(resolve(source), "utf8"));
+}
+
+function firstEnvValue(...keys: string[]): string | undefined {
+  return keys.map((key) => process.env[key]?.trim()).find((value): value is string => Boolean(value));
 }
 
 function extractResultEntries(feed: ResultFeed | TournamentData | FootballDataFeed | FifaCalendarFeed, baseData: TournamentData): ResultEntry[] {
