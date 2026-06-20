@@ -87,7 +87,7 @@ export function thirdPlaceSourceAssignments(sources: string[], bestThirdGroups: 
     return new Map(Object.entries(officialAssignments));
   }
 
-  return new Map(uniqueThirdPlaceSources.map((source, index) => [source, `3${bestThirdGroups[index]}`]));
+  return compatibleThirdPlaceSourceAssignments(uniqueThirdPlaceSources, bestThirdGroups);
 }
 
 const OFFICIAL_THIRD_PLACE_SOURCE_ASSIGNMENTS: Record<string, Record<string, string>> = {
@@ -105,6 +105,36 @@ const OFFICIAL_THIRD_PLACE_SOURCE_ASSIGNMENTS: Record<string, Record<string, str
 
 function isAmbiguousThirdPlaceSource(source: string) {
   return /^3[A-L](?:\/[A-L])+$/.test(source);
+}
+
+function compatibleThirdPlaceSourceAssignments(sources: string[], bestThirdGroups: GroupId[]): Map<string, string> {
+  const assignedSources = new Set<string>();
+  const assignments = new Map<string, string>();
+
+  function assign(groupIndex: number): boolean {
+    const group = bestThirdGroups[groupIndex];
+    if (!group) return true;
+
+    for (const source of sources) {
+      if (assignedSources.has(source) || !sourceIncludesGroup(source, group)) continue;
+      assignedSources.add(source);
+      assignments.set(source, `3${group}`);
+      if (assign(groupIndex + 1)) return true;
+      assignments.delete(source);
+      assignedSources.delete(source);
+    }
+
+    return false;
+  }
+
+  return assign(0) ? assignments : new Map();
+}
+
+function sourceIncludesGroup(source: string, group: GroupId) {
+  return source
+    .slice(1)
+    .split("/")
+    .includes(group);
 }
 
 function emptyRow(teamId: TeamId): StandingRow {

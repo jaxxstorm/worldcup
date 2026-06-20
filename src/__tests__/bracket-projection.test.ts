@@ -148,6 +148,24 @@ describe("bracket projection", () => {
     expect(assignments.get("3E/H/I/J/K")).toBe("3K");
   });
 
+  it("keeps fallback third-place assignments compatible with each placeholder source", () => {
+    const assignments = thirdPlaceSourceAssignments(["3E/H/I/J/K", "3A/B/C/D/F"], ["F", "E"] as GroupId[]);
+
+    expect(assignments.get("3E/H/I/J/K")).toBe("3E");
+    expect(assignments.get("3A/B/C/D/F")).toBe("3F");
+  });
+
+  it("never assigns a third-place group outside a placeholder's listed groups", () => {
+    const standings = calculateGroupStandings(tournamentData, {});
+    const bestGroups = bestThirdPlacedGroups(standings, tournamentData);
+    const sources = tournamentData.fixtures.flatMap((fixture) => [sourceLabel(fixture.home), sourceLabel(fixture.away)]);
+    const assignments = thirdPlaceSourceAssignments(sources, bestGroups);
+
+    for (const [source, slot] of assignments) {
+      expect(source.split("/").join("")).toContain(slot.slice(1));
+    }
+  });
+
   it("keeps third-place assignments unresolved only when fewer than eight groups exist", () => {
     expect(thirdPlaceSourceAssignments(["3A/B/C", "3D/E/F"], ["A"] as GroupId[])).toEqual(new Map());
   });
