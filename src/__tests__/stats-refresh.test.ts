@@ -52,6 +52,11 @@ describe("stats refresh", () => {
 
     expect(result.changed).toBe(true);
     expect(result.imported).toBe(5);
+    expect(result.summary).toEqual([
+      "Top Goal Scorers: 2 entries, leader Example Striker (3)",
+      "Top Assists: 2 entries, leader Example Creator (4)",
+      "Penalty Goals: 1 entry, leader Example Striker (1)"
+    ]);
     expect(result.data.statLeaderboards?.map((leaderboard) => leaderboard.id)).toEqual(["goals", "assists", "penalties"]);
     expect(result.data.statLeaderboards?.[0].entries[0]).toMatchObject({
       rank: 1,
@@ -119,6 +124,10 @@ describe("stats refresh", () => {
     }, source);
 
     expect(result.changed).toBe(true);
+    expect(result.summary).toEqual([
+      "Fair play: Spain set to 9",
+      "Fair play: Cabo Verde set to 1"
+    ]);
     expect(result.data.teams.find((team) => team.id === "spain")?.fairPlayPoints).toBe(9);
     expect(result.data.teams.find((team) => team.id === "cape-verde")?.fairPlayPoints).toBe(1);
   });

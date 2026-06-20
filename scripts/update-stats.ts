@@ -39,6 +39,7 @@ export interface StatsMergeResult {
   data: TournamentData;
   changed: boolean;
   imported: number;
+  summary: string[];
 }
 
 const outputPath = resolve("src/data/tournament.generated.json");
@@ -47,10 +48,10 @@ export function mergeStatsFeed(baseData: TournamentData, feed: FootballDataScore
   const data = structuredClone(baseData) as TournamentData;
   const statLeaderboards = feed.scorers ? buildStatLeaderboards(data, feed, source) : data.statLeaderboards ?? [];
   const statLeaderboardsChanged = JSON.stringify(data.statLeaderboards ?? []) !== JSON.stringify(statLeaderboards);
-  const fairPlayChanged = mergeFairPlayData(data, feed);
-  const changed = statLeaderboardsChanged || fairPlayChanged;
+  const fairPlayChanges = mergeFairPlayData(data, feed);
+  const changed = statLeaderboardsChanged || fairPlayChanges.length > 0;
 
-  if (!changed) return { data, changed: false, imported: 0 };
+  if (!changed) return { data, changed: false, imported: 0, summary: [] };
 
   data.statLeaderboards = statLeaderboards;
   data.generatedAt = source.accessedAt;
@@ -60,7 +61,11 @@ export function mergeStatsFeed(baseData: TournamentData, feed: FootballDataScore
   return {
     data,
     changed,
-    imported: (statLeaderboardsChanged ? statLeaderboards.reduce((count, leaderboard) => count + leaderboard.entries.length, 0) : 0) + (fairPlayChanged ? data.teams.filter((team) => Number.isFinite(team.fairPlayPoints)).length : 0)
+    imported: (statLeaderboardsChanged ? statLeaderboards.reduce((count, leaderboard) => count + leaderboard.entries.length, 0) : 0) + fairPlayChanges.length,
+    summary: [
+      ...(statLeaderboardsChanged ? statLeaderboards.map(formatLeaderboardSummary) : []),
+      ...fairPlayChanges.map((change) => `Fair play: ${change.teamName} ${formatPointsChange(change.previous, change.next)}`)
+    ]
   };
 }
 
@@ -95,9 +100,9 @@ function buildStatLeaderboards(data: TournamentData, feed: FootballDataScorersFe
   ];
 }
 
-function mergeFairPlayData(data: TournamentData, feed: FootballDataScorersFeed): boolean {
+function mergeFairPlayData(data: TournamentData, feed: FootballDataScorersFeed): Array<{ teamName: string; previous?: number; next: number }> {
   const entries = feed.fairPlay ?? feed.discipline ?? [];
-  let changed = false;
+  const changes: Array<{ teamName: string; previous?: number; next: number }> = [];
 
   for (const entry of entries) {
     const team = entry.teamId ? data.teams.find((candidate) => candidate.id === entry.teamId) : findTeam(data.teams, entry.team);
@@ -107,11 +112,21 @@ function mergeFairPlayData(data: TournamentData, feed: FootballDataScorersFeed):
     if (!Number.isFinite(points) || points < 0) continue;
     if (team.fairPlayPoints === points) continue;
 
+    changes.push({ teamName: team.name, previous: team.fairPlayPoints, next: points });
     team.fairPlayPoints = points;
-    changed = true;
   }
 
-  return changed;
+  return changes;
+}
+
+function formatLeaderboardSummary(leaderboard: StatLeaderboard): string {
+  const leader = leaderboard.entries[0];
+  const leaderSummary = leader ? ` leader ${leader.player} (${leader.value})` : " no entries";
+  return `${leaderboard.label}: ${leaderboard.entries.length} entr${leaderboard.entries.length === 1 ? "y" : "ies"},${leaderSummary}`;
+}
+
+function formatPointsChange(previous: number | undefined, next: number): string {
+  return previous === undefined ? `set to ${next}` : `${previous} -> ${next}`;
 }
 
 function fairPlayPoints(entry: FootballDataFairPlayEntry): number {
@@ -216,7 +231,10 @@ async function main() {
   }
 
   writeFileSync(outputPath, `${JSON.stringify(result.data, null, 2)}\n`);
-  console.log(`Imported ${result.imported} stat leaderboard entr${result.imported === 1 ? "y" : "ies"} into ${outputPath}`);
+  console.log(`Imported ${result.imported} stat update${result.imported === 1 ? "" : "s"} into ${outputPath}`);
+  for (const line of result.summary) {
+    console.log(`- ${line}`);
+  }
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
