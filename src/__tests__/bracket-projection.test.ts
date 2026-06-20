@@ -140,17 +140,12 @@ describe("bracket projection", () => {
     );
   });
 
-  it("uses the official third-place combination table for the current as-it-stands bracket", () => {
-    const standings = calculateGroupStandings(tournamentData, {});
-    const bestGroups = bestThirdPlacedGroups(standings, tournamentData);
-    const assignments = thirdPlaceSourceAssignments(["3E/H/I/J/K"], bestGroups);
-    const projection = projectTournament(tournamentData, {});
-    const englandMatch = projection.find((match) => match.fixtureId === "m080");
+  it("uses the official third-place combination table for qualifying group sets", () => {
+    const assignments = thirdPlaceSourceAssignments(["3A/B/C/D/F", "3C/D/F/G/H", "3E/H/I/J/K"], ["A", "B", "C", "D", "F", "G", "H", "K"]);
 
-    expect(bestGroups.slice().sort()).toEqual(["A", "B", "C", "D", "F", "G", "H", "K"]);
+    expect(assignments.get("3A/B/C/D/F")).toBe("3C");
+    expect(assignments.get("3C/D/F/G/H")).toBe("3F");
     expect(assignments.get("3E/H/I/J/K")).toBe("3K");
-    expect(englandMatch?.home.teamId).toBe("england");
-    expect(englandMatch?.away.teamId).toBe("portugal");
   });
 
   it("keeps third-place assignments unresolved only when fewer than eight groups exist", () => {

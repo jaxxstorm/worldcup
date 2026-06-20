@@ -179,56 +179,68 @@
       "name": "Netherlands",
       "fifaCode": "N",
       "group": "F",
-      "flag": "🇳🇱"
+      "flag": "🇳🇱",
+      "fifaRanking": 7,
+      "fairPlayPoints": 1
     },
     {
       "id": "japan",
       "name": "Japan",
       "fifaCode": "J",
       "group": "F",
-      "flag": "🇯🇵"
+      "flag": "🇯🇵",
+      "fifaRanking": 18,
+      "fairPlayPoints": 0
     },
     {
       "id": "sweden",
       "name": "Sweden",
       "fifaCode": "S",
       "group": "F",
-      "flag": "🇸🇪"
+      "flag": "🇸🇪",
+      "fifaRanking": 43
     },
     {
       "id": "tunisia",
       "name": "Tunisia",
       "fifaCode": "T",
       "group": "F",
-      "flag": "🇹🇳"
+      "flag": "🇹🇳",
+      "fifaRanking": 40
     },
     {
       "id": "belgium",
       "name": "Belgium",
       "fifaCode": "B",
       "group": "G",
-      "flag": "🇧🇪"
+      "flag": "🇧🇪",
+      "fifaRanking": 8
     },
     {
       "id": "egypt",
       "name": "Egypt",
       "fifaCode": "E",
       "group": "G",
-      "flag": "🇪🇬"
+      "flag": "🇪🇬",
+      "fifaRanking": 34
     },
     {
       "id": "iran",
       "name": "Iran",
       "fifaCode": "I",
       "group": "G",
-      "flag": "🇮🇷"
+      "flag": "🇮🇷",
+      "fifaRanking": 20,
+      "fairPlayPoints": 1
     },
     {
       "id": "new-zealand",
       "name": "New Zealand",
       "fifaCode": "NZ",
       "group": "G",
-      "flag": "🇳🇿"
+      "flag": "🇳🇿",
+      "fifaRanking": 86,
+      "fairPlayPoints": 0
     },
     {
       "id": "spain",

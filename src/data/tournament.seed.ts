@@ -60,8 +60,15 @@ const groups: Record<GroupId, Array<[string, string, string]>> = {
 const fifaRankings: Partial<Record<string, number>> = {
   spain: 1,
   portugal: 6,
+  netherlands: 7,
+  belgium: 8,
   colombia: 13,
+  japan: 18,
+  iran: 20,
+  egypt: 34,
   uruguay: 16,
+  tunisia: 40,
+  sweden: 43,
   uzbekistan: 50,
   "dr-congo": 56,
   "saudi-arabia": 60,
@@ -69,6 +76,10 @@ const fifaRankings: Partial<Record<string, number>> = {
 };
 
 const fairPlayPoints: Partial<Record<string, number>> = {
+  japan: 0,
+  netherlands: 1,
+  "new-zealand": 0,
+  iran: 1,
   "dr-congo": 0,
   portugal: 1
 };
