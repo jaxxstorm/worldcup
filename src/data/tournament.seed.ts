@@ -59,9 +59,18 @@ const groups: Record<GroupId, Array<[string, string, string]>> = {
 
 const fifaRankings: Partial<Record<string, number>> = {
   spain: 1,
+  portugal: 6,
+  colombia: 13,
   uruguay: 16,
+  uzbekistan: 50,
+  "dr-congo": 56,
   "saudi-arabia": 60,
   "cape-verde": 68
+};
+
+const fairPlayPoints: Partial<Record<string, number>> = {
+  "dr-congo": 0,
+  portugal: 1
 };
 
 const teams: Team[] = Object.entries(groups).flatMap(([group, entries]) =>
@@ -76,7 +85,8 @@ const teams: Team[] = Object.entries(groups).flatMap(([group, entries]) =>
       .toUpperCase(),
     group: group as GroupId,
     flag,
-    fifaRanking: fifaRankings[id]
+    fifaRanking: fifaRankings[id],
+    fairPlayPoints: fairPlayPoints[id]
   }))
 );
 

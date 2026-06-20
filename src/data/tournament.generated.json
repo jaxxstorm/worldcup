@@ -323,28 +323,34 @@
       "name": "Portugal",
       "fifaCode": "P",
       "group": "K",
-      "flag": "🇵🇹"
+      "flag": "🇵🇹",
+      "fifaRanking": 6,
+      "fairPlayPoints": 1
     },
     {
       "id": "dr-congo",
       "name": "DR Congo",
       "fifaCode": "DC",
       "group": "K",
-      "flag": "🇨🇩"
+      "flag": "🇨🇩",
+      "fifaRanking": 56,
+      "fairPlayPoints": 0
     },
     {
       "id": "uzbekistan",
       "name": "Uzbekistan",
       "fifaCode": "U",
       "group": "K",
-      "flag": "🇺🇿"
+      "flag": "🇺🇿",
+      "fifaRanking": 50
     },
     {
       "id": "colombia",
       "name": "Colombia",
       "fifaCode": "C",
       "group": "K",
-      "flag": "🇨🇴"
+      "flag": "🇨🇴",
+      "fifaRanking": 13
     },
     {
       "id": "england",

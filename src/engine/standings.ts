@@ -82,11 +82,26 @@ export function thirdPlaceSourceAssignments(sources: string[], bestThirdGroups: 
     return new Map();
   }
 
-  // FIFA's 2026 format uses a combination table for third-place teams; the
-  // generated local schedule stores only generic third-place source labels, so
-  // assign the projected third-place groups deterministically in fixture order.
+  const officialAssignments = OFFICIAL_THIRD_PLACE_SOURCE_ASSIGNMENTS[bestThirdGroups.slice().sort().join("")];
+  if (officialAssignments) {
+    return new Map(Object.entries(officialAssignments));
+  }
+
   return new Map(uniqueThirdPlaceSources.map((source, index) => [source, `3${bestThirdGroups[index]}`]));
 }
+
+const OFFICIAL_THIRD_PLACE_SOURCE_ASSIGNMENTS: Record<string, Record<string, string>> = {
+  ABCDFGHK: {
+    "3A/B/C/D/F": "3C",
+    "3C/D/F/G/H": "3F",
+    "3C/E/F/H/I": "3H",
+    "3E/H/I/J/K": "3K",
+    "3B/E/F/I/J": "3B",
+    "3A/E/H/I/J": "3A",
+    "3E/F/G/I/J": "3G",
+    "3D/E/I/J/L": "3D"
+  }
+};
 
 function isAmbiguousThirdPlaceSource(source: string) {
   return /^3[A-L](?:\/[A-L])+$/.test(source);
