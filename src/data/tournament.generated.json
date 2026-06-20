@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-20T18:20:19.790Z",
+  "generatedAt": "2026-06-20T18:58:07.868Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -1117,7 +1117,17 @@
       "venueId": "nrg-stadium",
       "home": "netherlands",
       "away": "sweden",
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 5,
+        "away": 1
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-20T18:58:07.868Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m034",
@@ -2189,7 +2199,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-20T18:20:19.790Z",
+        "accessedAt": "2026-06-20T18:57:36.799Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2272,7 +2282,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-20T18:20:19.790Z",
+        "accessedAt": "2026-06-20T18:57:36.799Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2280,36 +2290,36 @@
           "rank": 1,
           "player": "Alexander Isak",
           "teamId": "sweden",
-          "value": 2,
+          "value": 3,
           "detail": "Sweden"
         },
         {
           "rank": 2,
+          "player": "Cody Gakpo",
+          "teamId": "netherlands",
+          "value": 2,
+          "detail": "Netherlands"
+        },
+        {
+          "rank": 3,
           "player": "Deniz Undav",
           "teamId": "germany",
           "value": 2,
           "detail": "Germany"
         },
         {
-          "rank": 3,
+          "rank": 4,
           "player": "Vinicius Junior",
           "teamId": "brazil",
           "value": 2,
           "detail": "Brazil"
         },
         {
-          "rank": 4,
+          "rank": 5,
           "player": "Breel Embolo",
           "teamId": "switzerland",
           "value": 1,
           "detail": "Switzerland"
-        },
-        {
-          "rank": 5,
-          "player": "Cody Gakpo",
-          "teamId": "netherlands",
-          "value": 1,
-          "detail": "Netherlands"
         },
         {
           "rank": 6,
@@ -2355,7 +2365,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-20T18:20:19.790Z",
+        "accessedAt": "2026-06-20T18:57:36.799Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
