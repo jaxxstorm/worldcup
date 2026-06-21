@@ -22,7 +22,7 @@ if (!app) throw new Error("App root missing");
 const appRoot = app;
 let predictions: PredictionMap = loadPredictions(tournamentData);
 let activeView: "main" | "bracket" | "stats" | "performance" = "main";
-let activePerformanceMode: PerformanceMode = "per-match";
+let activePerformanceMode: PerformanceMode = "raw";
 
 const bracketRounds: MatchStage[] = ["round-of-32", "round-of-16", "quarter-final", "semi-final", "third-place", "final"];
 const fixtureById = new Map(tournamentData.fixtures.map((fixture) => [fixture.id, fixture]));
@@ -74,7 +74,7 @@ function parseActiveView(view: string | undefined): typeof activeView {
 
 function parsePerformanceMode(mode: string | undefined): PerformanceMode {
   if (mode === "raw" || mode === "per-match" || mode === "group-delta") return mode;
-  return "per-match";
+  return "raw";
 }
 
 function renderActiveView(view: typeof activeView, projection: ProjectedMatch[]) {
@@ -150,9 +150,9 @@ function renderPerformanceView() {
 
 function renderPerformanceModeControls() {
   const modes: Array<{ id: PerformanceMode; label: string }> = [
-    { id: "per-match", label: "Per match" },
     { id: "raw", label: "Raw" },
-    { id: "group-delta", label: "Group delta" }
+    { id: "group-delta", label: "Group delta" },
+    { id: "per-match", label: "Per match" }
   ];
 
   return `
