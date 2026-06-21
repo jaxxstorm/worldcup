@@ -4,6 +4,7 @@ import { validateTournamentData } from "./data/schema";
 import { buildBracketLayout, type BracketLayout, type BracketNode } from "./engine/bracket-layout";
 import { formatFixtureKickoff, groupFixturesByDisplayDate, orderFixturesChronologically } from "./engine/fixtures";
 import { drawSidesForProjection, projectTournament } from "./engine/knockout";
+import { calculatePerformanceRows, type PerformanceMode, type PerformanceRow } from "./engine/performance";
 import { interpretPredictionInput, isEditableFixture, setPrediction } from "./engine/predictions";
 import { calculateGroupStandings, thirdPlaceRankings } from "./engine/standings";
 import { loadPredictions, savePredictions } from "./storage/session";
@@ -20,7 +21,8 @@ if (!app) throw new Error("App root missing");
 
 const appRoot = app;
 let predictions: PredictionMap = loadPredictions(tournamentData);
-let activeView: "main" | "bracket" | "stats" = "main";
+let activeView: "main" | "bracket" | "stats" | "performance" = "main";
+let activePerformanceMode: PerformanceMode = "per-match";
 
 const bracketRounds: MatchStage[] = ["round-of-32", "round-of-16", "quarter-final", "semi-final", "third-place", "final"];
 const fixtureById = new Map(tournamentData.fixtures.map((fixture) => [fixture.id, fixture]));
@@ -40,6 +42,7 @@ function render() {
         <button class="${activeView === "main" ? "active" : ""}" type="button" data-view="main">Fixtures</button>
         <button class="${activeView === "bracket" ? "active" : ""}" type="button" data-view="bracket">Knockout Stages</button>
         <button class="${activeView === "stats" ? "active" : ""}" type="button" data-view="stats">Stats</button>
+        <button class="${activeView === "performance" ? "active" : ""}" type="button" data-view="performance">Performance</button>
       </nav>
       ${renderActiveView(activeView, projection)}
     </main>
@@ -52,19 +55,32 @@ function render() {
     });
   });
 
+  appRoot.querySelectorAll<HTMLButtonElement>("[data-performance-mode]").forEach((button) => {
+    button.addEventListener("click", () => {
+      activePerformanceMode = parsePerformanceMode(button.dataset.performanceMode);
+      render();
+    });
+  });
+
   appRoot.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-prediction]").forEach((input) => {
     input.addEventListener(input instanceof HTMLSelectElement ? "change" : "input", handlePredictionInput);
   });
 }
 
 function parseActiveView(view: string | undefined): typeof activeView {
-  if (view === "bracket" || view === "stats") return view;
+  if (view === "bracket" || view === "stats" || view === "performance") return view;
   return "main";
+}
+
+function parsePerformanceMode(mode: string | undefined): PerformanceMode {
+  if (mode === "raw" || mode === "per-match" || mode === "group-delta") return mode;
+  return "per-match";
 }
 
 function renderActiveView(view: typeof activeView, projection: ProjectedMatch[]) {
   if (view === "bracket") return renderBracketView(projection);
   if (view === "stats") return renderStatsView();
+  if (view === "performance") return renderPerformanceView();
   return renderMainView(projection);
 }
 
@@ -109,6 +125,87 @@ function renderStatsView() {
       </section>
     </div>
   `;
+}
+
+function renderPerformanceView() {
+  const rows = calculatePerformanceRows(tournamentData, predictions, activePerformanceMode);
+
+  return `
+    <div class="performance-page">
+      <section>
+        <h2>Performance</h2>
+        <p class="section-note">${performanceModeNote(activePerformanceMode)}</p>
+        <section class="stats-panel performance-panel" aria-labelledby="performance-table-heading">
+          <div class="stats-panel-heading">
+            <h3 id="performance-table-heading">Team Performance</h3>
+            <span>${rows.length} teams</span>
+          </div>
+          ${renderPerformanceModeControls()}
+          ${renderPerformanceTable(rows)}
+        </section>
+      </section>
+    </div>
+  `;
+}
+
+function renderPerformanceModeControls() {
+  const modes: Array<{ id: PerformanceMode; label: string }> = [
+    { id: "per-match", label: "Per match" },
+    { id: "raw", label: "Raw" },
+    { id: "group-delta", label: "Group delta" }
+  ];
+
+  return `
+    <div class="performance-mode-tabs" aria-label="Performance ranking mode">
+      ${modes.map((mode) => `
+        <button class="${activePerformanceMode === mode.id ? "active" : ""}" type="button" data-performance-mode="${mode.id}">
+          ${mode.label}
+        </button>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderPerformanceTable(rows: PerformanceRow[]) {
+  return `
+    <div class="performance-table">
+      <div class="performance-row header">
+        <span>#</span>
+        <span>Team</span>
+        <span>Group</span>
+        <span>Record</span>
+        <span>Pts</span>
+        <span>GD</span>
+        <span>FIFA</span>
+        <span>Move</span>
+        <span>Status</span>
+      </div>
+      ${rows.map(renderPerformanceRow).join("")}
+    </div>
+  `;
+}
+
+function renderPerformanceRow(row: PerformanceRow) {
+  const team = teamById.get(row.teamId);
+  return `
+    <div class="performance-row ${row.performanceStatus}">
+      <span>${row.currentRank}</span>
+      <span class="team-cell">${renderFlag(team)} ${team?.name ?? row.teamId}</span>
+      <span>${row.group}</span>
+      <span>${row.won}-${row.drawn}-${row.lost}</span>
+      <span>${row.points}</span>
+      <span>${formatSignedNumber(row.goalDifference)}</span>
+      <span>${row.fifaRanking ?? "-"}</span>
+      <span class="performance-delta">${formatPerformanceDelta(row.performanceDelta)}</span>
+      <span><span class="performance-status">${performanceStatusLabel(row)}</span></span>
+    </div>
+  `;
+}
+
+function performanceModeNote(mode: PerformanceMode) {
+  if (mode === "raw") return "Total points, goal difference, and goals compared with FIFA ranking.";
+  if (mode === "group-delta") return "Current group position compared with expected group position from FIFA ranking.";
+  return "Points, goal difference, and goals normalized per match, then compared with FIFA ranking.";
 }
 
 function renderStatLeaderboards(leaderboards: StatLeaderboard[]) {
@@ -580,6 +677,22 @@ function renderBracketParticipant(team: QualifiedTeam, source = team.slot) {
 function renderQualifiedTeam(team: QualifiedTeam) {
   const resolved = team.teamId ? teamById.get(team.teamId) : undefined;
   return resolved ? `${renderFlag(resolved)} ${resolved.name}` : team.label;
+}
+
+function formatPerformanceDelta(delta: number | undefined) {
+  if (delta === undefined) return "-";
+  return formatSignedNumber(delta);
+}
+
+function formatSignedNumber(value: number) {
+  return value > 0 ? `+${value}` : String(value);
+}
+
+function performanceStatusLabel(row: PerformanceRow) {
+  if (row.performanceStatus === "overperforming") return "Over";
+  if (row.performanceStatus === "underperforming") return "Under";
+  if (row.performanceStatus === "on-track") return "On rank";
+  return "Unknown";
 }
 
 function renderFlag(team?: Team) {

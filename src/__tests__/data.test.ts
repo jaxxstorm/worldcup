@@ -13,6 +13,10 @@ describe("tournament data", () => {
     expect(tournamentData.venues.every((venue) => venue.name && venue.city && venue.country && venue.timeZone)).toBe(true);
   });
 
+  it("includes FIFA rankings for every group-stage team", () => {
+    expect(tournamentData.teams.filter((team) => team.group && !team.fifaRanking).map((team) => team.id)).toEqual([]);
+  });
+
   it("accepts optional stat leaderboards and validates present entries", () => {
     const withoutLeaderboards = structuredClone(tournamentData) as TournamentData;
     delete withoutLeaderboards.statLeaderboards;

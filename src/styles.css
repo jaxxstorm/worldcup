@@ -298,6 +298,10 @@ h2 {
   padding: 24px clamp(16px, 4vw, 56px) 48px;
 }
 
+.performance-page {
+  padding: 24px clamp(16px, 4vw, 56px) 48px;
+}
+
 .stats-layout {
   display: grid;
   grid-template-columns: minmax(320px, 1fr) minmax(320px, 0.9fr);
@@ -562,6 +566,104 @@ h2 {
   color: #607268;
   background: #fff;
   font-size: 14px;
+}
+
+.performance-table {
+  display: grid;
+  overflow-x: auto;
+  border: 1px solid #d7e1d9;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.performance-mode-tabs {
+  display: inline-flex;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 3px;
+  border: 1px solid #c9d7cc;
+  border-radius: 8px;
+  background: #eef3ee;
+}
+
+.performance-mode-tabs button {
+  flex: 0 0 auto;
+  min-width: 92px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 6px;
+  color: #607268;
+  background: transparent;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.performance-mode-tabs button.active {
+  color: #fff;
+  background: #143b2b;
+}
+
+.performance-row {
+  display: grid;
+  grid-template-columns: 44px minmax(220px, 1fr) 60px 84px 58px 58px 70px 70px minmax(104px, auto);
+  gap: 12px;
+  align-items: center;
+  min-width: 900px;
+  padding: 10px 12px;
+  border-top: 1px solid #edf0ec;
+  font-size: 14px;
+}
+
+.performance-row.header {
+  border-top: 0;
+  color: #607268;
+  background: #f8faf7;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.performance-row.overperforming {
+  background: #f4fbf6;
+}
+
+.performance-row.underperforming {
+  background: #fff8f6;
+}
+
+.performance-delta {
+  font-weight: 800;
+}
+
+.performance-row.overperforming .performance-delta {
+  color: #0f6b3f;
+}
+
+.performance-row.underperforming .performance-delta {
+  color: #9e2f2f;
+}
+
+.performance-status {
+  display: inline-flex;
+  justify-content: center;
+  min-width: 78px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #607268;
+  background: #eef2ee;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.performance-row.overperforming .performance-status {
+  color: #0f6b3f;
+  background: #e5f3e8;
+}
+
+.performance-row.underperforming .performance-status {
+  color: #9e2f2f;
+  background: #f9e7e3;
 }
 
 .third-place-table {

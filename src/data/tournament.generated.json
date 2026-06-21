@@ -39,140 +39,160 @@
       "name": "Mexico",
       "fifaCode": "M",
       "group": "A",
-      "flag": "🇲🇽"
+      "flag": "🇲🇽",
+      "fifaRanking": 15
     },
     {
       "id": "south-africa",
       "name": "South Africa",
       "fifaCode": "SA",
       "group": "A",
-      "flag": "🇿🇦"
+      "flag": "🇿🇦",
+      "fifaRanking": 61
     },
     {
       "id": "south-korea",
       "name": "South Korea",
       "fifaCode": "SK",
       "group": "A",
-      "flag": "🇰🇷"
+      "flag": "🇰🇷",
+      "fifaRanking": 22
     },
     {
       "id": "czechia",
       "name": "Czechia",
       "fifaCode": "C",
       "group": "A",
-      "flag": "🇨🇿"
+      "flag": "🇨🇿",
+      "fifaRanking": 44
     },
     {
       "id": "canada",
       "name": "Canada",
       "fifaCode": "C",
       "group": "B",
-      "flag": "🇨🇦"
+      "flag": "🇨🇦",
+      "fifaRanking": 27
     },
     {
       "id": "bosnia",
       "name": "Bosnia and Herzegovina",
       "fifaCode": "B",
       "group": "B",
-      "flag": "🇧🇦"
+      "flag": "🇧🇦",
+      "fifaRanking": 71
     },
     {
       "id": "qatar",
       "name": "Qatar",
       "fifaCode": "Q",
       "group": "B",
-      "flag": "🇶🇦"
+      "flag": "🇶🇦",
+      "fifaRanking": 51
     },
     {
       "id": "switzerland",
       "name": "Switzerland",
       "fifaCode": "S",
       "group": "B",
-      "flag": "🇨🇭"
+      "flag": "🇨🇭",
+      "fifaRanking": 17
     },
     {
       "id": "brazil",
       "name": "Brazil",
       "fifaCode": "B",
       "group": "C",
-      "flag": "🇧🇷"
+      "flag": "🇧🇷",
+      "fifaRanking": 5
     },
     {
       "id": "morocco",
       "name": "Morocco",
       "fifaCode": "M",
       "group": "C",
-      "flag": "🇲🇦"
+      "flag": "🇲🇦",
+      "fifaRanking": 11
     },
     {
       "id": "haiti",
       "name": "Haiti",
       "fifaCode": "H",
       "group": "C",
-      "flag": "🇭🇹"
+      "flag": "🇭🇹",
+      "fifaRanking": 84
     },
     {
       "id": "scotland",
       "name": "Scotland",
       "fifaCode": "S",
       "group": "C",
-      "flag": "🏴"
+      "flag": "🏴",
+      "fifaRanking": 36
     },
     {
       "id": "united-states",
       "name": "United States",
       "fifaCode": "US",
       "group": "D",
-      "flag": "🇺🇸"
+      "flag": "🇺🇸",
+      "fifaRanking": 14
     },
     {
       "id": "paraguay",
       "name": "Paraguay",
       "fifaCode": "P",
       "group": "D",
-      "flag": "🇵🇾"
+      "flag": "🇵🇾",
+      "fifaRanking": 39
     },
     {
       "id": "australia",
       "name": "Australia",
       "fifaCode": "A",
       "group": "D",
-      "flag": "🇦🇺"
+      "flag": "🇦🇺",
+      "fifaRanking": 26
     },
     {
       "id": "turkiye",
       "name": "Türkiye",
       "fifaCode": "T",
       "group": "D",
-      "flag": "🇹🇷"
+      "flag": "🇹🇷",
+      "fifaRanking": 25
     },
     {
       "id": "germany",
       "name": "Germany",
       "fifaCode": "G",
       "group": "E",
-      "flag": "🇩🇪"
+      "flag": "🇩🇪",
+      "fifaRanking": 9
     },
     {
       "id": "curacao",
       "name": "Curacao",
       "fifaCode": "C",
       "group": "E",
-      "flag": "🇨🇼"
+      "flag": "🇨🇼",
+      "fifaRanking": 82
     },
     {
       "id": "cote-divoire",
       "name": "Cote d'Ivoire",
       "fifaCode": "CD",
       "group": "E",
-      "flag": "🇨🇮"
+      "flag": "🇨🇮",
+      "fifaRanking": 42
     },
     {
       "id": "ecuador",
       "name": "Ecuador",
       "fifaCode": "E",
       "group": "E",
-      "flag": "🇪🇨"
+      "flag": "🇪🇨",
+      "fifaRanking": 23
     },
     {
       "id": "netherlands",
@@ -279,56 +299,64 @@
       "name": "France",
       "fifaCode": "F",
       "group": "I",
-      "flag": "🇫🇷"
+      "flag": "🇫🇷",
+      "fifaRanking": 3
     },
     {
       "id": "senegal",
       "name": "Senegal",
       "fifaCode": "S",
       "group": "I",
-      "flag": "🇸🇳"
+      "flag": "🇸🇳",
+      "fifaRanking": 19
     },
     {
       "id": "iraq",
       "name": "Iraq",
       "fifaCode": "I",
       "group": "I",
-      "flag": "🇮🇶"
+      "flag": "🇮🇶",
+      "fifaRanking": 58
     },
     {
       "id": "norway",
       "name": "Norway",
       "fifaCode": "N",
       "group": "I",
-      "flag": "🇳🇴"
+      "flag": "🇳🇴",
+      "fifaRanking": 29
     },
     {
       "id": "argentina",
       "name": "Argentina",
       "fifaCode": "A",
       "group": "J",
-      "flag": "🇦🇷"
+      "flag": "🇦🇷",
+      "fifaRanking": 2
     },
     {
       "id": "algeria",
       "name": "Algeria",
       "fifaCode": "A",
       "group": "J",
-      "flag": "🇩🇿"
+      "flag": "🇩🇿",
+      "fifaRanking": 35
     },
     {
       "id": "austria",
       "name": "Austria",
       "fifaCode": "A",
       "group": "J",
-      "flag": "🇦🇹"
+      "flag": "🇦🇹",
+      "fifaRanking": 24
     },
     {
       "id": "jordan",
       "name": "Jordan",
       "fifaCode": "J",
       "group": "J",
-      "flag": "🇯🇴"
+      "flag": "🇯🇴",
+      "fifaRanking": 66
     },
     {
       "id": "portugal",
@@ -369,28 +397,32 @@
       "name": "England",
       "fifaCode": "E",
       "group": "L",
-      "flag": "🏴"
+      "flag": "🏴",
+      "fifaRanking": 4
     },
     {
       "id": "croatia",
       "name": "Croatia",
       "fifaCode": "C",
       "group": "L",
-      "flag": "🇭🇷"
+      "flag": "🇭🇷",
+      "fifaRanking": 10
     },
     {
       "id": "ghana",
       "name": "Ghana",
       "fifaCode": "G",
       "group": "L",
-      "flag": "🇬🇭"
+      "flag": "🇬🇭",
+      "fifaRanking": 72
     },
     {
       "id": "panama",
       "name": "Panama",
       "fifaCode": "P",
       "group": "L",
-      "flag": "🇵🇦"
+      "flag": "🇵🇦",
+      "fifaRanking": 30
     }
   ],
   "venues": [
@@ -2201,229 +2233,6 @@
       "status": "scheduled"
     }
   ],
-  "statLeaderboards": [
-    {
-      "id": "goals",
-      "label": "Top Goal Scorers",
-      "valueLabel": "Goals",
-      "source": {
-        "name": "football-data.org World Cup scorers API",
-        "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-21T01:14:46.308Z",
-        "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
-      },
-      "entries": [
-        {
-          "rank": 1,
-          "player": "Deniz Undav",
-          "teamId": "germany",
-          "value": 3,
-          "detail": "Germany"
-        },
-        {
-          "rank": 2,
-          "player": "Jonathan David",
-          "teamId": "canada",
-          "value": 3,
-          "detail": "Canada"
-        },
-        {
-          "rank": 3,
-          "player": "Lionel Messi",
-          "teamId": "argentina",
-          "value": 3,
-          "detail": "Argentina"
-        },
-        {
-          "rank": 4,
-          "player": "Brian Brobbey",
-          "teamId": "netherlands",
-          "value": 2,
-          "detail": "Netherlands"
-        },
-        {
-          "rank": 5,
-          "player": "Cody Gakpo",
-          "teamId": "netherlands",
-          "value": 2,
-          "detail": "Netherlands"
-        },
-        {
-          "rank": 6,
-          "player": "Cyle Larin",
-          "teamId": "canada",
-          "value": 2,
-          "detail": "Canada"
-        },
-        {
-          "rank": 7,
-          "player": "Elijah Just",
-          "teamId": "new-zealand",
-          "value": 2,
-          "detail": "New Zealand"
-        },
-        {
-          "rank": 8,
-          "player": "Erling Haaland",
-          "teamId": "norway",
-          "value": 2,
-          "detail": "Norway"
-        },
-        {
-          "rank": 9,
-          "player": "Folarin Balogun",
-          "teamId": "united-states",
-          "value": 2,
-          "detail": "United States"
-        },
-        {
-          "rank": 10,
-          "player": "Harry Kane",
-          "teamId": "england",
-          "value": 2,
-          "detail": "England"
-        }
-      ]
-    },
-    {
-      "id": "assists",
-      "label": "Top Assists",
-      "valueLabel": "Assists",
-      "source": {
-        "name": "football-data.org World Cup scorers API",
-        "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-21T01:14:46.308Z",
-        "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
-      },
-      "entries": [
-        {
-          "rank": 1,
-          "player": "Alexander Isak",
-          "teamId": "sweden",
-          "value": 3,
-          "detail": "Sweden"
-        },
-        {
-          "rank": 2,
-          "player": "Cody Gakpo",
-          "teamId": "netherlands",
-          "value": 2,
-          "detail": "Netherlands"
-        },
-        {
-          "rank": 3,
-          "player": "Deniz Undav",
-          "teamId": "germany",
-          "value": 2,
-          "detail": "Germany"
-        },
-        {
-          "rank": 4,
-          "player": "Vinicius Junior",
-          "teamId": "brazil",
-          "value": 2,
-          "detail": "Brazil"
-        },
-        {
-          "rank": 5,
-          "player": "Breel Embolo",
-          "teamId": "switzerland",
-          "value": 1,
-          "detail": "Switzerland"
-        },
-        {
-          "rank": 6,
-          "player": "Crysencio Summerville",
-          "teamId": "netherlands",
-          "value": 1,
-          "detail": "Netherlands"
-        },
-        {
-          "rank": 7,
-          "player": "Felix Kalu Nmecha",
-          "teamId": "germany",
-          "value": 1,
-          "detail": "Germany"
-        },
-        {
-          "rank": 8,
-          "player": "In-beom Hwang",
-          "teamId": "south-korea",
-          "value": 1,
-          "detail": "South Korea"
-        },
-        {
-          "rank": 9,
-          "player": "Luis Díaz",
-          "teamId": "colombia",
-          "value": 1,
-          "detail": "Colombia"
-        },
-        {
-          "rank": 10,
-          "player": "Nathaniel Brown",
-          "teamId": "germany",
-          "value": 1,
-          "detail": "Germany"
-        }
-      ]
-    },
-    {
-      "id": "penalties",
-      "label": "Penalty Goals",
-      "valueLabel": "Pens",
-      "source": {
-        "name": "football-data.org World Cup scorers API",
-        "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-21T01:14:46.308Z",
-        "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
-      },
-      "entries": [
-        {
-          "rank": 1,
-          "player": "Breel Embolo",
-          "teamId": "switzerland",
-          "value": 1,
-          "detail": "Switzerland"
-        },
-        {
-          "rank": 2,
-          "player": "Granit Xhaka",
-          "teamId": "switzerland",
-          "value": 1,
-          "detail": "Switzerland"
-        },
-        {
-          "rank": 3,
-          "player": "Harry Kane",
-          "teamId": "england",
-          "value": 1,
-          "detail": "England"
-        },
-        {
-          "rank": 4,
-          "player": "Kai Havertz",
-          "teamId": "germany",
-          "value": 1,
-          "detail": "Germany"
-        },
-        {
-          "rank": 5,
-          "player": "Marko Arnautovic",
-          "teamId": "austria",
-          "value": 1,
-          "detail": "Austria"
-        },
-        {
-          "rank": 6,
-          "player": "Teboho Mokoena",
-          "teamId": "south-africa",
-          "value": 1,
-          "detail": "South Africa"
-        }
-      ]
-    }
-  ],
   "knockoutSlots": [
     {
       "id": "slot-m073",
@@ -2648,6 +2457,229 @@
       "fixtureId": "m104",
       "homeSource": "Winner m101",
       "awaySource": "Winner m102"
+    }
+  ],
+  "statLeaderboards": [
+    {
+      "id": "goals",
+      "label": "Top Goal Scorers",
+      "valueLabel": "Goals",
+      "source": {
+        "name": "football-data.org World Cup scorers API",
+        "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
+        "accessedAt": "2026-06-21T01:14:46.308Z",
+        "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
+      },
+      "entries": [
+        {
+          "rank": 1,
+          "player": "Deniz Undav",
+          "teamId": "germany",
+          "value": 3,
+          "detail": "Germany"
+        },
+        {
+          "rank": 2,
+          "player": "Jonathan David",
+          "teamId": "canada",
+          "value": 3,
+          "detail": "Canada"
+        },
+        {
+          "rank": 3,
+          "player": "Lionel Messi",
+          "teamId": "argentina",
+          "value": 3,
+          "detail": "Argentina"
+        },
+        {
+          "rank": 4,
+          "player": "Brian Brobbey",
+          "teamId": "netherlands",
+          "value": 2,
+          "detail": "Netherlands"
+        },
+        {
+          "rank": 5,
+          "player": "Cody Gakpo",
+          "teamId": "netherlands",
+          "value": 2,
+          "detail": "Netherlands"
+        },
+        {
+          "rank": 6,
+          "player": "Cyle Larin",
+          "teamId": "canada",
+          "value": 2,
+          "detail": "Canada"
+        },
+        {
+          "rank": 7,
+          "player": "Elijah Just",
+          "teamId": "new-zealand",
+          "value": 2,
+          "detail": "New Zealand"
+        },
+        {
+          "rank": 8,
+          "player": "Erling Haaland",
+          "teamId": "norway",
+          "value": 2,
+          "detail": "Norway"
+        },
+        {
+          "rank": 9,
+          "player": "Folarin Balogun",
+          "teamId": "united-states",
+          "value": 2,
+          "detail": "United States"
+        },
+        {
+          "rank": 10,
+          "player": "Harry Kane",
+          "teamId": "england",
+          "value": 2,
+          "detail": "England"
+        }
+      ]
+    },
+    {
+      "id": "assists",
+      "label": "Top Assists",
+      "valueLabel": "Assists",
+      "source": {
+        "name": "football-data.org World Cup scorers API",
+        "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
+        "accessedAt": "2026-06-21T01:14:46.308Z",
+        "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
+      },
+      "entries": [
+        {
+          "rank": 1,
+          "player": "Alexander Isak",
+          "teamId": "sweden",
+          "value": 3,
+          "detail": "Sweden"
+        },
+        {
+          "rank": 2,
+          "player": "Cody Gakpo",
+          "teamId": "netherlands",
+          "value": 2,
+          "detail": "Netherlands"
+        },
+        {
+          "rank": 3,
+          "player": "Deniz Undav",
+          "teamId": "germany",
+          "value": 2,
+          "detail": "Germany"
+        },
+        {
+          "rank": 4,
+          "player": "Vinicius Junior",
+          "teamId": "brazil",
+          "value": 2,
+          "detail": "Brazil"
+        },
+        {
+          "rank": 5,
+          "player": "Breel Embolo",
+          "teamId": "switzerland",
+          "value": 1,
+          "detail": "Switzerland"
+        },
+        {
+          "rank": 6,
+          "player": "Crysencio Summerville",
+          "teamId": "netherlands",
+          "value": 1,
+          "detail": "Netherlands"
+        },
+        {
+          "rank": 7,
+          "player": "Felix Kalu Nmecha",
+          "teamId": "germany",
+          "value": 1,
+          "detail": "Germany"
+        },
+        {
+          "rank": 8,
+          "player": "In-beom Hwang",
+          "teamId": "south-korea",
+          "value": 1,
+          "detail": "South Korea"
+        },
+        {
+          "rank": 9,
+          "player": "Luis Díaz",
+          "teamId": "colombia",
+          "value": 1,
+          "detail": "Colombia"
+        },
+        {
+          "rank": 10,
+          "player": "Nathaniel Brown",
+          "teamId": "germany",
+          "value": 1,
+          "detail": "Germany"
+        }
+      ]
+    },
+    {
+      "id": "penalties",
+      "label": "Penalty Goals",
+      "valueLabel": "Pens",
+      "source": {
+        "name": "football-data.org World Cup scorers API",
+        "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
+        "accessedAt": "2026-06-21T01:14:46.308Z",
+        "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
+      },
+      "entries": [
+        {
+          "rank": 1,
+          "player": "Breel Embolo",
+          "teamId": "switzerland",
+          "value": 1,
+          "detail": "Switzerland"
+        },
+        {
+          "rank": 2,
+          "player": "Granit Xhaka",
+          "teamId": "switzerland",
+          "value": 1,
+          "detail": "Switzerland"
+        },
+        {
+          "rank": 3,
+          "player": "Harry Kane",
+          "teamId": "england",
+          "value": 1,
+          "detail": "England"
+        },
+        {
+          "rank": 4,
+          "player": "Kai Havertz",
+          "teamId": "germany",
+          "value": 1,
+          "detail": "Germany"
+        },
+        {
+          "rank": 5,
+          "player": "Marko Arnautovic",
+          "teamId": "austria",
+          "value": 1,
+          "detail": "Austria"
+        },
+        {
+          "rank": 6,
+          "player": "Teboho Mokoena",
+          "teamId": "south-africa",
+          "value": 1,
+          "detail": "South Africa"
+        }
+      ]
     }
   ]
 }
