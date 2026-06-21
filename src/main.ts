@@ -193,7 +193,7 @@ function renderFixturePerformancePanel(summaryRows: FixturePerformanceSummary[],
       <div class="stats-panel-heading">
         <div>
           <h3 id="fixture-performance-heading">Fixture Performances</h3>
-          <p>Credit compares actual points with a ranking baseline for each team's side of a group fixture.</p>
+        <p>Credit compares actual points with a ranking baseline, then scales by how far apart the teams are in FIFA ranking.</p>
         </div>
         <span>${fixtureRows.length} entries</span>
       </div>
@@ -299,6 +299,9 @@ function renderFixturePerformanceSummaryTable(rows: FixturePerformanceSummary[])
         <span>Group</span>
         <span>Rank</span>
         <span>Played</span>
+        <span>Record</span>
+        <span>GD</span>
+        <span>GF</span>
         <span>Actual</span>
         <span>Base</span>
         <span>Credit</span>
@@ -320,6 +323,9 @@ function renderFixturePerformanceSummaryRow(row: FixturePerformanceSummary, inde
       <span>${row.group}</span>
       <span>${row.fifaRanking}</span>
       <span>${row.fixtures}</span>
+      <span>${row.won}-${row.drawn}-${row.lost}</span>
+      <span>${formatSignedNumber(row.goalDifference)}</span>
+      <span>${row.goalsFor}</span>
       <span>${row.actualPoints}</span>
       <span>${row.baselinePoints}</span>
       <span class="fixture-performance-score">${formatSignedNumber(row.totalCredit)}</span>
@@ -345,6 +351,7 @@ function renderFixturePerformanceTable(rows: FixturePerformanceEntry[]) {
         <span>Gap</span>
         <span>Pts</span>
         <span>Base</span>
+        <span>Factor</span>
         <span>Credit</span>
         <span>Source</span>
       </div>
@@ -369,6 +376,7 @@ function renderFixturePerformanceRow(row: FixturePerformanceEntry, index: number
       <span>${formatSignedNumber(row.rankingGap)}</span>
       <span>${row.resultPoints}</span>
       <span>${row.baselinePoints}</span>
+      <span>x${row.rankingFactor}</span>
       <span class="fixture-performance-score">${formatSignedNumber(row.performanceScore)}</span>
       <span><span class="fixture-performance-source">${row.source === "final" ? "Final" : "Predicted"}</span></span>
     </div>
@@ -380,13 +388,14 @@ function renderFixturePerformanceFormula() {
     <div class="fixture-performance-formula">
       <div>
         <strong>How Fixture Credit Works</strong>
-        <p>Each team gets a baseline for every ranked fixture. Credit is simply actual points minus baseline points.</p>
+        <p>Each team gets a baseline for every ranked fixture. Credit is actual points versus baseline points, scaled by ranking gap.</p>
       </div>
       <div class="formula-grid">
         <span><strong>Baseline</strong>: if your FIFA rank is better than your opponent's, you are expected to win and get 3 baseline points.</span>
         <span><strong>Underdog</strong>: if your FIFA rank is worse, you are expected to lose and get 0 baseline points.</span>
         <span><strong>Even ranks</strong>: equal-ranked teams use a 1 point baseline, matching a draw.</span>
-        <span><strong>Credit</strong> = actual points - baseline points. Positive means better than expected; negative means worse than expected.</span>
+        <span><strong>Rank factor</strong>: ranking gap 0-4 = x1, 5-14 = x2, 15-29 = x3, 30+ = x4.</span>
+        <span><strong>Credit</strong> = (actual points - baseline points) x rank factor. Positive means better than expected; negative means worse than expected.</span>
         <span><strong>Table</strong>: totals add fixture credit across played final results and complete predictions.</span>
       </div>
     </div>

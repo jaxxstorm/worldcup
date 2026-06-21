@@ -5,7 +5,7 @@ The system SHALL display individual fixture performances in the Performance view
 
 #### Scenario: User views fixture performances
 - **WHEN** a user opens the Performance view
-- **THEN** the app MUST show the fixture performance baseline rules and a result list with team, opponent, fixture, scoreline, result type, FIFA ranking context, actual points, baseline points, fixture credit, and whether the score comes from a final result or active prediction
+- **THEN** the app MUST show the fixture performance baseline and rank-factor rules and a result list with team, opponent, fixture, scoreline, result type, FIFA ranking context, actual points, baseline points, rank factor, fixture credit, and whether the score comes from a final result or active prediction
 
 #### Scenario: Fixture tab summarizes teams first
 - **WHEN** a user opens the fixture-level Performance sub-tab
@@ -17,7 +17,7 @@ The system SHALL display individual fixture performances in the Performance view
 
 #### Scenario: Formula explanation is readable
 - **WHEN** the fixture performance baseline rules are displayed
-- **THEN** the app MUST explain how baseline points and credit are derived from FIFA ranking and actual match points in user-facing language
+- **THEN** the app MUST explain how baseline points, rank factor, and credit are derived from FIFA ranking and actual match points in user-facing language
 
 #### Scenario: Prediction changes fixture performance table
 - **WHEN** a user changes a complete group-stage prediction

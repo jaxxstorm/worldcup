@@ -31,6 +31,7 @@ export interface FixturePerformanceEntry {
   fifaRanking: number;
   opponentFifaRanking: number;
   rankingGap: number;
+  rankingFactor: number;
   performanceScore: number;
   source: FixturePerformanceSource;
 }
@@ -40,6 +41,12 @@ export interface FixturePerformanceSummary {
   group: GroupId;
   fifaRanking: number;
   fixtures: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
   actualPoints: number;
   baselinePoints: number;
   totalCredit: number;
@@ -99,6 +106,12 @@ export function calculateFixturePerformanceSummaries(data: TournamentData, predi
         group: entry.group,
         fifaRanking: entry.fifaRanking,
         fixtures: 1,
+        won: entry.result === "win" ? 1 : 0,
+        drawn: entry.result === "draw" ? 1 : 0,
+        lost: entry.result === "loss" ? 1 : 0,
+        goalsFor: entry.goalsFor,
+        goalsAgainst: entry.goalsAgainst,
+        goalDifference: entry.goalDifference,
         actualPoints: entry.resultPoints,
         baselinePoints: entry.baselinePoints,
         totalCredit: entry.performanceScore,
@@ -109,6 +122,12 @@ export function calculateFixturePerformanceSummaries(data: TournamentData, predi
     }
 
     current.fixtures += 1;
+    current.won += entry.result === "win" ? 1 : 0;
+    current.drawn += entry.result === "draw" ? 1 : 0;
+    current.lost += entry.result === "loss" ? 1 : 0;
+    current.goalsFor += entry.goalsFor;
+    current.goalsAgainst += entry.goalsAgainst;
+    current.goalDifference += entry.goalDifference;
     current.actualPoints += entry.resultPoints;
     current.baselinePoints += entry.baselinePoints;
     current.totalCredit += entry.performanceScore;
@@ -119,6 +138,8 @@ export function calculateFixturePerformanceSummaries(data: TournamentData, predi
   return Array.from(summaries.values()).sort((left, right) => (
     right.totalCredit - left.totalCredit ||
     right.actualPoints - left.actualPoints ||
+    right.goalDifference - left.goalDifference ||
+    right.goalsFor - left.goalsFor ||
     left.baselinePoints - right.baselinePoints ||
     left.fifaRanking - right.fifaRanking ||
     compareTeamName(left.teamId, right.teamId, teamById)
@@ -180,6 +201,7 @@ function buildFixturePerformanceEntry(
   const resultPoints = goalsFor > goalsAgainst ? 3 : goalsFor === goalsAgainst ? 1 : 0;
   const rankingGap = team.fifaRanking! - opponent.fifaRanking!;
   const baselinePoints = baselineFixturePoints(team.fifaRanking!, opponent.fifaRanking!);
+  const rankingFactor = fixtureRankingFactor(rankingGap);
 
   return {
     fixtureId: fixture.id,
@@ -196,7 +218,8 @@ function buildFixturePerformanceEntry(
     fifaRanking: team.fifaRanking!,
     opponentFifaRanking: opponent.fifaRanking!,
     rankingGap,
-    performanceScore: resultPoints - baselinePoints,
+    rankingFactor,
+    performanceScore: (resultPoints - baselinePoints) * rankingFactor,
     source
   };
 }
@@ -204,6 +227,14 @@ function buildFixturePerformanceEntry(
 function baselineFixturePoints(teamRanking: number, opponentRanking: number) {
   if (teamRanking < opponentRanking) return 3;
   if (teamRanking > opponentRanking) return 0;
+  return 1;
+}
+
+function fixtureRankingFactor(rankingGap: number) {
+  const gap = Math.abs(rankingGap);
+  if (gap >= 30) return 4;
+  if (gap >= 15) return 3;
+  if (gap >= 5) return 2;
   return 1;
 }
 

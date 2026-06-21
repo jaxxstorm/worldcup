@@ -237,21 +237,24 @@ describe("performance analysis", () => {
       resultPoints: 3,
       rankingGap: 85,
       baselinePoints: 0,
-      performanceScore: 3,
+      rankingFactor: 4,
+      performanceScore: 12,
       source: "final"
     });
     expect(rows.find((row) => row.fixtureId === "echo-foxtrot" && row.teamId === "echo")).toMatchObject({
       result: "loss",
       resultPoints: 0,
       baselinePoints: 3,
-      performanceScore: -3
+      rankingFactor: 4,
+      performanceScore: -12
     });
     expect(rows.find((row) => row.fixtureId === "alpha-beta" && row.teamId === "beta")).toMatchObject({
       goalsFor: 2,
       goalsAgainst: 0,
       opponentFifaRanking: 1,
       baselinePoints: 0,
-      performanceScore: 3
+      rankingFactor: 3,
+      performanceScore: 9
     });
   });
 
@@ -268,7 +271,8 @@ describe("performance analysis", () => {
       rankingGap: 30,
       resultPoints: 1,
       baselinePoints: 0,
-      performanceScore: 1,
+      rankingFactor: 4,
+      performanceScore: 4,
       source: "prediction"
     });
     expect(favorite).toMatchObject({
@@ -276,7 +280,8 @@ describe("performance analysis", () => {
       rankingGap: -30,
       resultPoints: 1,
       baselinePoints: 3,
-      performanceScore: -2,
+      rankingFactor: 4,
+      performanceScore: -8,
       source: "prediction"
     });
     expect(underdog!.performanceScore).toBeGreaterThan(favorite!.performanceScore);
@@ -321,7 +326,7 @@ describe("performance analysis", () => {
     );
 
     const tiedFavoriteDraws = calculateFixturePerformanceEntries(data, {})
-      .filter((row) => row.performanceScore === -2 && row.result === "draw" && row.teamId === "india")
+      .filter((row) => row.performanceScore === -8 && row.result === "draw" && row.teamId === "india")
       .map((row) => row.fixtureId);
 
     expect(tiedFavoriteDraws).toEqual(["india-juliet", "india-juliet-rematch"]);
@@ -335,11 +340,24 @@ describe("performance analysis", () => {
       group: "C",
       fifaRanking: 90,
       fixtures: 2,
+      won: 2,
+      drawn: 0,
+      lost: 0,
+      goalsFor: 4,
+      goalsAgainst: 0,
+      goalDifference: 4,
       actualPoints: 6,
       baselinePoints: 0,
-      totalCredit: 6,
+      totalCredit: 21,
       finalCount: 2,
       predictionCount: 0
     });
+  });
+
+  it("breaks summary credit ties with actual football performance before FIFA rank", () => {
+    const rows = calculateFixturePerformanceSummaries(performanceTournament(), {});
+    const tiedCreditRows = rows.filter((row) => row.totalCredit === 9).map((row) => row.teamId);
+
+    expect(tiedCreditRows).toEqual(["beta"]);
   });
 });
