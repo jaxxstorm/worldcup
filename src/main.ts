@@ -4,7 +4,7 @@ import { validateTournamentData } from "./data/schema";
 import { buildBracketLayout, type BracketLayout, type BracketNode } from "./engine/bracket-layout";
 import { formatFixtureKickoff, groupFixturesByDisplayDate, orderFixturesChronologically } from "./engine/fixtures";
 import { drawSidesForProjection, projectTournament } from "./engine/knockout";
-import { calculatePerformanceRows, type PerformanceMode, type PerformanceRow } from "./engine/performance";
+import { calculateFixturePerformanceEntries, calculatePerformanceRows, type FixturePerformanceEntry, type PerformanceMode, type PerformanceRow } from "./engine/performance";
 import { interpretPredictionInput, isEditableFixture, setPrediction } from "./engine/predictions";
 import { calculateGroupStandings, thirdPlaceRankings } from "./engine/standings";
 import { loadPredictions, savePredictions } from "./storage/session";
@@ -22,6 +22,7 @@ if (!app) throw new Error("App root missing");
 const appRoot = app;
 let predictions: PredictionMap = loadPredictions(tournamentData);
 let activeView: "main" | "bracket" | "stats" | "performance" = "main";
+let activePerformanceTab: "teams" | "fixtures" = "teams";
 let activePerformanceMode: PerformanceMode = "raw";
 
 const bracketRounds: MatchStage[] = ["round-of-32", "round-of-16", "quarter-final", "semi-final", "third-place", "final"];
@@ -62,6 +63,13 @@ function render() {
     });
   });
 
+  appRoot.querySelectorAll<HTMLButtonElement>("[data-performance-tab]").forEach((button) => {
+    button.addEventListener("click", () => {
+      activePerformanceTab = parsePerformanceTab(button.dataset.performanceTab);
+      render();
+    });
+  });
+
   appRoot.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-prediction]").forEach((input) => {
     input.addEventListener(input instanceof HTMLSelectElement ? "change" : "input", handlePredictionInput);
   });
@@ -75,6 +83,11 @@ function parseActiveView(view: string | undefined): typeof activeView {
 function parsePerformanceMode(mode: string | undefined): PerformanceMode {
   if (mode === "raw" || mode === "per-match" || mode === "group-delta") return mode;
   return "raw";
+}
+
+function parsePerformanceTab(tab: string | undefined): typeof activePerformanceTab {
+  if (tab === "fixtures") return "fixtures";
+  return "teams";
 }
 
 function renderActiveView(view: typeof activeView, projection: ProjectedMatch[]) {
@@ -129,22 +142,63 @@ function renderStatsView() {
 
 function renderPerformanceView() {
   const rows = calculatePerformanceRows(tournamentData, predictions, activePerformanceMode);
+  const fixtureRows = calculateFixturePerformanceEntries(tournamentData, predictions);
 
   return `
     <div class="performance-page">
       <section>
         <h2>Performance</h2>
-        <p class="section-note">${performanceModeNote(activePerformanceMode)}</p>
-        <section class="stats-panel performance-panel" aria-labelledby="performance-table-heading">
-          <div class="stats-panel-heading">
-            <h3 id="performance-table-heading">Team Performance</h3>
-            <span>${rows.length} teams</span>
-          </div>
-          ${renderPerformanceModeControls()}
-          ${renderPerformanceTable(rows, activePerformanceMode)}
-        </section>
+        ${renderPerformanceSubTabs()}
+        ${activePerformanceTab === "teams" ? renderTeamPerformancePanel(rows) : renderFixturePerformancePanel(fixtureRows)}
       </section>
     </div>
+  `;
+}
+
+function renderPerformanceSubTabs() {
+  const tabs: Array<{ id: typeof activePerformanceTab; label: string }> = [
+    { id: "teams", label: "Teams" },
+    { id: "fixtures", label: "Fixtures" }
+  ];
+
+  return `
+    <div class="performance-subtabs" aria-label="Performance analysis type">
+      ${tabs.map((tab) => `
+        <button class="${activePerformanceTab === tab.id ? "active" : ""}" type="button" data-performance-tab="${tab.id}">
+          ${tab.label}
+        </button>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderTeamPerformancePanel(rows: PerformanceRow[]) {
+  return `
+    <p class="section-note">${performanceModeNote(activePerformanceMode)}</p>
+    <section class="stats-panel performance-panel" aria-labelledby="performance-table-heading">
+      <div class="stats-panel-heading">
+        <h3 id="performance-table-heading">Team Performance</h3>
+        <span>${rows.length} teams</span>
+      </div>
+      ${renderPerformanceModeControls()}
+      ${renderPerformanceTable(rows, activePerformanceMode)}
+    </section>
+  `;
+}
+
+function renderFixturePerformancePanel(fixtureRows: FixturePerformanceEntry[]) {
+  return `
+    <section class="stats-panel fixture-performance-panel" aria-labelledby="fixture-performance-heading">
+      <div class="stats-panel-heading">
+        <div>
+          <h3 id="fixture-performance-heading">Fixture Performances</h3>
+          <p>Credit combines ranking surprise and scoreline strength for each team's side of a group fixture.</p>
+        </div>
+        <span>${fixtureRows.length} entries</span>
+      </div>
+      ${renderFixturePerformanceFormula()}
+      ${renderFixturePerformanceTable(fixtureRows)}
+    </section>
   `;
 }
 
@@ -225,6 +279,75 @@ function renderGroupDeltaCells(row: PerformanceRow) {
     <span>${row.fifaRanking ?? "-"}</span>
     <span class="performance-delta">${formatPerformanceDelta(row.performanceDelta)}</span>
     <span><span class="performance-status">${performanceStatusLabel(row)}</span></span>
+  `;
+}
+
+function renderFixturePerformanceTable(rows: FixturePerformanceEntry[]) {
+  if (rows.length === 0) return `<p class="empty-state">No completed or predicted ranked group fixtures are available yet.</p>`;
+
+  return `
+    <div class="fixture-performance-table">
+      <div class="fixture-performance-row header">
+        <span>#</span>
+        <span>Team</span>
+        <span>Opponent</span>
+        <span>Fixture</span>
+        <span>Score</span>
+        <span>Rank</span>
+        <span>Opp</span>
+        <span>Gap</span>
+        <span>Pts</span>
+        <span>xPts</span>
+        <span>Surp</span>
+        <span>GD</span>
+        <span>Credit</span>
+        <span>Source</span>
+      </div>
+      ${rows.map((row, index) => renderFixturePerformanceRow(row, index)).join("")}
+    </div>
+  `;
+}
+
+function renderFixturePerformanceRow(row: FixturePerformanceEntry, index: number) {
+  const team = teamById.get(row.teamId);
+  const opponent = teamById.get(row.opponentId);
+
+  return `
+    <div class="fixture-performance-row ${row.source}">
+      <span>${index + 1}</span>
+      <span class="team-cell">${renderFlag(team)} ${team?.name ?? row.teamId}</span>
+      <span class="team-cell">${renderFlag(opponent)} ${opponent?.name ?? row.opponentId}</span>
+      <span>${row.fixtureId}</span>
+      <span>${row.goalsFor}-${row.goalsAgainst} ${fixtureResultLabel(row)}</span>
+      <span>${row.fifaRanking}</span>
+      <span>${row.opponentFifaRanking}</span>
+      <span>${formatSignedNumber(row.rankingGap)}</span>
+      <span>${row.resultPoints}</span>
+      <span>${formatDecimal(row.expectedResultPoints)}</span>
+      <span>${formatSignedDecimal(row.surprisePoints)}</span>
+      <span>${formatSignedNumber(row.marginBonus)}</span>
+      <span class="fixture-performance-score">${formatSignedNumber(row.performanceScore)}</span>
+      <span><span class="fixture-performance-source">${row.source === "final" ? "Final" : "Predicted"}</span></span>
+    </div>
+  `;
+}
+
+function renderFixturePerformanceFormula() {
+  return `
+    <div class="fixture-performance-formula">
+      <div>
+        <strong>How Credit Works</strong>
+        <p>Each row compares what a team got from a fixture with what its FIFA ranking suggested it should get, then adds a scoreline-strength bonus.</p>
+      </div>
+      <div class="formula-grid">
+        <span><strong>Rank gap</strong> = team rank - opponent rank. Positive means underdog; negative means favorite.</span>
+        <span><strong>xPts</strong> estimates expected points from the ranking gap: close to 3 for heavy favorites, close to 0 for heavy underdogs, around 1.5 for evenly ranked teams.</span>
+        <span><strong>Curve</strong>: xPts = 3 / (1 + e^(rank gap / 15)). The 15 smooths the curve so a small ranking gap only nudges expectation, while a large gap matters a lot.</span>
+        <span><strong>Surprise</strong> = actual points - xPts. Positive means the team beat expectation; negative means it fell short.</span>
+        <span><strong>Margin</strong> = goal difference capped at +/-4, then multiplied by 20.</span>
+        <span><strong>Credit</strong> = round(surprise * 100 + margin).</span>
+      </div>
+    </div>
   `;
 }
 
@@ -723,6 +846,11 @@ function formatDecimal(value: number) {
   return Number.isInteger(value) ? String(value) : value.toFixed(2);
 }
 
+function formatSignedDecimal(value: number) {
+  const formatted = formatDecimal(value);
+  return value > 0 ? `+${formatted}` : formatted;
+}
+
 function ordinal(value: number) {
   const suffix = value % 10 === 1 && value % 100 !== 11
     ? "st"
@@ -743,6 +871,12 @@ function performanceStatusLabel(row: PerformanceRow) {
   if (row.performanceStatus === "underperforming") return "Under";
   if (row.performanceStatus === "on-track") return "On rank";
   return "Unknown";
+}
+
+function fixtureResultLabel(row: FixturePerformanceEntry) {
+  if (row.result === "win") return "W";
+  if (row.result === "draw") return "D";
+  return "L";
 }
 
 function renderFlag(team?: Team) {

@@ -1,8 +1,10 @@
-import type { GroupId, PredictionMap, StandingRow, Team, TeamId, TournamentData } from "../types";
+import type { Fixture, FixtureId, GroupId, PredictionMap, Score, StandingRow, Team, TeamId, TournamentData } from "../types";
 import { calculateGroupStandings } from "./standings";
 
 export type PerformanceStatus = "overperforming" | "underperforming" | "on-track" | "unknown";
 export type PerformanceMode = "raw" | "per-match" | "group-delta";
+export type FixturePerformanceSource = "final" | "prediction";
+export type FixturePerformanceResult = "win" | "draw" | "loss";
 
 export interface PerformanceRow extends StandingRow {
   group: GroupId;
@@ -12,6 +14,27 @@ export interface PerformanceRow extends StandingRow {
   expectedGroupRank?: number;
   performanceDelta?: number;
   performanceStatus: PerformanceStatus;
+}
+
+export interface FixturePerformanceEntry {
+  fixtureId: FixtureId;
+  matchNumber: number;
+  group: GroupId;
+  teamId: TeamId;
+  opponentId: TeamId;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  result: FixturePerformanceResult;
+  resultPoints: number;
+  expectedResultPoints: number;
+  surprisePoints: number;
+  fifaRanking: number;
+  opponentFifaRanking: number;
+  rankingGap: number;
+  marginBonus: number;
+  performanceScore: number;
+  source: FixturePerformanceSource;
 }
 
 export function calculatePerformanceRows(data: TournamentData, predictions: PredictionMap, mode: PerformanceMode = "raw"): PerformanceRow[] {
@@ -45,6 +68,14 @@ export function calculatePerformanceRows(data: TournamentData, predictions: Pred
   });
 }
 
+export function calculateFixturePerformanceEntries(data: TournamentData, predictions: PredictionMap): FixturePerformanceEntry[] {
+  const teamById = new Map(data.teams.map((team) => [team.id, team]));
+
+  return data.fixtures
+    .flatMap((fixture) => fixturePerformanceEntries(fixture, predictions, teamById))
+    .sort(compareFixturePerformanceEntries(teamById));
+}
+
 function comparePerformanceEntries(
   left: { group: GroupId; row: StandingRow },
   right: { group: GroupId; row: StandingRow },
@@ -65,6 +96,89 @@ function comparePerformanceEntries(
   }
 
   return compareRawRows(left.row, right.row, teamById) || left.group.localeCompare(right.group);
+}
+
+function fixturePerformanceEntries(
+  fixture: Fixture,
+  predictions: PredictionMap,
+  teamById: Map<TeamId, Team>
+): FixturePerformanceEntry[] {
+  if (fixture.stage !== "group" || !fixture.group) return [];
+  if (typeof fixture.home !== "string" || typeof fixture.away !== "string") return [];
+
+  const source: FixturePerformanceSource = fixture.result ? "final" : "prediction";
+  const score = fixture.result ?? predictions[fixture.id];
+  if (!isCompleteScore(score)) return [];
+
+  const homeTeam = teamById.get(fixture.home);
+  const awayTeam = teamById.get(fixture.away);
+  if (!homeTeam?.fifaRanking || !awayTeam?.fifaRanking) return [];
+
+  return [
+    buildFixturePerformanceEntry(fixture, source, homeTeam, awayTeam, score.home, score.away),
+    buildFixturePerformanceEntry(fixture, source, awayTeam, homeTeam, score.away, score.home)
+  ];
+}
+
+function buildFixturePerformanceEntry(
+  fixture: Fixture,
+  source: FixturePerformanceSource,
+  team: Team,
+  opponent: Team,
+  goalsFor: number,
+  goalsAgainst: number
+): FixturePerformanceEntry {
+  const resultPoints = goalsFor > goalsAgainst ? 3 : goalsFor === goalsAgainst ? 1 : 0;
+  const rankingGap = team.fifaRanking! - opponent.fifaRanking!;
+  const expectedResultPoints = expectedFixtureResultPoints(team.fifaRanking!, opponent.fifaRanking!);
+  const surprisePoints = resultPoints - expectedResultPoints;
+  const marginBonus = fixtureMarginBonus(goalsFor - goalsAgainst);
+
+  return {
+    fixtureId: fixture.id,
+    matchNumber: fixture.matchNumber,
+    group: fixture.group!,
+    teamId: team.id,
+    opponentId: opponent.id,
+    goalsFor,
+    goalsAgainst,
+    goalDifference: goalsFor - goalsAgainst,
+    result: goalsFor > goalsAgainst ? "win" : goalsFor === goalsAgainst ? "draw" : "loss",
+    resultPoints,
+    expectedResultPoints,
+    surprisePoints,
+    fifaRanking: team.fifaRanking!,
+    opponentFifaRanking: opponent.fifaRanking!,
+    rankingGap,
+    marginBonus,
+    performanceScore: Math.round(surprisePoints * 100 + marginBonus),
+    source
+  };
+}
+
+function expectedFixtureResultPoints(teamRanking: number, opponentRanking: number) {
+  const rankingGap = teamRanking - opponentRanking;
+  return 3 / (1 + Math.exp(rankingGap / 15));
+}
+
+function fixtureMarginBonus(goalDifference: number) {
+  const cappedDifference = Math.max(-4, Math.min(4, goalDifference));
+  return cappedDifference * 20;
+}
+
+function isCompleteScore(score: Score | undefined): score is Score {
+  return score !== undefined && Number.isFinite(score.home) && Number.isFinite(score.away);
+}
+
+function compareFixturePerformanceEntries(teamById: Map<TeamId, Team>) {
+  return (left: FixturePerformanceEntry, right: FixturePerformanceEntry) => (
+    right.performanceScore - left.performanceScore ||
+    right.resultPoints - left.resultPoints ||
+    right.goalDifference - left.goalDifference ||
+    left.opponentFifaRanking - right.opponentFifaRanking ||
+    left.matchNumber - right.matchNumber ||
+    compareTeamName(left.teamId, right.teamId, teamById)
+  );
 }
 
 function compareRawRows(left: StandingRow, right: StandingRow, teamById: Map<TeamId, Team>) {

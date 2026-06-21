@@ -576,6 +576,35 @@ h2 {
   background: #fff;
 }
 
+.performance-subtabs {
+  display: inline-flex;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  margin-bottom: 14px;
+  padding: 3px;
+  border: 1px solid #c9d7cc;
+  border-radius: 8px;
+  background: #eef3ee;
+}
+
+.performance-subtabs button {
+  flex: 0 0 auto;
+  min-width: 104px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 6px;
+  color: #607268;
+  background: transparent;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.performance-subtabs button.active {
+  color: #fff;
+  background: #143b2b;
+}
+
 .performance-mode-tabs {
   display: inline-flex;
   width: max-content;
@@ -669,6 +698,97 @@ h2 {
 .performance-row.underperforming .performance-status {
   color: #9e2f2f;
   background: #f9e7e3;
+}
+
+.fixture-performance-panel {
+  margin-top: 18px;
+}
+
+.fixture-performance-table {
+  display: grid;
+  overflow-x: auto;
+  border: 1px solid #d7e1d9;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.fixture-performance-formula {
+  display: grid;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #d7e1d9;
+  border-radius: 8px;
+  color: #53665b;
+  background: #fff;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.fixture-performance-formula p {
+  margin: 4px 0 0;
+}
+
+.fixture-performance-formula strong {
+  color: #17382a;
+}
+
+.formula-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 8px;
+}
+
+.formula-grid span {
+  padding: 8px;
+  border: 1px solid #e2e9e2;
+  border-radius: 6px;
+  background: #f8faf7;
+}
+
+.fixture-performance-row {
+  display: grid;
+  grid-template-columns: 44px minmax(190px, 1fr) minmax(190px, 1fr) 86px 78px 52px 52px 54px 44px 58px 62px 58px 74px minmax(94px, auto);
+  gap: 12px;
+  align-items: center;
+  min-width: 1320px;
+  padding: 10px 12px;
+  border-top: 1px solid #edf0ec;
+  font-size: 14px;
+}
+
+.fixture-performance-row.header {
+  border-top: 0;
+  color: #607268;
+  background: #f8faf7;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.fixture-performance-row.prediction {
+  background: #f7fbff;
+}
+
+.fixture-performance-score {
+  color: #0f5132;
+  font-weight: 800;
+}
+
+.fixture-performance-source {
+  display: inline-flex;
+  justify-content: center;
+  min-width: 74px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #245b40;
+  background: #e5f3e8;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.fixture-performance-row.prediction .fixture-performance-source {
+  color: #255578;
+  background: #e4f0fb;
 }
 
 .third-place-table {

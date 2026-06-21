@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculatePerformanceRows } from "../engine/performance";
+import { calculateFixturePerformanceEntries, calculatePerformanceRows } from "../engine/performance";
 import type { PredictionMap, TournamentData } from "../types";
 
 function performanceTournament(): TournamentData {
@@ -53,6 +53,17 @@ function performanceTournament(): TournamentData {
         venueId: "venue",
         home: "alpha",
         away: "gamma",
+        status: "scheduled"
+      },
+      {
+        id: "beta-delta",
+        matchNumber: 8,
+        stage: "group",
+        group: "A",
+        date: "2026-06-17T12:00:00.000Z",
+        venueId: "venue",
+        home: "beta",
+        away: "delta",
         status: "scheduled"
       },
       {
@@ -213,5 +224,110 @@ describe("performance analysis", () => {
       performanceDelta: -3,
       performanceStatus: "underperforming"
     });
+  });
+
+  it("calculates rank-adjusted fixture performance for completed fixtures", () => {
+    const rows = calculateFixturePerformanceEntries(performanceTournament(), {});
+
+    expect(rows.find((row) => row.fixtureId === "hotel-india" && row.teamId === "hotel")).toMatchObject({
+      fixtureId: "hotel-india",
+      teamId: "hotel",
+      opponentId: "india",
+      result: "win",
+      resultPoints: 3,
+      rankingGap: 85,
+      marginBonus: 40,
+      performanceScore: 339,
+      source: "final"
+    });
+    expect(rows.find((row) => row.fixtureId === "hotel-india" && row.teamId === "hotel")?.expectedResultPoints).toBeCloseTo(0.01, 2);
+    expect(rows.find((row) => row.fixtureId === "echo-foxtrot" && row.teamId === "echo")).toMatchObject({
+      result: "loss",
+      resultPoints: 0,
+      marginBonus: -20,
+      performanceScore: -318
+    });
+    expect(rows.find((row) => row.fixtureId === "echo-foxtrot" && row.teamId === "echo")?.expectedResultPoints).toBeCloseTo(2.98, 2);
+    expect(rows.find((row) => row.fixtureId === "alpha-beta" && row.teamId === "beta")).toMatchObject({
+      goalsFor: 2,
+      goalsAgainst: 0,
+      opponentFifaRanking: 1,
+      marginBonus: 40,
+      performanceScore: 274
+    });
+  });
+
+  it("gives an underdog more credit than a favorite for the same draw", () => {
+    const rows = calculateFixturePerformanceEntries(performanceTournament(), {
+      "beta-delta": { home: 1, away: 1 }
+    });
+
+    const favorite = rows.find((row) => row.fixtureId === "beta-delta" && row.teamId === "beta");
+    const underdog = rows.find((row) => row.fixtureId === "beta-delta" && row.teamId === "delta");
+
+    expect(underdog).toMatchObject({
+      result: "draw",
+      rankingGap: 30,
+      resultPoints: 1,
+      marginBonus: 0,
+      performanceScore: 64,
+      source: "prediction"
+    });
+    expect(favorite).toMatchObject({
+      result: "draw",
+      rankingGap: -30,
+      resultPoints: 1,
+      marginBonus: 0,
+      performanceScore: -164,
+      source: "prediction"
+    });
+    expect(underdog!.expectedResultPoints).toBeCloseTo(0.36, 2);
+    expect(favorite!.expectedResultPoints).toBeCloseTo(2.64, 2);
+    expect(underdog!.performanceScore).toBeGreaterThan(favorite!.performanceScore);
+  });
+
+  it("skips unresolved fixtures and fixtures with missing rankings", () => {
+    const rows = calculateFixturePerformanceEntries(performanceTournament(), {
+      "gamma-delta": { home: 3, away: 0 }
+    });
+
+    expect(rows.some((row) => row.fixtureId === "beta-delta")).toBe(false);
+    expect(rows.some((row) => row.fixtureId === "gamma-delta")).toBe(false);
+  });
+
+  it("sorts fixture performances deterministically when scores tie", () => {
+    const data = performanceTournament();
+    data.fixtures.push(
+      {
+        id: "india-juliet",
+        matchNumber: 9,
+        stage: "group",
+        group: "C",
+        date: "2026-06-18T12:00:00.000Z",
+        venueId: "venue",
+        home: "india",
+        away: "juliet",
+        status: "completed",
+        result: { home: 1, away: 1 }
+      },
+      {
+        id: "india-juliet-rematch",
+        matchNumber: 10,
+        stage: "group",
+        group: "C",
+        date: "2026-06-18T12:00:00.000Z",
+        venueId: "venue",
+        home: "india",
+        away: "juliet",
+        status: "completed",
+        result: { home: 1, away: 1 }
+      }
+    );
+
+    const tiedFavoriteDraws = calculateFixturePerformanceEntries(data, {})
+      .filter((row) => row.performanceScore === -196 && row.result === "draw" && row.teamId === "india")
+      .map((row) => row.fixtureId);
+
+    expect(tiedFavoriteDraws).toEqual(["india-juliet", "india-juliet-rematch"]);
   });
 });
