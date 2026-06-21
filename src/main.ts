@@ -294,19 +294,19 @@ function renderFixturePerformanceSummaryTable(rows: FixturePerformanceSummary[])
   return `
     <div class="fixture-summary-table" aria-label="Fixture credit summary by team">
       <div class="fixture-summary-row header">
-        <span>#</span>
-        <span>Team</span>
-        <span>Group</span>
-        <span>Rank</span>
-        <span>Played</span>
-        <span>Record</span>
-        <span>GD</span>
-        <span>GF</span>
-        <span>Actual</span>
-        <span>Base</span>
-        <span>Credit</span>
-        <span>Final</span>
-        <span>Pred</span>
+        ${renderHeaderTooltip("#", "Position in this fixture-credit table.")}
+        ${renderHeaderTooltip("Team", "Team being summarized.")}
+        ${renderHeaderTooltip("Group", "World Cup group.")}
+        ${renderHeaderTooltip("Rank", "Team FIFA ranking. Lower numbers are stronger.")}
+        ${renderHeaderTooltip("Played", "Final results and complete predictions included in this summary.")}
+        ${renderHeaderTooltip("Record", "Wins-draws-losses across included fixture rows.")}
+        ${renderHeaderTooltip("GD", "Goal difference across included fixture rows.")}
+        ${renderHeaderTooltip("GF", "Goals scored across included fixture rows.")}
+        ${renderHeaderTooltip("Actual", "Actual match points earned: win 3, draw 1, loss 0.")}
+        ${renderHeaderTooltip("Base", "Baseline points expected from FIFA ranking: favorite 3, underdog 0, equal rank 1.")}
+        ${renderHeaderTooltip("Credit", "Total fixture credit: (Actual - Base) times the rank-gap factor for each row.")}
+        ${renderHeaderTooltip("Final", "Number of authoritative final results included.")}
+        ${renderHeaderTooltip("Pred", "Number of complete user predictions included.")}
       </div>
       ${rows.map((row, index) => renderFixturePerformanceSummaryRow(row, index)).join("")}
     </div>
@@ -341,23 +341,27 @@ function renderFixturePerformanceTable(rows: FixturePerformanceEntry[]) {
   return `
     <div class="fixture-performance-table">
       <div class="fixture-performance-row header">
-        <span>#</span>
-        <span>Team</span>
-        <span>Opponent</span>
-        <span>Fixture</span>
-        <span>Score</span>
-        <span>Rank</span>
-        <span>Opp</span>
-        <span>Gap</span>
-        <span>Pts</span>
-        <span>Base</span>
-        <span>Factor</span>
-        <span>Credit</span>
-        <span>Source</span>
+        ${renderHeaderTooltip("#", "Position in the fixture-result credit list.")}
+        ${renderHeaderTooltip("Team", "Team whose side of the fixture is being scored.")}
+        ${renderHeaderTooltip("Opponent", "The team faced in this fixture.")}
+        ${renderHeaderTooltip("Fixture", "Fixture identifier from the tournament data.")}
+        ${renderHeaderTooltip("Score", "Score from this team's perspective, plus W/D/L result.")}
+        ${renderHeaderTooltip("Rank", "Team FIFA ranking. Lower numbers are stronger.")}
+        ${renderHeaderTooltip("Opp", "Opponent FIFA ranking. Lower numbers are stronger.")}
+        ${renderHeaderTooltip("Gap", "Team rank minus opponent rank. Positive means underdog; negative means favorite.")}
+        ${renderHeaderTooltip("Pts", "Actual points earned from this fixture: win 3, draw 1, loss 0.")}
+        ${renderHeaderTooltip("Base", "Baseline points expected from ranking: favorite 3, underdog 0, equal rank 1.")}
+        ${renderHeaderTooltip("Factor", "Rank-gap multiplier: 0-4 = x1, 5-14 = x2, 15-29 = x3, 30+ = x4.")}
+        ${renderHeaderTooltip("Credit", "Fixture credit: (Pts - Base) x Factor.")}
+        ${renderHeaderTooltip("Source", "Whether the score is an authoritative final result or active prediction.")}
       </div>
       ${rows.map((row, index) => renderFixturePerformanceRow(row, index)).join("")}
     </div>
   `;
+}
+
+function renderHeaderTooltip(label: string, tooltip: string) {
+  return `<span class="table-header-help" title="${tooltip}" aria-label="${label}: ${tooltip}">${label}<span aria-hidden="true">?</span></span>`;
 }
 
 function renderFixturePerformanceRow(row: FixturePerformanceEntry, index: number) {

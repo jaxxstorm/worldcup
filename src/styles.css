@@ -773,6 +773,30 @@ h2 {
   text-transform: uppercase;
 }
 
+.table-header-help {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: max-content;
+  max-width: 100%;
+  cursor: help;
+}
+
+.table-header-help > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border: 1px solid #b9c8bd;
+  border-radius: 999px;
+  color: #607268;
+  background: #fff;
+  font-size: 10px;
+  line-height: 1;
+  text-transform: none;
+}
+
 .fixture-performance-detail-heading {
   display: flex;
   align-items: center;
