@@ -606,13 +606,18 @@ h2 {
 
 .performance-row {
   display: grid;
-  grid-template-columns: 44px minmax(220px, 1fr) 60px 84px 58px 58px 70px 70px minmax(104px, auto);
+  grid-template-columns: 44px minmax(220px, 1fr) 60px 84px 58px 58px 64px 70px 70px minmax(104px, auto);
   gap: 12px;
   align-items: center;
-  min-width: 900px;
+  min-width: 980px;
   padding: 10px 12px;
   border-top: 1px solid #edf0ec;
   font-size: 14px;
+}
+
+.performance-row.group-delta {
+  grid-template-columns: 44px minmax(220px, 1fr) 60px 76px 86px 84px 58px 58px 70px 70px minmax(104px, auto);
+  min-width: 1080px;
 }
 
 .performance-row.header {

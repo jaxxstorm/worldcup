@@ -116,14 +116,23 @@ describe("performance analysis", () => {
     expect(rows.find((row) => row.teamId === "beta")).toMatchObject({
       currentRank: 2,
       fifaRanking: 20,
-      performanceDelta: 18,
+      expectedOverallRank: 4,
+      performanceDelta: 2,
       performanceStatus: "overperforming"
     });
     expect(rows.find((row) => row.teamId === "alpha")).toMatchObject({
       currentRank: 8,
       fifaRanking: 1,
+      expectedOverallRank: 1,
       performanceDelta: -7,
       performanceStatus: "underperforming"
+    });
+    expect(rows.find((row) => row.teamId === "hotel")).toMatchObject({
+      currentRank: 1,
+      fifaRanking: 90,
+      expectedOverallRank: 8,
+      performanceDelta: 7,
+      performanceStatus: "overperforming"
     });
   });
 
@@ -149,6 +158,7 @@ describe("performance analysis", () => {
     expect(rows[0]).toMatchObject({
       teamId: "gamma",
       points: 6,
+      performanceDelta: undefined,
       performanceStatus: "unknown"
     });
     expect(data.fixtures.find((fixture) => fixture.id === "gamma-delta")?.result).toBeUndefined();
@@ -184,11 +194,13 @@ describe("performance analysis", () => {
     expect(rows.filter((row) => row.performanceDelta === 1).map((row) => row.teamId)).toEqual(["beta"]);
     expect(rows.find((row) => row.teamId === "hotel")).toMatchObject({
       expectedGroupRank: 3,
+      expectedOverallRank: 8,
       rank: 1,
       performanceDelta: 2,
       performanceStatus: "overperforming"
     });
     expect(rows.find((row) => row.teamId === "foxtrot")).toMatchObject({
+      expectedOverallRank: 7,
       expectedGroupRank: 2,
       rank: 2,
       performanceDelta: 0,

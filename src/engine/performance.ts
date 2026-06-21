@@ -8,6 +8,7 @@ export interface PerformanceRow extends StandingRow {
   group: GroupId;
   currentRank: number;
   fifaRanking?: number;
+  expectedOverallRank?: number;
   expectedGroupRank?: number;
   performanceDelta?: number;
   performanceStatus: PerformanceStatus;
@@ -16,6 +17,7 @@ export interface PerformanceRow extends StandingRow {
 export function calculatePerformanceRows(data: TournamentData, predictions: PredictionMap, mode: PerformanceMode = "raw"): PerformanceRow[] {
   const teamById = new Map(data.teams.map((team) => [team.id, team]));
   const standings = calculateGroupStandings(data, predictions);
+  const expectedOverallRanks = expectedOverallRankings(data);
   const expectedGroupRanks = expectedGroupRankings(data);
   const rows = (Object.entries(standings) as Array<[GroupId, StandingRow[]]>)
     .flatMap(([group, groupRows]) => groupRows.map((row) => ({ group, row })))
@@ -24,16 +26,18 @@ export function calculatePerformanceRows(data: TournamentData, predictions: Pred
   return rows.map(({ group, row }, index) => {
     const currentRank = index + 1;
     const fifaRanking = teamById.get(row.teamId)?.fifaRanking;
+    const expectedOverallRank = expectedOverallRanks.get(row.teamId);
     const expectedGroupRank = expectedGroupRanks.get(row.teamId);
     const performanceDelta = mode === "group-delta"
       ? expectedGroupRank === undefined ? undefined : expectedGroupRank - row.rank
-      : fifaRanking ? fifaRanking - currentRank : undefined;
+      : expectedOverallRank === undefined ? undefined : expectedOverallRank - currentRank;
 
     return {
       ...row,
       group,
       currentRank,
       fifaRanking,
+      expectedOverallRank,
       expectedGroupRank,
       performanceDelta,
       performanceStatus: performanceStatus(performanceDelta)
@@ -91,6 +95,18 @@ function perMatch(value: number, played: number) {
 
 function groupDelta(row: StandingRow, expectedGroupRanks: Map<TeamId, number>) {
   return (expectedGroupRanks.get(row.teamId) ?? row.rank) - row.rank;
+}
+
+function expectedOverallRankings(data: TournamentData) {
+  const ranks = new Map<TeamId, number>();
+
+  data.teams
+    .filter((team) => team.group && team.fifaRanking)
+    .slice()
+    .sort((left, right) => (left.fifaRanking ?? Number.MAX_SAFE_INTEGER) - (right.fifaRanking ?? Number.MAX_SAFE_INTEGER) || left.name.localeCompare(right.name))
+    .forEach((team, index) => ranks.set(team.id, index + 1));
+
+  return ranks;
 }
 
 function expectedGroupRankings(data: TournamentData) {
