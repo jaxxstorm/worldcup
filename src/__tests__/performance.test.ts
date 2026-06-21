@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateFixturePerformanceEntries, calculatePerformanceRows } from "../engine/performance";
+import { calculateFixturePerformanceEntries, calculateFixturePerformanceSummaries, calculatePerformanceRows } from "../engine/performance";
 import type { PredictionMap, TournamentData } from "../types";
 
 function performanceTournament(): TournamentData {
@@ -329,5 +329,22 @@ describe("performance analysis", () => {
       .map((row) => row.fixtureId);
 
     expect(tiedFavoriteDraws).toEqual(["india-juliet", "india-juliet-rematch"]);
+  });
+
+  it("summarizes fixture performance credit by team", () => {
+    const rows = calculateFixturePerformanceSummaries(performanceTournament(), {});
+
+    expect(rows[0]).toMatchObject({
+      teamId: "hotel",
+      group: "C",
+      fifaRanking: 90,
+      fixtures: 2,
+      totalCredit: 616,
+      bestCredit: 339,
+      worstCredit: 277,
+      finalCount: 2,
+      predictionCount: 0
+    });
+    expect(rows[0].averageCredit).toBeCloseTo(308, 2);
   });
 });

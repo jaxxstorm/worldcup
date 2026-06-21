@@ -37,6 +37,19 @@ export interface FixturePerformanceEntry {
   source: FixturePerformanceSource;
 }
 
+export interface FixturePerformanceSummary {
+  teamId: TeamId;
+  group: GroupId;
+  fifaRanking: number;
+  fixtures: number;
+  totalCredit: number;
+  averageCredit: number;
+  bestCredit: number;
+  worstCredit: number;
+  finalCount: number;
+  predictionCount: number;
+}
+
 export function calculatePerformanceRows(data: TournamentData, predictions: PredictionMap, mode: PerformanceMode = "raw"): PerformanceRow[] {
   const teamById = new Map(data.teams.map((team) => [team.id, team]));
   const standings = calculateGroupStandings(data, predictions);
@@ -74,6 +87,47 @@ export function calculateFixturePerformanceEntries(data: TournamentData, predict
   return data.fixtures
     .flatMap((fixture) => fixturePerformanceEntries(fixture, predictions, teamById))
     .sort(compareFixturePerformanceEntries(teamById));
+}
+
+export function calculateFixturePerformanceSummaries(data: TournamentData, predictions: PredictionMap): FixturePerformanceSummary[] {
+  const teamById = new Map(data.teams.map((team) => [team.id, team]));
+  const entries = calculateFixturePerformanceEntries(data, predictions);
+  const summaries = new Map<TeamId, FixturePerformanceSummary>();
+
+  for (const entry of entries) {
+    const current = summaries.get(entry.teamId);
+    if (!current) {
+      summaries.set(entry.teamId, {
+        teamId: entry.teamId,
+        group: entry.group,
+        fifaRanking: entry.fifaRanking,
+        fixtures: 1,
+        totalCredit: entry.performanceScore,
+        averageCredit: entry.performanceScore,
+        bestCredit: entry.performanceScore,
+        worstCredit: entry.performanceScore,
+        finalCount: entry.source === "final" ? 1 : 0,
+        predictionCount: entry.source === "prediction" ? 1 : 0
+      });
+      continue;
+    }
+
+    current.fixtures += 1;
+    current.totalCredit += entry.performanceScore;
+    current.averageCredit = current.totalCredit / current.fixtures;
+    current.bestCredit = Math.max(current.bestCredit, entry.performanceScore);
+    current.worstCredit = Math.min(current.worstCredit, entry.performanceScore);
+    current.finalCount += entry.source === "final" ? 1 : 0;
+    current.predictionCount += entry.source === "prediction" ? 1 : 0;
+  }
+
+  return Array.from(summaries.values()).sort((left, right) => (
+    right.totalCredit - left.totalCredit ||
+    right.averageCredit - left.averageCredit ||
+    right.bestCredit - left.bestCredit ||
+    left.fifaRanking - right.fifaRanking ||
+    compareTeamName(left.teamId, right.teamId, teamById)
+  ));
 }
 
 function comparePerformanceEntries(

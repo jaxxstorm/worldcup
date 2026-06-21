@@ -745,6 +745,52 @@ h2 {
   background: #f8faf7;
 }
 
+.fixture-summary-table {
+  display: grid;
+  overflow-x: auto;
+  border: 1px solid #d7e1d9;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.fixture-summary-row {
+  display: grid;
+  grid-template-columns: 44px minmax(210px, 1fr) 56px 54px 54px 70px 70px 70px 70px 54px 54px;
+  gap: 12px;
+  align-items: center;
+  min-width: 920px;
+  padding: 10px 12px;
+  border-top: 1px solid #edf0ec;
+  font-size: 14px;
+}
+
+.fixture-summary-row.header {
+  border-top: 0;
+  color: #607268;
+  background: #f8faf7;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.fixture-performance-detail-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fixture-performance-detail-heading h4 {
+  margin: 0;
+  color: #17382a;
+  font-size: 15px;
+}
+
+.fixture-performance-detail-heading span {
+  color: #607268;
+  font-size: 13px;
+}
+
 .fixture-performance-row {
   display: grid;
   grid-template-columns: 44px minmax(190px, 1fr) minmax(190px, 1fr) 86px 78px 52px 52px 54px 44px 58px 62px 58px 74px minmax(94px, auto);

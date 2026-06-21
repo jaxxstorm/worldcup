@@ -4,7 +4,7 @@ import { validateTournamentData } from "./data/schema";
 import { buildBracketLayout, type BracketLayout, type BracketNode } from "./engine/bracket-layout";
 import { formatFixtureKickoff, groupFixturesByDisplayDate, orderFixturesChronologically } from "./engine/fixtures";
 import { drawSidesForProjection, projectTournament } from "./engine/knockout";
-import { calculateFixturePerformanceEntries, calculatePerformanceRows, type FixturePerformanceEntry, type PerformanceMode, type PerformanceRow } from "./engine/performance";
+import { calculateFixturePerformanceEntries, calculateFixturePerformanceSummaries, calculatePerformanceRows, type FixturePerformanceEntry, type FixturePerformanceSummary, type PerformanceMode, type PerformanceRow } from "./engine/performance";
 import { interpretPredictionInput, isEditableFixture, setPrediction } from "./engine/predictions";
 import { calculateGroupStandings, thirdPlaceRankings } from "./engine/standings";
 import { loadPredictions, savePredictions } from "./storage/session";
@@ -143,13 +143,14 @@ function renderStatsView() {
 function renderPerformanceView() {
   const rows = calculatePerformanceRows(tournamentData, predictions, activePerformanceMode);
   const fixtureRows = calculateFixturePerformanceEntries(tournamentData, predictions);
+  const fixtureSummaries = calculateFixturePerformanceSummaries(tournamentData, predictions);
 
   return `
     <div class="performance-page">
       <section>
         <h2>Performance</h2>
         ${renderPerformanceSubTabs()}
-        ${activePerformanceTab === "teams" ? renderTeamPerformancePanel(rows) : renderFixturePerformancePanel(fixtureRows)}
+        ${activePerformanceTab === "teams" ? renderTeamPerformancePanel(rows) : renderFixturePerformancePanel(fixtureSummaries, fixtureRows)}
       </section>
     </div>
   `;
@@ -186,7 +187,7 @@ function renderTeamPerformancePanel(rows: PerformanceRow[]) {
   `;
 }
 
-function renderFixturePerformancePanel(fixtureRows: FixturePerformanceEntry[]) {
+function renderFixturePerformancePanel(summaryRows: FixturePerformanceSummary[], fixtureRows: FixturePerformanceEntry[]) {
   return `
     <section class="stats-panel fixture-performance-panel" aria-labelledby="fixture-performance-heading">
       <div class="stats-panel-heading">
@@ -196,7 +197,12 @@ function renderFixturePerformancePanel(fixtureRows: FixturePerformanceEntry[]) {
         </div>
         <span>${fixtureRows.length} entries</span>
       </div>
+      ${renderFixturePerformanceSummaryTable(summaryRows)}
       ${renderFixturePerformanceFormula()}
+      <div class="fixture-performance-detail-heading">
+        <h4>Results & Credit</h4>
+        <span>${fixtureRows.length} rows</span>
+      </div>
       ${renderFixturePerformanceTable(fixtureRows)}
     </section>
   `;
@@ -279,6 +285,49 @@ function renderGroupDeltaCells(row: PerformanceRow) {
     <span>${row.fifaRanking ?? "-"}</span>
     <span class="performance-delta">${formatPerformanceDelta(row.performanceDelta)}</span>
     <span><span class="performance-status">${performanceStatusLabel(row)}</span></span>
+  `;
+}
+
+function renderFixturePerformanceSummaryTable(rows: FixturePerformanceSummary[]) {
+  if (rows.length === 0) return `<p class="empty-state">No ranked fixture credits are available yet.</p>`;
+
+  return `
+    <div class="fixture-summary-table" aria-label="Fixture credit summary by team">
+      <div class="fixture-summary-row header">
+        <span>#</span>
+        <span>Team</span>
+        <span>Group</span>
+        <span>Rank</span>
+        <span>Rows</span>
+        <span>Total</span>
+        <span>Avg</span>
+        <span>Best</span>
+        <span>Worst</span>
+        <span>Final</span>
+        <span>Pred</span>
+      </div>
+      ${rows.map((row, index) => renderFixturePerformanceSummaryRow(row, index)).join("")}
+    </div>
+  `;
+}
+
+function renderFixturePerformanceSummaryRow(row: FixturePerformanceSummary, index: number) {
+  const team = teamById.get(row.teamId);
+
+  return `
+    <div class="fixture-summary-row">
+      <span>${index + 1}</span>
+      <span class="team-cell">${renderFlag(team)} ${team?.name ?? row.teamId}</span>
+      <span>${row.group}</span>
+      <span>${row.fifaRanking}</span>
+      <span>${row.fixtures}</span>
+      <span class="fixture-performance-score">${formatSignedNumber(row.totalCredit)}</span>
+      <span>${formatSignedDecimal(row.averageCredit)}</span>
+      <span>${formatSignedNumber(row.bestCredit)}</span>
+      <span>${formatSignedNumber(row.worstCredit)}</span>
+      <span>${row.finalCount}</span>
+      <span>${row.predictionCount}</span>
+    </div>
   `;
 }
 
