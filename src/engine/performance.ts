@@ -79,7 +79,9 @@ function comparePerMatchRows(left: StandingRow, right: StandingRow, teamById: Ma
     perMatch(right.points, right.played) - perMatch(left.points, left.played) ||
     perMatch(right.goalDifference, right.played) - perMatch(left.goalDifference, left.played) ||
     perMatch(right.goalsFor, right.played) - perMatch(left.goalsFor, left.played) ||
-    compareRawRows(left, right, teamById)
+    compareFairPlayPerMatch(left, right) ||
+    compareFifaRanking(left.teamId, right.teamId, teamById) ||
+    compareTeamName(left.teamId, right.teamId, teamById)
   );
 }
 
@@ -112,6 +114,11 @@ function expectedGroupRankings(data: TournamentData) {
 function compareFairPlay(left: StandingRow, right: StandingRow) {
   if (!Number.isFinite(left.fairPlayPoints) || !Number.isFinite(right.fairPlayPoints)) return 0;
   return left.fairPlayPoints! - right.fairPlayPoints!;
+}
+
+function compareFairPlayPerMatch(left: StandingRow, right: StandingRow) {
+  if (!Number.isFinite(left.fairPlayPoints) || !Number.isFinite(right.fairPlayPoints)) return 0;
+  return perMatch(left.fairPlayPoints!, left.played) - perMatch(right.fairPlayPoints!, right.played);
 }
 
 function compareFifaRanking(leftTeamId: TeamId, rightTeamId: TeamId, teamById: Map<TeamId, Team>) {

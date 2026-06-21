@@ -141,7 +141,7 @@ function renderPerformanceView() {
             <span>${rows.length} teams</span>
           </div>
           ${renderPerformanceModeControls()}
-          ${renderPerformanceTable(rows)}
+          ${renderPerformanceTable(rows, activePerformanceMode)}
         </section>
       </section>
     </div>
@@ -166,7 +166,7 @@ function renderPerformanceModeControls() {
   `;
 }
 
-function renderPerformanceTable(rows: PerformanceRow[]) {
+function renderPerformanceTable(rows: PerformanceRow[], mode: PerformanceMode) {
   return `
     <div class="performance-table">
       <div class="performance-row header">
@@ -174,18 +174,18 @@ function renderPerformanceTable(rows: PerformanceRow[]) {
         <span>Team</span>
         <span>Group</span>
         <span>Record</span>
-        <span>Pts</span>
-        <span>GD</span>
+        <span>${mode === "per-match" ? "PPM" : "Pts"}</span>
+        <span>${mode === "per-match" ? "GD/M" : "GD"}</span>
         <span>FIFA</span>
         <span>Move</span>
         <span>Status</span>
       </div>
-      ${rows.map(renderPerformanceRow).join("")}
+      ${rows.map((row) => renderPerformanceRow(row, mode)).join("")}
     </div>
   `;
 }
 
-function renderPerformanceRow(row: PerformanceRow) {
+function renderPerformanceRow(row: PerformanceRow, mode: PerformanceMode) {
   const team = teamById.get(row.teamId);
   return `
     <div class="performance-row ${row.performanceStatus}">
@@ -193,8 +193,8 @@ function renderPerformanceRow(row: PerformanceRow) {
       <span class="team-cell">${renderFlag(team)} ${team?.name ?? row.teamId}</span>
       <span>${row.group}</span>
       <span>${row.won}-${row.drawn}-${row.lost}</span>
-      <span>${row.points}</span>
-      <span>${formatSignedNumber(row.goalDifference)}</span>
+      <span>${performancePointsValue(row, mode)}</span>
+      <span>${performanceGoalDifferenceValue(row, mode)}</span>
       <span>${row.fifaRanking ?? "-"}</span>
       <span class="performance-delta">${formatPerformanceDelta(row.performanceDelta)}</span>
       <span><span class="performance-status">${performanceStatusLabel(row)}</span></span>
@@ -205,7 +205,7 @@ function renderPerformanceRow(row: PerformanceRow) {
 function performanceModeNote(mode: PerformanceMode) {
   if (mode === "raw") return "Total points, goal difference, and goals compared with FIFA ranking.";
   if (mode === "group-delta") return "Current group position compared with expected group position from FIFA ranking.";
-  return "Points, goal difference, and goals normalized per match, then compared with FIFA ranking.";
+  return "Average table: ranks by points per match, then goal difference per match, goals per match, fair play per match, and FIFA rank. Move compares that average rank with FIFA ranking.";
 }
 
 function renderStatLeaderboards(leaderboards: StatLeaderboard[]) {
@@ -682,6 +682,25 @@ function renderQualifiedTeam(team: QualifiedTeam) {
 function formatPerformanceDelta(delta: number | undefined) {
   if (delta === undefined) return "-";
   return formatSignedNumber(delta);
+}
+
+function performancePointsValue(row: PerformanceRow, mode: PerformanceMode) {
+  if (mode !== "per-match") return String(row.points);
+  return formatRate(row.points, row.played);
+}
+
+function performanceGoalDifferenceValue(row: PerformanceRow, mode: PerformanceMode) {
+  if (mode !== "per-match") return formatSignedNumber(row.goalDifference);
+  const value = row.played > 0 ? row.goalDifference / row.played : 0;
+  return value > 0 ? `+${formatDecimal(value)}` : formatDecimal(value);
+}
+
+function formatRate(value: number, played: number) {
+  return formatDecimal(played > 0 ? value / played : 0);
+}
+
+function formatDecimal(value: number) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(2);
 }
 
 function formatSignedNumber(value: number) {
