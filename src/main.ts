@@ -24,6 +24,7 @@ let predictions: PredictionMap = loadPredictions(tournamentData);
 let activeView: "main" | "bracket" | "stats" | "performance" = "main";
 let activePerformanceTab: "teams" | "fixtures" = "teams";
 let activePerformanceMode: PerformanceMode = "raw";
+let activeTooltip: HTMLDivElement | undefined;
 
 const bracketRounds: MatchStage[] = ["round-of-32", "round-of-16", "quarter-final", "semi-final", "third-place", "final"];
 const fixtureById = new Map(tournamentData.fixtures.map((fixture) => [fixture.id, fixture]));
@@ -68,6 +69,13 @@ function render() {
       activePerformanceTab = parsePerformanceTab(button.dataset.performanceTab);
       render();
     });
+  });
+
+  appRoot.querySelectorAll<HTMLElement>("[data-tooltip]").forEach((element) => {
+    element.addEventListener("mouseenter", () => showTooltip(element));
+    element.addEventListener("mouseleave", hideTooltip);
+    element.addEventListener("focus", () => showTooltip(element));
+    element.addEventListener("blur", hideTooltip);
   });
 
   appRoot.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-prediction]").forEach((input) => {
@@ -361,7 +369,35 @@ function renderFixturePerformanceTable(rows: FixturePerformanceEntry[]) {
 }
 
 function renderHeaderTooltip(label: string, tooltip: string) {
-  return `<span class="table-header-help" title="${tooltip}" aria-label="${label}: ${tooltip}">${label}<span aria-hidden="true">?</span></span>`;
+  return `<span class="table-header-help" data-tooltip="${tooltip}" aria-label="${label}: ${tooltip}" tabindex="0">${label}<span aria-hidden="true">?</span></span>`;
+}
+
+function showTooltip(anchor: HTMLElement) {
+  hideTooltip();
+
+  const tooltip = anchor.dataset.tooltip;
+  if (!tooltip) return;
+
+  activeTooltip = document.createElement("div");
+  activeTooltip.className = "floating-tooltip";
+  activeTooltip.textContent = tooltip;
+  document.body.append(activeTooltip);
+
+  const anchorRect = anchor.getBoundingClientRect();
+  const tooltipRect = activeTooltip.getBoundingClientRect();
+  const left = Math.min(
+    window.innerWidth - tooltipRect.width - 12,
+    Math.max(12, anchorRect.left + anchorRect.width / 2 - tooltipRect.width / 2)
+  );
+  const top = anchorRect.bottom + 8;
+
+  activeTooltip.style.left = `${left}px`;
+  activeTooltip.style.top = `${top}px`;
+}
+
+function hideTooltip() {
+  activeTooltip?.remove();
+  activeTooltip = undefined;
 }
 
 function renderFixturePerformanceRow(row: FixturePerformanceEntry, index: number) {
