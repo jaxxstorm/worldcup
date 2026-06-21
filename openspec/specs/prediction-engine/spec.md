@@ -65,6 +65,14 @@ The system SHALL calculate standings, qualifiers, current bracket slot resolutio
 - **WHEN** the same normalized tournament data and prediction model are evaluated repeatedly
 - **THEN** the system MUST produce the same standings, qualifiers, bracket slot resolution, and knockout projection each time
 
+#### Scenario: Tie-breaker behavior is isolated from live result drift
+- **WHEN** tests assert FIFA ranking, fair-play, or head-to-head tie-breaker behavior
+- **THEN** they MUST construct or normalize fixture state so evolving authoritative results cannot change the teams being compared
+
+#### Scenario: Generated data integration remains explicit
+- **WHEN** tests assert behavior against the current generated tournament dataset
+- **THEN** they MUST treat expected standings or projection outputs as integration expectations for that dataset rather than reusable tie-breaker fixtures
+
 ### Requirement: Current bracket slot resolution
 The system SHALL expose both the source label and the current resolved team for each bracket slot when tournament data plus active predictions can determine that team.
 
@@ -82,4 +90,3 @@ The system SHALL include fixture metadata needed to render bracket match time an
 #### Scenario: Projected bracket match includes metadata
 - **WHEN** a bracket match is projected
 - **THEN** the projection MUST expose its fixture id, stage, kickoff time, venue id, and participant sources
-

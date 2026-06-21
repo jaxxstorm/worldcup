@@ -18,6 +18,10 @@ function editableGroupTournamentData(): TournamentData {
   return data;
 }
 
+function editableGroupFixtureCount(data: TournamentData) {
+  return data.fixtures.filter((fixture) => fixture.stage === "group" && fixture.status === "scheduled" && !fixture.result && !fixture.sourceResult).length;
+}
+
 function groupPredictionSet(data: TournamentData): PredictionMap {
   return Object.fromEntries(
     data.fixtures
@@ -59,21 +63,25 @@ describe("prediction engine", () => {
   });
 
   it("uses FIFA ranking as the final group-stage tie-breaker when teams remain level", () => {
-    const groupH = calculateGroupStandings(tournamentData, {}).H;
+    const data = editableGroupTournamentData();
+    const groupH = calculateGroupStandings(data, {}).H;
 
-    expect(groupH.map((row) => row.teamId)).toEqual(["uruguay", "saudi-arabia", "spain", "cape-verde"]);
+    expect(editableGroupFixtureCount(data)).toBe(tournamentData.fixtures.filter((fixture) => fixture.stage === "group").length);
+    expect(groupH.map((row) => row.teamId)).toEqual(["spain", "uruguay", "saudi-arabia", "cape-verde"]);
   });
 
   it("uses fair-play points before FIFA ranking when group teams remain level", () => {
-    const data = structuredClone(tournamentData) as TournamentData;
+    const data = editableGroupTournamentData();
     data.teams = data.teams.map((team) => {
       if (team.id === "spain") return { ...team, fairPlayPoints: 5 };
       if (team.id === "cape-verde") return { ...team, fairPlayPoints: 1 };
+      if (team.id === "saudi-arabia") return { ...team, fairPlayPoints: 7 };
+      if (team.id === "uruguay") return { ...team, fairPlayPoints: 9 };
       return team;
     });
     const groupH = calculateGroupStandings(data, {}).H;
 
-    expect(groupH.map((row) => row.teamId).slice(2)).toEqual(["cape-verde", "spain"]);
+    expect(groupH.map((row) => row.teamId)).toEqual(["cape-verde", "spain", "saudi-arabia", "uruguay"]);
   });
 
   it("uses predicted head-to-head results before FIFA ranking for tied group teams", () => {

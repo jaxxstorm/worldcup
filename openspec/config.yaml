@@ -39,8 +39,10 @@ rules:
   design:
     - Specify the JSON schema impact for fixture, result, standings, venue, location, flag, or knockout-path changes.
     - Define recalculation behavior for group tables and projected knockout qualification when predictions change.
+    - When standings or prediction behavior is tested against evolving generated data, separate behavior fixtures from live-data integration assertions so scheduled result updates cannot invalidate static expectations.
     - Account for session storage persistence and restoration where prediction state is involved.
   tasks:
     - Include data normalization tasks when external fixture or result sources are introduced or changed.
     - Include tests for standings, qualification, and knockout-path calculations when those behaviors change.
+    - Ensure calculation tests that assert specific standings order either construct their own unresolved fixture state or explicitly document that they are integration tests for the current generated dataset.
     - Include static deployment verification for GitHub Pages when build or routing behavior changes.
