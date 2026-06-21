@@ -27,12 +27,10 @@ export interface FixturePerformanceEntry {
   goalDifference: number;
   result: FixturePerformanceResult;
   resultPoints: number;
-  expectedResultPoints: number;
-  surprisePoints: number;
+  baselinePoints: number;
   fifaRanking: number;
   opponentFifaRanking: number;
   rankingGap: number;
-  marginBonus: number;
   performanceScore: number;
   source: FixturePerformanceSource;
 }
@@ -42,10 +40,9 @@ export interface FixturePerformanceSummary {
   group: GroupId;
   fifaRanking: number;
   fixtures: number;
+  actualPoints: number;
+  baselinePoints: number;
   totalCredit: number;
-  averageCredit: number;
-  bestCredit: number;
-  worstCredit: number;
   finalCount: number;
   predictionCount: number;
 }
@@ -102,10 +99,9 @@ export function calculateFixturePerformanceSummaries(data: TournamentData, predi
         group: entry.group,
         fifaRanking: entry.fifaRanking,
         fixtures: 1,
+        actualPoints: entry.resultPoints,
+        baselinePoints: entry.baselinePoints,
         totalCredit: entry.performanceScore,
-        averageCredit: entry.performanceScore,
-        bestCredit: entry.performanceScore,
-        worstCredit: entry.performanceScore,
         finalCount: entry.source === "final" ? 1 : 0,
         predictionCount: entry.source === "prediction" ? 1 : 0
       });
@@ -113,18 +109,17 @@ export function calculateFixturePerformanceSummaries(data: TournamentData, predi
     }
 
     current.fixtures += 1;
+    current.actualPoints += entry.resultPoints;
+    current.baselinePoints += entry.baselinePoints;
     current.totalCredit += entry.performanceScore;
-    current.averageCredit = current.totalCredit / current.fixtures;
-    current.bestCredit = Math.max(current.bestCredit, entry.performanceScore);
-    current.worstCredit = Math.min(current.worstCredit, entry.performanceScore);
     current.finalCount += entry.source === "final" ? 1 : 0;
     current.predictionCount += entry.source === "prediction" ? 1 : 0;
   }
 
   return Array.from(summaries.values()).sort((left, right) => (
     right.totalCredit - left.totalCredit ||
-    right.averageCredit - left.averageCredit ||
-    right.bestCredit - left.bestCredit ||
+    right.actualPoints - left.actualPoints ||
+    left.baselinePoints - right.baselinePoints ||
     left.fifaRanking - right.fifaRanking ||
     compareTeamName(left.teamId, right.teamId, teamById)
   ));
@@ -184,9 +179,7 @@ function buildFixturePerformanceEntry(
 ): FixturePerformanceEntry {
   const resultPoints = goalsFor > goalsAgainst ? 3 : goalsFor === goalsAgainst ? 1 : 0;
   const rankingGap = team.fifaRanking! - opponent.fifaRanking!;
-  const expectedResultPoints = expectedFixtureResultPoints(team.fifaRanking!, opponent.fifaRanking!);
-  const surprisePoints = resultPoints - expectedResultPoints;
-  const marginBonus = fixtureMarginBonus(goalsFor - goalsAgainst);
+  const baselinePoints = baselineFixturePoints(team.fifaRanking!, opponent.fifaRanking!);
 
   return {
     fixtureId: fixture.id,
@@ -199,25 +192,19 @@ function buildFixturePerformanceEntry(
     goalDifference: goalsFor - goalsAgainst,
     result: goalsFor > goalsAgainst ? "win" : goalsFor === goalsAgainst ? "draw" : "loss",
     resultPoints,
-    expectedResultPoints,
-    surprisePoints,
+    baselinePoints,
     fifaRanking: team.fifaRanking!,
     opponentFifaRanking: opponent.fifaRanking!,
     rankingGap,
-    marginBonus,
-    performanceScore: Math.round(surprisePoints * 100 + marginBonus),
+    performanceScore: resultPoints - baselinePoints,
     source
   };
 }
 
-function expectedFixtureResultPoints(teamRanking: number, opponentRanking: number) {
-  const rankingGap = teamRanking - opponentRanking;
-  return 3 / (1 + Math.exp(rankingGap / 15));
-}
-
-function fixtureMarginBonus(goalDifference: number) {
-  const cappedDifference = Math.max(-4, Math.min(4, goalDifference));
-  return cappedDifference * 20;
+function baselineFixturePoints(teamRanking: number, opponentRanking: number) {
+  if (teamRanking < opponentRanking) return 3;
+  if (teamRanking > opponentRanking) return 0;
+  return 1;
 }
 
 function isCompleteScore(score: Score | undefined): score is Score {

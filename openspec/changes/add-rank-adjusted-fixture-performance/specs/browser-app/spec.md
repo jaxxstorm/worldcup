@@ -5,19 +5,19 @@ The system SHALL display individual fixture performances in the Performance view
 
 #### Scenario: User views fixture performances
 - **WHEN** a user opens the Performance view
-- **THEN** the app MUST show the fixture performance formula and a table with team, opponent, fixture, scoreline, result type, FIFA ranking context, actual points, expected points, surprise points, margin contribution, rank-adjusted credit, and whether the score comes from a final result or active prediction
+- **THEN** the app MUST show the fixture performance baseline rules and a result list with team, opponent, fixture, scoreline, result type, FIFA ranking context, actual points, baseline points, fixture credit, and whether the score comes from a final result or active prediction
 
 #### Scenario: Fixture tab summarizes teams first
 - **WHEN** a user opens the fixture-level Performance sub-tab
-- **THEN** the app MUST show a team summary table before the individual result list with total credit, average credit, best credit, worst credit, and final/predicted row counts
+- **THEN** the app MUST show a team summary table before the individual result list with games played, actual points, baseline points, total credit, and final/predicted row counts
 
 #### Scenario: User switches performance analysis type
 - **WHEN** a user opens the Performance view
 - **THEN** the app MUST provide sub-tabs for team-level performance and fixture-level performance so each analysis can be viewed without scrolling through the other table
 
 #### Scenario: Formula explanation is readable
-- **WHEN** the fixture performance formula is displayed
-- **THEN** the app MUST explain rank gap, expected points, surprise points, margin contribution, and final credit in user-facing language alongside the mathematical formula
+- **WHEN** the fixture performance baseline rules are displayed
+- **THEN** the app MUST explain how baseline points and credit are derived from FIFA ranking and actual match points in user-facing language
 
 #### Scenario: Prediction changes fixture performance table
 - **WHEN** a user changes a complete group-stage prediction

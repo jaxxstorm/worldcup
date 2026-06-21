@@ -193,7 +193,7 @@ function renderFixturePerformancePanel(summaryRows: FixturePerformanceSummary[],
       <div class="stats-panel-heading">
         <div>
           <h3 id="fixture-performance-heading">Fixture Performances</h3>
-          <p>Credit combines ranking surprise and scoreline strength for each team's side of a group fixture.</p>
+          <p>Credit compares actual points with a ranking baseline for each team's side of a group fixture.</p>
         </div>
         <span>${fixtureRows.length} entries</span>
       </div>
@@ -298,11 +298,10 @@ function renderFixturePerformanceSummaryTable(rows: FixturePerformanceSummary[])
         <span>Team</span>
         <span>Group</span>
         <span>Rank</span>
-        <span>Rows</span>
-        <span>Total</span>
-        <span>Avg</span>
-        <span>Best</span>
-        <span>Worst</span>
+        <span>Played</span>
+        <span>Actual</span>
+        <span>Base</span>
+        <span>Credit</span>
         <span>Final</span>
         <span>Pred</span>
       </div>
@@ -321,10 +320,9 @@ function renderFixturePerformanceSummaryRow(row: FixturePerformanceSummary, inde
       <span>${row.group}</span>
       <span>${row.fifaRanking}</span>
       <span>${row.fixtures}</span>
+      <span>${row.actualPoints}</span>
+      <span>${row.baselinePoints}</span>
       <span class="fixture-performance-score">${formatSignedNumber(row.totalCredit)}</span>
-      <span>${formatSignedDecimal(row.averageCredit)}</span>
-      <span>${formatSignedNumber(row.bestCredit)}</span>
-      <span>${formatSignedNumber(row.worstCredit)}</span>
       <span>${row.finalCount}</span>
       <span>${row.predictionCount}</span>
     </div>
@@ -346,9 +344,7 @@ function renderFixturePerformanceTable(rows: FixturePerformanceEntry[]) {
         <span>Opp</span>
         <span>Gap</span>
         <span>Pts</span>
-        <span>xPts</span>
-        <span>Surp</span>
-        <span>GD</span>
+        <span>Base</span>
         <span>Credit</span>
         <span>Source</span>
       </div>
@@ -372,9 +368,7 @@ function renderFixturePerformanceRow(row: FixturePerformanceEntry, index: number
       <span>${row.opponentFifaRanking}</span>
       <span>${formatSignedNumber(row.rankingGap)}</span>
       <span>${row.resultPoints}</span>
-      <span>${formatDecimal(row.expectedResultPoints)}</span>
-      <span>${formatSignedDecimal(row.surprisePoints)}</span>
-      <span>${formatSignedNumber(row.marginBonus)}</span>
+      <span>${row.baselinePoints}</span>
       <span class="fixture-performance-score">${formatSignedNumber(row.performanceScore)}</span>
       <span><span class="fixture-performance-source">${row.source === "final" ? "Final" : "Predicted"}</span></span>
     </div>
@@ -385,16 +379,15 @@ function renderFixturePerformanceFormula() {
   return `
     <div class="fixture-performance-formula">
       <div>
-        <strong>How Credit Works</strong>
-        <p>Each row compares what a team got from a fixture with what its FIFA ranking suggested it should get, then adds a scoreline-strength bonus.</p>
+        <strong>How Fixture Credit Works</strong>
+        <p>Each team gets a baseline for every ranked fixture. Credit is simply actual points minus baseline points.</p>
       </div>
       <div class="formula-grid">
-        <span><strong>Rank gap</strong> = team rank - opponent rank. Positive means underdog; negative means favorite.</span>
-        <span><strong>xPts</strong> estimates expected points from the ranking gap: close to 3 for heavy favorites, close to 0 for heavy underdogs, around 1.5 for evenly ranked teams.</span>
-        <span><strong>Curve</strong>: xPts = 3 / (1 + e^(rank gap / 15)). The 15 smooths the curve so a small ranking gap only nudges expectation, while a large gap matters a lot.</span>
-        <span><strong>Surprise</strong> = actual points - xPts. Positive means the team beat expectation; negative means it fell short.</span>
-        <span><strong>Margin</strong> = goal difference capped at +/-4, then multiplied by 20.</span>
-        <span><strong>Credit</strong> = round(surprise * 100 + margin).</span>
+        <span><strong>Baseline</strong>: if your FIFA rank is better than your opponent's, you are expected to win and get 3 baseline points.</span>
+        <span><strong>Underdog</strong>: if your FIFA rank is worse, you are expected to lose and get 0 baseline points.</span>
+        <span><strong>Even ranks</strong>: equal-ranked teams use a 1 point baseline, matching a draw.</span>
+        <span><strong>Credit</strong> = actual points - baseline points. Positive means better than expected; negative means worse than expected.</span>
+        <span><strong>Table</strong>: totals add fixture credit across played final results and complete predictions.</span>
       </div>
     </div>
   `;
@@ -893,11 +886,6 @@ function formatRate(value: number, played: number) {
 
 function formatDecimal(value: number) {
   return Number.isInteger(value) ? String(value) : value.toFixed(2);
-}
-
-function formatSignedDecimal(value: number) {
-  const formatted = formatDecimal(value);
-  return value > 0 ? `+${formatted}` : formatted;
 }
 
 function ordinal(value: number) {

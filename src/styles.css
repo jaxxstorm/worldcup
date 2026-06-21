@@ -755,10 +755,10 @@ h2 {
 
 .fixture-summary-row {
   display: grid;
-  grid-template-columns: 44px minmax(210px, 1fr) 56px 54px 54px 70px 70px 70px 70px 54px 54px;
+  grid-template-columns: 44px minmax(210px, 1fr) 56px 54px 64px 64px 64px 70px 54px 54px;
   gap: 12px;
   align-items: center;
-  min-width: 920px;
+  min-width: 860px;
   padding: 10px 12px;
   border-top: 1px solid #edf0ec;
   font-size: 14px;
@@ -793,10 +793,10 @@ h2 {
 
 .fixture-performance-row {
   display: grid;
-  grid-template-columns: 44px minmax(190px, 1fr) minmax(190px, 1fr) 86px 78px 52px 52px 54px 44px 58px 62px 58px 74px minmax(94px, auto);
+  grid-template-columns: 44px minmax(190px, 1fr) minmax(190px, 1fr) 86px 78px 52px 52px 54px 44px 54px 74px minmax(94px, auto);
   gap: 12px;
   align-items: center;
-  min-width: 1320px;
+  min-width: 1120px;
   padding: 10px 12px;
   border-top: 1px solid #edf0ec;
   font-size: 14px;

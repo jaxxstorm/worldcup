@@ -236,24 +236,22 @@ describe("performance analysis", () => {
       result: "win",
       resultPoints: 3,
       rankingGap: 85,
-      marginBonus: 40,
-      performanceScore: 339,
+      baselinePoints: 0,
+      performanceScore: 3,
       source: "final"
     });
-    expect(rows.find((row) => row.fixtureId === "hotel-india" && row.teamId === "hotel")?.expectedResultPoints).toBeCloseTo(0.01, 2);
     expect(rows.find((row) => row.fixtureId === "echo-foxtrot" && row.teamId === "echo")).toMatchObject({
       result: "loss",
       resultPoints: 0,
-      marginBonus: -20,
-      performanceScore: -318
+      baselinePoints: 3,
+      performanceScore: -3
     });
-    expect(rows.find((row) => row.fixtureId === "echo-foxtrot" && row.teamId === "echo")?.expectedResultPoints).toBeCloseTo(2.98, 2);
     expect(rows.find((row) => row.fixtureId === "alpha-beta" && row.teamId === "beta")).toMatchObject({
       goalsFor: 2,
       goalsAgainst: 0,
       opponentFifaRanking: 1,
-      marginBonus: 40,
-      performanceScore: 274
+      baselinePoints: 0,
+      performanceScore: 3
     });
   });
 
@@ -269,20 +267,18 @@ describe("performance analysis", () => {
       result: "draw",
       rankingGap: 30,
       resultPoints: 1,
-      marginBonus: 0,
-      performanceScore: 64,
+      baselinePoints: 0,
+      performanceScore: 1,
       source: "prediction"
     });
     expect(favorite).toMatchObject({
       result: "draw",
       rankingGap: -30,
       resultPoints: 1,
-      marginBonus: 0,
-      performanceScore: -164,
+      baselinePoints: 3,
+      performanceScore: -2,
       source: "prediction"
     });
-    expect(underdog!.expectedResultPoints).toBeCloseTo(0.36, 2);
-    expect(favorite!.expectedResultPoints).toBeCloseTo(2.64, 2);
     expect(underdog!.performanceScore).toBeGreaterThan(favorite!.performanceScore);
   });
 
@@ -325,7 +321,7 @@ describe("performance analysis", () => {
     );
 
     const tiedFavoriteDraws = calculateFixturePerformanceEntries(data, {})
-      .filter((row) => row.performanceScore === -196 && row.result === "draw" && row.teamId === "india")
+      .filter((row) => row.performanceScore === -2 && row.result === "draw" && row.teamId === "india")
       .map((row) => row.fixtureId);
 
     expect(tiedFavoriteDraws).toEqual(["india-juliet", "india-juliet-rematch"]);
@@ -339,12 +335,11 @@ describe("performance analysis", () => {
       group: "C",
       fifaRanking: 90,
       fixtures: 2,
-      totalCredit: 616,
-      bestCredit: 339,
-      worstCredit: 277,
+      actualPoints: 6,
+      baselinePoints: 0,
+      totalCredit: 6,
       finalCount: 2,
       predictionCount: 0
     });
-    expect(rows[0].averageCredit).toBeCloseTo(308, 2);
   });
 });

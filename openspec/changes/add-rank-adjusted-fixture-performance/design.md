@@ -28,10 +28,10 @@ This change adds fixture-level performance entries. It does not require a new ex
    - Rationale: the user wants to compare individual fixture performances, such as giving Cape Verde more credit for a draw than Spain. A match-level row would hide which side exceeded expectation.
    - Alternative considered: a single fixture upset score. That is less useful for browsing team performances.
 
-3. Base the ranking adjustment on a published formula using expected points and goal-difference strength.
-   - Formula: `xPts = 3 / (1 + e^(rank gap / 15))`, where `rank gap = team FIFA rank - opponent FIFA rank`. `credit = round((actual points - xPts) * 100 + capped goal difference * 20)`, with goal difference capped at +/-4.
-   - Rationale: this keeps the score explainable while avoiding all-or-nothing buckets. Underdogs get high credit for taking points from favorites, favorites are penalized for draws or losses, and multi-goal wins carry extra strength.
-   - Alternative considered: hand-authored upset weights. That would be harder for users to audit and would not adapt smoothly across ranking gaps.
+3. Base fixture credit on actual points versus baseline points.
+   - Formula: `credit = actual points - baseline points`. The baseline assumes the better FIFA-ranked team beats the worse-ranked team for 3 points, the underdog gets 0 points, and equal-ranked teams draw for 1 point each.
+   - Rationale: this is easy to derive from any fixture row and creates a table that can be checked by hand. An underdog draw is +1, an underdog win is +3, a favorite draw is -2, a favorite loss is -3, and an expected favorite win is 0.
+   - Alternative considered: a curved expected-points formula with margin bonuses. That produced more nuanced scores, but it was harder to explain and made the fixture table feel less transparent.
 
 4. Include unresolved predicted group fixtures only when a complete valid prediction exists.
    - Rationale: predictions are mutable user state and should affect the visible model immediately, while partial predictions should not create misleading performance rows.
@@ -39,7 +39,7 @@ This change adds fixture-level performance entries. It does not require a new ex
 
 ## Risks / Trade-offs
 
-- Ranking gaps are a rough proxy for match difficulty -> Publish the formula in the UI and expose ranking, expected-points, actual-points, surprise, margin, and credit context so users can interpret it.
+- Ranking gaps are a rough proxy for match difficulty -> Publish the baseline rules in the UI and expose ranking, actual points, baseline points, and credit so users can interpret the table.
 - Teams without FIFA rankings cannot be fairly scored -> Keep those fixtures out of scored rows or mark their score as unavailable rather than inventing a ranking.
 - The metric may over-reward one-off results early in the tournament -> Keep it as a fixture table, separate from team-level aggregate movement.
 - User predictions can create hypothetical fixture performances -> Identify predicted rows separately from final results.
