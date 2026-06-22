@@ -6,6 +6,11 @@ export interface FixtureDateGroup {
   fixtures: Fixture[];
 }
 
+export interface FixtureDisplaySections {
+  actionable: FixtureDateGroup[];
+  completed: FixtureDateGroup[];
+}
+
 const unscheduledGroup: Pick<FixtureDateGroup, "key" | "label"> = {
   key: "unscheduled",
   label: "Date TBD"
@@ -36,6 +41,17 @@ export function groupFixturesByDisplayDate(fixtures: Fixture[]): FixtureDateGrou
   });
 
   return Array.from(groups.values());
+}
+
+export function sectionFixturesForDisplay(fixtures: Fixture[]): FixtureDisplaySections {
+  const ordered = orderFixturesChronologically(fixtures);
+  const actionable = ordered.filter((fixture) => fixture.status !== "completed");
+  const completed = ordered.filter((fixture) => fixture.status === "completed");
+
+  return {
+    actionable: groupFixturesByDisplayDate(actionable),
+    completed: groupFixturesByDisplayDate(completed)
+  };
 }
 
 export function formatFixtureKickoff(fixture: Pick<Fixture, "date">): string {

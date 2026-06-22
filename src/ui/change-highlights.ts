@@ -6,7 +6,6 @@ interface StandingSnapshot {
   rank: number;
   points: number;
   goalDifference: number;
-  qualifies: boolean;
 }
 
 interface ThirdPlaceSnapshot {
@@ -49,7 +48,6 @@ export interface MatchChange {
 export function capturePredictionChangeSnapshot(data: TournamentData, predictions: PredictionMap): PredictionChangeSnapshot {
   const standings = calculateGroupStandings(data, predictions);
   const thirdPlaces = thirdPlaceRankings(standings, data);
-  const qualifyingThirdPlaceTeams = new Set(thirdPlaces.filter((row) => row.qualifies).map((row) => row.teamId));
 
   return {
     standings: new Map(
@@ -59,8 +57,7 @@ export function capturePredictionChangeSnapshot(data: TournamentData, prediction
           {
             rank: row.rank,
             points: row.points,
-            goalDifference: row.goalDifference,
-            qualifies: row.rank <= 2 || qualifyingThirdPlaceTeams.has(row.teamId)
+            goalDifference: row.goalDifference
           }
         ])
       )
@@ -80,20 +77,19 @@ export function capturePredictionChangeSnapshot(data: TournamentData, prediction
   };
 }
 
-export function standingRowChange(snapshot: PredictionChangeSnapshot | undefined, row: StandingRow, qualifies: boolean): RowChange | undefined {
+export function standingRowChange(snapshot: PredictionChangeSnapshot | undefined, row: StandingRow): RowChange | undefined {
   const previous = snapshot?.standings.get(row.teamId);
   if (!previous) return undefined;
 
   const changed = previous.rank !== row.rank
     || previous.points !== row.points
-    || previous.goalDifference !== row.goalDifference
-    || previous.qualifies !== qualifies;
+    || previous.goalDifference !== row.goalDifference;
 
   if (!changed) return undefined;
   return {
     changed,
     rankDelta: previous.rank - row.rank,
-    previousSummary: `Previous: #${previous.rank}, ${previous.points} pts, GD ${formatSignedNumber(previous.goalDifference)}, ${qualificationLabel(previous.qualifies)}`
+    previousSummary: `Previous: #${previous.rank}, ${previous.points} pts, GD ${formatSignedNumber(previous.goalDifference)}`
   };
 }
 

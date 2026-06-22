@@ -31,7 +31,7 @@ describe("prediction change highlights", () => {
     const row = calculateGroupStandings(tournamentData, {}).A[0];
     const match = projectTournament(tournamentData, {})[0];
 
-    expect(standingRowChange(undefined, row, row.rank <= 2)).toBeUndefined();
+    expect(standingRowChange(undefined, row)).toBeUndefined();
     expect(matchChange(undefined, match)).toBeUndefined();
   });
 
@@ -41,9 +41,8 @@ describe("prediction change highlights", () => {
     const before = capturePredictionChangeSnapshot(data, {});
     const predictions: PredictionMap = { [fixture.id]: { home: 3, away: 0 } };
     const standings = calculateGroupStandings(data, predictions);
-    const qualifyingThirdPlaceTeams = new Set(thirdPlaceRankings(standings, data).filter((row) => row.qualifies).map((row) => row.teamId));
     const changedRow = standings.A.find((row) => row.teamId === fixture.home)!;
-    const change = standingRowChange(before, changedRow, changedRow.rank <= 2 || qualifyingThirdPlaceTeams.has(changedRow.teamId));
+    const change = standingRowChange(before, changedRow);
 
     expect(change).toEqual(expect.objectContaining({ changed: true }));
     expect(change?.previousSummary).toContain("Previous:");

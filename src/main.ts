@@ -2,7 +2,7 @@ import "./styles.css";
 import { tournamentData, teamById, venueById } from "./data/tournament";
 import { validateTournamentData } from "./data/schema";
 import { buildBracketLayout, type BracketLayout, type BracketNode } from "./engine/bracket-layout";
-import { formatFixtureKickoff, groupFixturesByDisplayDate, orderFixturesChronologically } from "./engine/fixtures";
+import { formatFixtureKickoff, sectionFixturesForDisplay } from "./engine/fixtures";
 import { drawSidesForProjection, projectTournament } from "./engine/knockout";
 import { calculateFixturePerformanceEntries, calculateFixturePerformanceSummaries, calculatePerformanceRows, type FixturePerformanceEntry, type FixturePerformanceSummary, type PerformanceMode, type PerformanceRow } from "./engine/performance";
 import { interpretPredictionInput, isEditableFixture, setPrediction } from "./engine/predictions";
@@ -522,11 +522,33 @@ function renderThirdPlaceRow(row: ThirdPlaceStandingRow) {
 }
 
 function renderFixtures() {
-  const visibleFixtures = orderFixturesChronologically(
-    tournamentData.fixtures.filter((fixture) => fixture.stage === "group" || fixture.stage === "round-of-32")
-  );
-  const fixtureGroups = groupFixturesByDisplayDate(visibleFixtures);
+  const visibleFixtures = tournamentData.fixtures.filter((fixture) => fixture.stage === "group" || fixture.stage === "round-of-32");
+  const { actionable, completed } = sectionFixturesForDisplay(visibleFixtures);
 
+  return `
+    ${renderCompletedFixtureSection(completed)}
+    ${renderFixtureDateGroups(actionable)}
+  `;
+}
+
+function renderCompletedFixtureSection(fixtureGroups: ReturnType<typeof sectionFixturesForDisplay>["completed"]) {
+  const completedCount = fixtureGroups.reduce((total, group) => total + group.fixtures.length, 0);
+  if (completedCount === 0) return "";
+
+  return `
+    <details class="completed-fixtures">
+      <summary>
+        <span>Completed Fixtures</span>
+        <span>${completedCount} ${completedCount === 1 ? "match" : "matches"}</span>
+      </summary>
+      <div class="completed-fixture-list">
+        ${renderFixtureDateGroups(fixtureGroups)}
+      </div>
+    </details>
+  `;
+}
+
+function renderFixtureDateGroups(fixtureGroups: ReturnType<typeof sectionFixturesForDisplay>["actionable"]) {
   return fixtureGroups
     .map((group) => `
       <section class="fixture-date-group" aria-labelledby="fixture-date-${group.key}">
@@ -615,7 +637,6 @@ function renderKnockoutDecisionControls(fixture: Fixture, score?: Score) {
 
 function renderStandings() {
   const standings = calculateGroupStandings(tournamentData, predictions);
-  const qualifyingThirdPlaceTeams = new Set(thirdPlaceRankings(standings, tournamentData).filter((row) => row.qualifies).map((row) => row.teamId));
   return Object.entries(standings)
     .map(([group, rows]) => `
       <article class="standing">
@@ -623,8 +644,7 @@ function renderStandings() {
         <div class="standing-row header"><span>#</span><span>Team</span><span>P</span><span>W</span><span>D</span><span>L</span><span>GD</span><span>Pts</span></div>
         ${rows.map((row) => {
           const team = teamById.get(row.teamId);
-          const qualifies = row.rank <= 2 || qualifyingThirdPlaceTeams.has(row.teamId);
-          const change = standingRowChange(recentPredictionChange, row, qualifies);
+          const change = standingRowChange(recentPredictionChange, row);
           return `
             <div class="standing-row ${change ? "recent-change" : ""}">
               <span>${row.rank}</span>
@@ -1065,7 +1085,7 @@ function handlePredictionInput(event: Event) {
     predictions = setPrediction(tournamentData, predictions, fixtureId);
     recentPredictionChange = undefined;
   } else {
-    recentPredictionChange = capturePredictionChangeSnapshot(tournamentData, predictions);
+    recentPredictionChange ??= capturePredictionChangeSnapshot(tournamentData, predictions);
     predictions = setPrediction(tournamentData, predictions, fixtureId, decision.score);
   }
 

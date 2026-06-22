@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { formatFixtureKickoff, groupFixturesByDisplayDate, orderFixturesChronologically } from "../engine/fixtures";
-import type { Fixture } from "../types";
+import { formatFixtureKickoff, groupFixturesByDisplayDate, orderFixturesChronologically, sectionFixturesForDisplay } from "../engine/fixtures";
+import type { Fixture, MatchStatus } from "../types";
 
-function fixture(matchNumber: number, date: string): Fixture {
+function fixture(matchNumber: number, date: string, status: MatchStatus = "scheduled"): Fixture {
   return {
     id: `m${String(matchNumber).padStart(3, "0")}`,
     matchNumber,
@@ -12,7 +12,8 @@ function fixture(matchNumber: number, date: string): Fixture {
     venueId: "venue",
     home: { kind: "placeholder", label: "Home" },
     away: { kind: "placeholder", label: "Away" },
-    status: "scheduled"
+    status,
+    ...(status === "completed" ? { result: { home: 1, away: 0 } } : {})
   };
 }
 
@@ -115,6 +116,45 @@ describe("groupFixturesByDisplayDate", () => {
     ]);
   });
 
+});
+
+describe("sectionFixturesForDisplay", () => {
+  it("separates completed fixtures from actionable fixtures while preserving chronological order", () => {
+    const sections = sectionFixturesForDisplay([
+      fixture(4, "2026-06-14T19:00:00Z"),
+      fixture(2, "2026-06-12T22:00:00Z", "completed"),
+      fixture(1, "2026-06-11T19:00:00Z", "completed"),
+      fixture(3, "2026-06-13T19:00:00Z")
+    ]);
+
+    expect(sections.completed.flatMap((group) => group.fixtures.map((match) => match.matchNumber))).toEqual([1, 2]);
+    expect(sections.actionable.flatMap((group) => group.fixtures.map((match) => match.matchNumber))).toEqual([3, 4]);
+  });
+
+  it("keeps date groups inside each completed and actionable section", () => {
+    const sections = sectionFixturesForDisplay([
+      fixture(1, "2026-06-11T19:00:00Z", "completed"),
+      fixture(2, "2026-06-11T22:00:00Z", "completed"),
+      fixture(3, "2026-06-12T19:00:00Z"),
+      fixture(4, "2026-06-12T22:00:00Z")
+    ]);
+
+    expect(sections.completed).toHaveLength(1);
+    expect(sections.completed[0].fixtures.map((match) => match.matchNumber)).toEqual([1, 2]);
+    expect(sections.actionable).toHaveLength(1);
+    expect(sections.actionable[0].fixtures.map((match) => match.matchNumber)).toEqual([3, 4]);
+  });
+
+  it("does not mutate the source fixture array", () => {
+    const fixtures = [
+      fixture(3, "2026-06-13T19:00:00Z"),
+      fixture(1, "2026-06-11T19:00:00Z", "completed")
+    ];
+
+    sectionFixturesForDisplay(fixtures);
+
+    expect(fixtures.map((match) => match.matchNumber)).toEqual([3, 1]);
+  });
 });
 
 describe("formatFixtureKickoff", () => {

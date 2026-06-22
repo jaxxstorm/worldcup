@@ -152,6 +152,41 @@ h2 {
   gap: 10px;
 }
 
+.completed-fixtures {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #ccd8cf;
+  border-radius: 8px;
+  background: #fbfcfa;
+}
+
+.completed-fixtures summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #17382a;
+  cursor: pointer;
+  font-weight: 800;
+  list-style-position: inside;
+}
+
+.completed-fixtures summary span:last-child {
+  flex: 0 0 auto;
+  color: #607268;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.completed-fixture-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e9e2;
+}
+
 .fixture,
 .standing,
 .knockout-match,

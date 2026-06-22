@@ -18,11 +18,11 @@ The system SHALL provide a TypeScript/JavaScript browser application that builds
 - **THEN** the built browser app MUST use the refreshed generated data for fixtures, results, standings, and projections
 
 ### Requirement: Fixtures and locations are visible
-The system SHALL display World Cup fixtures with team names, flags, match status, kickoff details when available, venue, host city, and location, grouped into visually distinct date sections.
+The system SHALL display World Cup fixtures with team names, flags, match status, kickoff details when available, venue, host city, and location, grouped into visually distinct date sections while collapsing completed fixtures by default.
 
 #### Scenario: Fixture list renders
 - **WHEN** a user views fixtures
-- **THEN** each fixture MUST show its teams or unresolved placeholders, status, venue, and host city
+- **THEN** each visible fixture MUST show its teams or unresolved placeholders, status, venue, and host city
 
 #### Scenario: Match has a completed result
 - **WHEN** a fixture has an authoritative result
@@ -38,11 +38,23 @@ The system SHALL display World Cup fixtures with team names, flags, match status
 
 #### Scenario: Date groups are chronological
 - **WHEN** a user views the fixture list
-- **THEN** dated fixture groups MUST be ordered chronologically by match date
+- **THEN** dated fixture groups MUST be ordered chronologically by match date within their fixture section
 
 #### Scenario: Fixtures within a date group are chronological
 - **WHEN** a dated fixture group contains multiple matches
 - **THEN** fixtures within that group MUST be ordered by kickoff time and then match number
+
+#### Scenario: Completed fixtures remain above unresolved fixtures
+- **WHEN** the main Fixtures view contains both unresolved and completed fixtures
+- **THEN** completed fixtures MUST render above unresolved fixtures to preserve chronological flow
+
+#### Scenario: Completed fixtures are collapsed by default
+- **WHEN** the main Fixtures view contains completed fixtures
+- **THEN** completed fixtures MUST render in a collapsed section by default with a count of completed matches so unresolved fixtures appear closer to the top of the page
+
+#### Scenario: Completed fixtures can be expanded
+- **WHEN** a user expands the completed fixtures section
+- **THEN** completed fixtures MUST remain grouped by date and show final scores without editable prediction controls
 
 ### Requirement: Prediction editing updates the displayed model
 The system SHALL let users edit predictions for unresolved matches and immediately display updated standings and tournament projections when a complete valid prediction is available.
@@ -68,7 +80,7 @@ The system SHALL let users edit predictions for unresolved matches and immediate
 - **THEN** the app MUST preserve the user's scroll position and restore focus to the edited prediction input when it is still present
 
 #### Scenario: Prediction edit highlights table changes
-- **WHEN** a complete prediction edit changes a team's standing rank, points, goal difference, or qualification status
+- **WHEN** a complete prediction edit changes a team's visible standing rank, points, or goal difference
 - **THEN** the affected standings row MUST be visually distinguished from unchanged rows after recalculation
 
 #### Scenario: Prediction edit highlights bracket changes
