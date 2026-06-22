@@ -7,6 +7,7 @@ import { drawSidesForProjection, projectTournament } from "./engine/knockout";
 import { calculateFixturePerformanceEntries, calculateFixturePerformanceSummaries, calculatePerformanceRows, type FixturePerformanceEntry, type FixturePerformanceSummary, type PerformanceMode, type PerformanceRow } from "./engine/performance";
 import { interpretPredictionInput, isEditableFixture, setPrediction } from "./engine/predictions";
 import { calculateGroupStandings, thirdPlaceRankings } from "./engine/standings";
+import { recentResultsForTeam, type TeamRecentResult } from "./engine/team-details";
 import { buildPredictionShareUrl, sharedPredictionsFromUrl } from "./storage/share";
 import { loadPredictions, savePredictions } from "./storage/session";
 import type { Fixture, MatchStage, PredictionMap, ProjectedMatch, QualifiedTeam, Score, StatLeaderboard, Team, TeamRef, ThirdPlaceStandingRow } from "./types";
@@ -89,6 +90,13 @@ function render() {
     element.addEventListener("mouseenter", () => showTooltip(element));
     element.addEventListener("mouseleave", hideTooltip);
     element.addEventListener("focus", () => showTooltip(element));
+    element.addEventListener("blur", hideTooltip);
+  });
+
+  appRoot.querySelectorAll<HTMLElement>("[data-team-id]").forEach((element) => {
+    element.addEventListener("mouseenter", () => showTeamTooltip(element));
+    element.addEventListener("mouseleave", hideTooltip);
+    element.addEventListener("focus", () => showTeamTooltip(element));
     element.addEventListener("blur", hideTooltip);
   });
 
@@ -276,7 +284,7 @@ function renderPerformanceRow(row: PerformanceRow, mode: PerformanceMode) {
   return `
     <div class="performance-row ${row.performanceStatus} ${mode === "group-delta" ? "group-delta" : ""}">
       <span>${row.currentRank}</span>
-      <span class="team-cell">${renderFlag(team)} ${team?.name ?? row.teamId}</span>
+      <span class="team-cell">${renderTeamIdentity(team, row.teamId)}</span>
       <span>${row.group}</span>
       ${mode === "group-delta" ? renderGroupDeltaCells(row) : renderOverallPerformanceCells(row, mode)}
     </div>
@@ -345,7 +353,7 @@ function renderFixturePerformanceSummaryRow(row: FixturePerformanceSummary, inde
   return `
     <div class="fixture-summary-row">
       <span>${index + 1}</span>
-      <span class="team-cell">${renderFlag(team)} ${team?.name ?? row.teamId}</span>
+      <span class="team-cell">${renderTeamIdentity(team, row.teamId)}</span>
       <span>${row.group}</span>
       <span>${row.fifaRanking}</span>
       <span>${row.fixtures}</span>
@@ -401,6 +409,41 @@ function showTooltip(anchor: HTMLElement) {
   activeTooltip.textContent = tooltip;
   document.body.append(activeTooltip);
 
+  positionFloatingTooltip(anchor);
+}
+
+function showTeamTooltip(anchor: HTMLElement) {
+  hideTooltip();
+
+  const teamId = anchor.dataset.teamId;
+  const team = teamId ? teamById.get(teamId) : undefined;
+  if (!team) return;
+
+  const results = recentResultsForTeam(tournamentData, team.id);
+  activeTooltip = document.createElement("div");
+  activeTooltip.className = "floating-tooltip team-details-tooltip";
+  activeTooltip.innerHTML = `
+    <div class="team-details-heading">
+      ${renderFlag(team)}
+      <strong>${escapeHtml(team.name)}</strong>
+    </div>
+    <div class="team-details-ranking">
+      <span>FIFA ranking</span>
+      <strong>${team.fifaRanking ?? "Unavailable"}</strong>
+    </div>
+    <div class="team-details-results">
+      <span class="team-details-label">Previous results</span>
+      ${results.length > 0 ? results.map(renderTeamRecentResult).join("") : `<span class="team-details-empty">No completed results yet</span>`}
+    </div>
+  `;
+  document.body.append(activeTooltip);
+
+  positionFloatingTooltip(anchor);
+}
+
+function positionFloatingTooltip(anchor: HTMLElement) {
+  if (!activeTooltip) return;
+
   const anchorRect = anchor.getBoundingClientRect();
   const tooltipRect = activeTooltip.getBoundingClientRect();
   const left = Math.min(
@@ -411,6 +454,18 @@ function showTooltip(anchor: HTMLElement) {
 
   activeTooltip.style.left = `${left}px`;
   activeTooltip.style.top = `${top}px`;
+}
+
+function renderTeamRecentResult(result: TeamRecentResult) {
+  const opponent = teamById.get(result.opponentId);
+  return `
+    <div class="team-result-row">
+      <span class="team-result-outcome ${result.outcome}">${teamResultLabel(result.outcome)}</span>
+      <span class="team-result-opponent">${renderFlag(opponent)} ${escapeHtml(opponent?.name ?? result.opponentId)}</span>
+      <span class="team-result-score">${result.goalsFor}-${result.goalsAgainst}</span>
+      <span class="team-result-date">${formatCompactDate(result.date)}</span>
+    </div>
+  `;
 }
 
 function hideTooltip() {
@@ -425,8 +480,8 @@ function renderFixturePerformanceRow(row: FixturePerformanceEntry, index: number
   return `
     <div class="fixture-performance-row ${row.source}">
       <span>${index + 1}</span>
-      <span class="team-cell">${renderFlag(team)} ${team?.name ?? row.teamId}</span>
-      <span class="team-cell">${renderFlag(opponent)} ${opponent?.name ?? row.opponentId}</span>
+      <span class="team-cell">${renderTeamIdentity(team, row.teamId)}</span>
+      <span class="team-cell">${renderTeamIdentity(opponent, row.opponentId)}</span>
       <span>${row.fixtureId}</span>
       <span>${row.goalsFor}-${row.goalsAgainst} ${fixtureResultLabel(row)}</span>
       <span>${row.fifaRanking}</span>
@@ -485,7 +540,7 @@ function renderStatLeaderboard(leaderboard: StatLeaderboard) {
               <div class="leaderboard-row">
                 <span>${entry.rank}</span>
                 <span class="leaderboard-player">${entry.player}<em>${team?.name ?? entry.detail ?? ""}</em></span>
-                <span class="team-cell">${renderFlag(team)}</span>
+                <span class="team-cell">${team ? renderTeamIdentity(team, team.id) : renderFlag()}</span>
                 <strong>${entry.value}</strong>
               </div>
             `;
@@ -526,7 +581,7 @@ function renderThirdPlaceRow(row: ThirdPlaceStandingRow) {
     <div class="third-place-row ${row.qualifies ? "qualifies" : ""} ${change ? "recent-change" : ""}">
       <span>${row.thirdPlaceRank}</span>
       <span>${row.group}</span>
-      <span class="team-cell">${renderFlag(team)} ${team?.name ?? row.teamId}${renderChangeBadge(change)}</span>
+      <span class="team-cell">${renderTeamIdentity(team, row.teamId)}${renderChangeBadge(change)}</span>
       <span>${row.played}</span>
       <span>${row.goalDifference}</span>
       <span>${row.goalsFor}</span>
@@ -612,8 +667,7 @@ function renderFixtureTeam(teamRef: TeamRef, score?: number) {
   const label = team ? team.name : typeof teamRef === "string" ? teamRef : teamRef.label;
   return `
     <div class="team-line">
-      ${renderFlag(team)}
-      <span>${label}</span>
+      ${renderTeamIdentity(team, label)}
       <span class="score">${score ?? "-"}</span>
     </div>
   `;
@@ -664,7 +718,7 @@ function renderStandings() {
           return `
             <div class="standing-row ${change ? "recent-change" : ""}">
               <span>${row.rank}</span>
-              <span class="team-cell">${renderFlag(team)} ${team?.name ?? row.teamId}${renderChangeBadge(change)}</span>
+              <span class="team-cell">${renderTeamIdentity(team, row.teamId)}${renderChangeBadge(change)}</span>
               <span>${row.played}</span>
               <span>${row.won}</span>
               <span>${row.drawn}</span>
@@ -801,8 +855,7 @@ function renderDiagramTeam(team: QualifiedTeam, source: string, winnerTeamId?: s
   const isWinner = Boolean(winnerTeamId && resolved?.id === winnerTeamId);
   return `
     <div class="diagram-team ${resolved ? "resolved" : "unresolved"} ${isWinner ? "winner-team" : ""} ${change ? "recent-change" : ""}">
-      ${renderFlag(resolved)}
-      <span>${resolved?.name ?? source}</span>
+      ${renderTeamIdentity(resolved, source)}
       <em ${change ? tooltipAttributes(previousItemTooltip("participant", change.previous)) : ""}>${change ? "Changed" : source}</em>
     </div>
   `;
@@ -858,7 +911,7 @@ function renderBracketFixtureRow(match: ProjectedMatch) {
 
 function renderBracketTableTeam(team: QualifiedTeam, source: string) {
   const resolved = team.teamId ? teamById.get(team.teamId) : undefined;
-  return `<span class="bracket-table-team">${renderFlag(resolved)} ${resolved?.name ?? source}</span>`;
+  return `<span class="bracket-table-team">${renderTeamIdentity(resolved, source)}</span>`;
 }
 
 function renderDrawSides(projection: ProjectedMatch[]) {
@@ -915,8 +968,7 @@ function renderDrawParticipant(team: QualifiedTeam, source = team.slot) {
   return `
     <div class="draw-team ${resolved ? "resolved" : "unresolved"}">
       <span class="draw-team-identity">
-        ${renderFlag(resolved)}
-        <span class="draw-team-name">${resolved?.name ?? source}</span>
+        ${renderTeamIdentity(resolved, source)}
       </span>
       <span class="slot-label">${source}</span>
     </div>
@@ -951,14 +1003,14 @@ function renderBracketMatch(match: ProjectedMatch) {
 
 function renderBracketParticipant(team: QualifiedTeam, source = team.slot, changed = false, tooltip?: string) {
   const resolved = team.teamId ? teamById.get(team.teamId) : undefined;
-  const label = resolved ? `${renderFlag(resolved)} ${resolved.name}` : source;
+  const label = renderTeamIdentity(resolved, source);
   const sourceLabel = resolved ? `<span class="slot-label">${source}</span>` : "";
   return `<span class="bracket-team ${resolved ? "resolved" : "unresolved"} ${changed ? "recent-change" : ""}">${label}${sourceLabel}${renderChangeBadge(changed ? true : undefined, tooltip)}</span>`;
 }
 
 function renderQualifiedTeam(team: QualifiedTeam) {
   const resolved = team.teamId ? teamById.get(team.teamId) : undefined;
-  return resolved ? `${renderFlag(resolved)} ${resolved.name}` : team.label;
+  return renderTeamIdentity(resolved, team.label);
 }
 
 function formatPerformanceDelta(delta: number | undefined) {
@@ -1011,6 +1063,17 @@ function fixtureResultLabel(row: FixturePerformanceEntry) {
   if (row.result === "win") return "W";
   if (row.result === "draw") return "D";
   return "L";
+}
+
+function renderTeamIdentity(team: Team | undefined, fallback: string) {
+  if (!team) return `${renderFlag()} <span>${escapeHtml(fallback)}</span>`;
+
+  return `
+    <span class="team-hover-target" data-team-id="${escapeAttribute(team.id)}" tabindex="0">
+      ${renderFlag(team)}
+      <span class="team-hover-name">${escapeHtml(team.name)}</span>
+    </span>
+  `;
 }
 
 function renderFlag(team?: Team) {
@@ -1171,9 +1234,25 @@ function formatPreviousChangeValue(value: string) {
   return teamById.get(value)?.name ?? value;
 }
 
+function teamResultLabel(outcome: TeamRecentResult["outcome"]) {
+  if (outcome === "win") return "W";
+  if (outcome === "draw") return "D";
+  return "L";
+}
+
+function formatCompactDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "TBD";
+  return date.toLocaleDateString([], { month: "short", day: "numeric" });
+}
+
 function tooltipAttributes(tooltip: string | undefined) {
   if (!tooltip) return "";
   return `data-tooltip="${escapeAttribute(tooltip)}" tabindex="0"`;
+}
+
+function escapeHtml(value: string) {
+  return escapeAttribute(value);
 }
 
 function escapeAttribute(value: string) {
