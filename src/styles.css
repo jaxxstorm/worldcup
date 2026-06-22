@@ -279,6 +279,64 @@ h2 {
   text-transform: uppercase;
 }
 
+.recent-change {
+  animation: recent-change-pulse 1.6s ease-out;
+}
+
+.standing-row.recent-change,
+.third-place-row.recent-change,
+.bracket-fixture-row.recent-change {
+  border-left: 4px solid #c58a1f;
+  background: #fff7df;
+}
+
+.knockout-match.recent-change,
+.diagram-node.recent-change,
+.bracket-team.recent-change,
+.diagram-team.recent-change {
+  border-color: #d39b2a;
+  background: #fff7df;
+  box-shadow: 0 0 0 2px rgba(197, 138, 31, 0.15);
+}
+
+.diagram-team.winner-team.recent-change {
+  background: #f8edc9;
+}
+
+.recent-change-text {
+  color: #8a5a0a;
+}
+
+.change-badge {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  max-width: 100%;
+  margin-left: 7px;
+  padding: 2px 6px;
+  border: 1px solid #d9ac50;
+  border-radius: 999px;
+  color: #704600;
+  background: #fff0c7;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+  cursor: help;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+@keyframes recent-change-pulse {
+  0% {
+    background-color: #ffe08a;
+    box-shadow: 0 0 0 4px rgba(197, 138, 31, 0.24);
+  }
+
+  100% {
+    box-shadow: none;
+  }
+}
+
 .team-cell {
   min-width: 0;
   overflow: hidden;

@@ -9,6 +9,7 @@ import { interpretPredictionInput, isEditableFixture, setPrediction } from "./en
 import { calculateGroupStandings, thirdPlaceRankings } from "./engine/standings";
 import { loadPredictions, savePredictions } from "./storage/session";
 import type { Fixture, MatchStage, PredictionMap, ProjectedMatch, QualifiedTeam, Score, StatLeaderboard, Team, TeamRef, ThirdPlaceStandingRow } from "./types";
+import { capturePredictionChangeSnapshot, changeLabel, matchChange, matchChanged, participantChange, standingRowChange, thirdPlaceRowChange, winnerChange, type MatchChange, type PredictionChangeSnapshot, type RowChange } from "./ui/change-highlights";
 
 const validationIssues = validateTournamentData(tournamentData);
 if (validationIssues.length > 0) {
@@ -25,6 +26,7 @@ let activeView: "main" | "bracket" | "stats" | "performance" = "main";
 let activePerformanceTab: "teams" | "fixtures" = "teams";
 let activePerformanceMode: PerformanceMode = "raw";
 let activeTooltip: HTMLDivElement | undefined;
+let recentPredictionChange: PredictionChangeSnapshot | undefined;
 
 const bracketRounds: MatchStage[] = ["round-of-32", "round-of-16", "quarter-final", "semi-final", "third-place", "final"];
 const fixtureById = new Map(tournamentData.fixtures.map((fixture) => [fixture.id, fixture]));
@@ -503,11 +505,12 @@ function renderThirdPlaceTable() {
 
 function renderThirdPlaceRow(row: ThirdPlaceStandingRow) {
   const team = teamById.get(row.teamId);
+  const change = thirdPlaceRowChange(recentPredictionChange, row);
   return `
-    <div class="third-place-row ${row.qualifies ? "qualifies" : ""}">
+    <div class="third-place-row ${row.qualifies ? "qualifies" : ""} ${change ? "recent-change" : ""}">
       <span>${row.thirdPlaceRank}</span>
       <span>${row.group}</span>
-      <span class="team-cell">${renderFlag(team)} ${team?.name ?? row.teamId}</span>
+      <span class="team-cell">${renderFlag(team)} ${team?.name ?? row.teamId}${renderChangeBadge(change)}</span>
       <span>${row.played}</span>
       <span>${row.goalDifference}</span>
       <span>${row.goalsFor}</span>
@@ -612,6 +615,7 @@ function renderKnockoutDecisionControls(fixture: Fixture, score?: Score) {
 
 function renderStandings() {
   const standings = calculateGroupStandings(tournamentData, predictions);
+  const qualifyingThirdPlaceTeams = new Set(thirdPlaceRankings(standings, tournamentData).filter((row) => row.qualifies).map((row) => row.teamId));
   return Object.entries(standings)
     .map(([group, rows]) => `
       <article class="standing">
@@ -619,10 +623,12 @@ function renderStandings() {
         <div class="standing-row header"><span>#</span><span>Team</span><span>P</span><span>W</span><span>D</span><span>L</span><span>GD</span><span>Pts</span></div>
         ${rows.map((row) => {
           const team = teamById.get(row.teamId);
+          const qualifies = row.rank <= 2 || qualifyingThirdPlaceTeams.has(row.teamId);
+          const change = standingRowChange(recentPredictionChange, row, qualifies);
           return `
-            <div class="standing-row">
+            <div class="standing-row ${change ? "recent-change" : ""}">
               <span>${row.rank}</span>
-              <span class="team-cell">${renderFlag(team)} ${team?.name ?? row.teamId}</span>
+              <span class="team-cell">${renderFlag(team)} ${team?.name ?? row.teamId}${renderChangeBadge(change)}</span>
               <span>${row.played}</span>
               <span>${row.won}</span>
               <span>${row.drawn}</span>
@@ -640,13 +646,18 @@ function renderStandings() {
 function renderKnockout(projection: ProjectedMatch[]) {
   return projection
     .filter((match) => match.stage === "round-of-32" || match.stage === "round-of-16" || match.stage === "quarter-final" || match.stage === "semi-final" || match.stage === "final")
-    .map((match) => `
-      <article class="knockout-match">
-        <div class="knockout-round">${formatStage(match.stage)} · ${match.fixtureId}</div>
-        <div class="knockout-row">${renderBracketParticipant(match.home, match.homeSource)} vs ${renderBracketParticipant(match.away, match.awaySource)}</div>
-        ${match.winner ? `<div class="winner">Advances: ${renderQualifiedTeam(match.winner)}</div>` : ""}
-      </article>
-    `)
+    .map((match) => {
+      const homeChange = participantChange(recentPredictionChange, match, "home");
+      const awayChange = participantChange(recentPredictionChange, match, "away");
+      const winningChange = winnerChange(recentPredictionChange, match);
+      return `
+        <article class="knockout-match ${matchChanged(recentPredictionChange, match) ? "recent-change" : ""}">
+          <div class="knockout-round">${formatStage(match.stage)} · ${match.fixtureId}</div>
+          <div class="knockout-row">${renderBracketParticipant(match.home, match.homeSource, homeChange?.changed, previousItemTooltip("participant", homeChange?.previous))} vs ${renderBracketParticipant(match.away, match.awaySource, awayChange?.changed, previousItemTooltip("participant", awayChange?.previous))}</div>
+          ${match.winner ? `<div class="winner ${winningChange ? "recent-change-text" : ""}">Advances: ${renderQualifiedTeam(match.winner)}${renderChangeBadge(winningChange ? true : undefined, previousItemTooltip("winner", winningChange?.previous))}</div>` : ""}
+        </article>
+      `;
+    })
     .join("");
 }
 
@@ -727,7 +738,7 @@ function renderBracketRoundLabels(layout: BracketLayout) {
 function renderBracketNode(node: BracketNode) {
   return `
     <foreignObject x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="diagram-node ${node.side}">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="diagram-node ${node.side} ${matchChanged(recentPredictionChange, node.match) ? "recent-change" : ""}">
         ${renderBracketNodeContent(node.match)}
       </div>
     </foreignObject>
@@ -742,21 +753,21 @@ function renderBracketNodeContent(match: ProjectedMatch) {
       <span>${formatStage(match.stage)}</span>
     </div>
     <div class="diagram-node-teams">
-      ${renderDiagramTeam(match.home, match.homeSource, match.winner?.teamId)}
-      ${renderDiagramTeam(match.away, match.awaySource, match.winner?.teamId)}
+      ${renderDiagramTeam(match.home, match.homeSource, match.winner?.teamId, participantChange(recentPredictionChange, match, "home"))}
+      ${renderDiagramTeam(match.away, match.awaySource, match.winner?.teamId, participantChange(recentPredictionChange, match, "away"))}
     </div>
     <div class="diagram-node-detail" title="${formatFixtureKickoff(match)} · ${venue ? `${venue.city}` : "Venue TBD"}">${formatBracketDiagramKickoff(match)} · ${venue ? venue.city : "Venue TBD"}</div>
   `;
 }
 
-function renderDiagramTeam(team: QualifiedTeam, source: string, winnerTeamId?: string) {
+function renderDiagramTeam(team: QualifiedTeam, source: string, winnerTeamId?: string, change?: { changed: boolean; previous: string }) {
   const resolved = team.teamId ? teamById.get(team.teamId) : undefined;
   const isWinner = Boolean(winnerTeamId && resolved?.id === winnerTeamId);
   return `
-    <div class="diagram-team ${resolved ? "resolved" : "unresolved"} ${isWinner ? "winner-team" : ""}">
+    <div class="diagram-team ${resolved ? "resolved" : "unresolved"} ${isWinner ? "winner-team" : ""} ${change ? "recent-change" : ""}">
       ${renderFlag(resolved)}
       <span>${resolved?.name ?? source}</span>
-      <em>${source}</em>
+      <em ${change ? tooltipAttributes(previousItemTooltip("participant", change.previous)) : ""}>${change ? "Changed" : source}</em>
     </div>
   `;
 }
@@ -791,10 +802,11 @@ function renderBracketFixtureRow(match: ProjectedMatch) {
   const fixture = fixtureById.get(match.fixtureId);
   const venue = venueById.get(match.venueId);
   const score = fixture ? fixture.result ?? predictions[fixture.id] : undefined;
+  const change = matchChange(recentPredictionChange, match);
 
   return `
-    <div class="bracket-fixture-row">
-      <span class="bracket-fixture-match">${match.fixtureId}</span>
+    <div class="bracket-fixture-row ${change ? "recent-change" : ""}">
+      <span class="bracket-fixture-match">${match.fixtureId}${renderChangeBadge(change ? true : undefined, previousMatchTooltip(change))}</span>
       <span>${formatStage(match.stage)}</span>
       <span class="bracket-fixture-teams">
         <span>${renderBracketTableTeam(match.home, match.homeSource)} <strong>${score?.home ?? "-"}</strong></span>
@@ -901,11 +913,11 @@ function renderBracketMatch(match: ProjectedMatch) {
   `;
 }
 
-function renderBracketParticipant(team: QualifiedTeam, source = team.slot) {
+function renderBracketParticipant(team: QualifiedTeam, source = team.slot, changed = false, tooltip?: string) {
   const resolved = team.teamId ? teamById.get(team.teamId) : undefined;
   const label = resolved ? `${renderFlag(resolved)} ${resolved.name}` : source;
   const sourceLabel = resolved ? `<span class="slot-label">${source}</span>` : "";
-  return `<span class="bracket-team ${resolved ? "resolved" : "unresolved"}">${label}${sourceLabel}</span>`;
+  return `<span class="bracket-team ${resolved ? "resolved" : "unresolved"} ${changed ? "recent-change" : ""}">${label}${sourceLabel}${renderChangeBadge(changed ? true : undefined, tooltip)}</span>`;
 }
 
 function renderQualifiedTeam(team: QualifiedTeam) {
@@ -1051,7 +1063,9 @@ function handlePredictionInput(event: Event) {
 
   if (decision.kind === "cleared") {
     predictions = setPrediction(tournamentData, predictions, fixtureId);
+    recentPredictionChange = undefined;
   } else {
+    recentPredictionChange = capturePredictionChangeSnapshot(tournamentData, predictions);
     predictions = setPrediction(tournamentData, predictions, fixtureId, decision.score);
   }
 
@@ -1081,6 +1095,44 @@ function renderScoreDecision(score: Score) {
   if (score.decision === "penalties") return `<span class="score-decision">Pens</span>`;
   if (score.decision === "aet") return `<span class="score-decision">AET</span>`;
   return "";
+}
+
+function renderChangeBadge(change: RowChange | true | undefined, tooltip?: string) {
+  if (!change) return "";
+
+  const label = change === true ? "Changed" : changeLabel(change);
+  const tooltipText = tooltip ?? (change === true ? "Changed by latest prediction" : change.previousSummary);
+  return `<span class="change-badge" ${tooltipAttributes(tooltipText)} aria-label="${escapeAttribute(tooltipText)}">${label}</span>`;
+}
+
+function previousItemTooltip(_kind: "participant" | "winner", previous: string | undefined) {
+  if (!previous) return undefined;
+  return `Previous: ${formatPreviousChangeValue(previous)}`;
+}
+
+function previousMatchTooltip(change: MatchChange | undefined) {
+  if (!change) return undefined;
+
+  const matchup = `${formatPreviousChangeValue(change.previousHome)} vs ${formatPreviousChangeValue(change.previousAway)}`;
+  const winner = change.previousWinner === "unresolved" ? "" : `; winner: ${formatPreviousChangeValue(change.previousWinner)}`;
+  return `Previous: ${matchup}${winner}`;
+}
+
+function formatPreviousChangeValue(value: string) {
+  return teamById.get(value)?.name ?? value;
+}
+
+function tooltipAttributes(tooltip: string | undefined) {
+  if (!tooltip) return "";
+  return `data-tooltip="${escapeAttribute(tooltip)}" tabindex="0"`;
+}
+
+function escapeAttribute(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("\"", "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
 }
 
 function formatBracketDiagramKickoff(match: Pick<ProjectedMatch, "date">) {

@@ -67,6 +67,22 @@ The system SHALL let users edit predictions for unresolved matches and immediate
 - **WHEN** a complete prediction edit causes standings and projected outcomes to recalculate
 - **THEN** the app MUST preserve the user's scroll position and restore focus to the edited prediction input when it is still present
 
+#### Scenario: Prediction edit highlights table changes
+- **WHEN** a complete prediction edit changes a team's standing rank, points, goal difference, or qualification status
+- **THEN** the affected standings row MUST be visually distinguished from unchanged rows after recalculation
+
+#### Scenario: Prediction edit highlights bracket changes
+- **WHEN** a complete prediction edit changes a projected knockout participant, source slot, matchup, or winner
+- **THEN** the affected bracket cards, bracket diagram participants, and bracket fixture rows MUST be visually distinguished from unchanged bracket content after recalculation
+
+#### Scenario: Change highlight explains previous value
+- **WHEN** a user hovers or focuses a recent-change badge
+- **THEN** the app MUST show the previous standing, participant, matchup, or winner value that was replaced by the latest completed prediction edit
+
+#### Scenario: Initial model has no change highlights
+- **WHEN** the app first renders restored predictions from session storage
+- **THEN** standings and bracket content MUST render without recent-change highlighting until the user completes a new prediction edit
+
 ### Requirement: Session storage persistence
 The system SHALL persist the active prediction model in browser session storage and restore it during the same browser session.
 
@@ -166,3 +182,55 @@ The system SHALL show a fixture table underneath the visual bracket panel for br
 - **WHEN** a user edits an unresolved fixture score in the bracket table
 - **THEN** the active prediction model, bracket diagram, and downstream projected outcomes MUST update without a page reload
 
+### Requirement: Stats tab
+The system SHALL provide a Stats tab that displays tournament player stat leaderboards.
+
+#### Scenario: User opens stats tab
+- **WHEN** a user selects the Stats tab
+- **THEN** the app MUST display available player stat leaderboards
+
+#### Scenario: No leaderboard data exists
+- **WHEN** no stat leaderboards are available in tournament data
+- **THEN** the Stats tab MUST display a non-failing empty state for player stats
+
+#### Scenario: Stats tab on static hosting
+- **WHEN** the app is served from static hosting
+- **THEN** Stats tab navigation MUST work without requiring a server-side route
+
+### Requirement: Bracket tab shows knockout qualification
+The system SHALL show the current best third-place ranking table on the Bracket tab as knockout qualification context.
+
+#### Scenario: User opens bracket tab
+- **WHEN** a user selects the Bracket tab
+- **THEN** the app MUST display the calculated best third-place ranking table near the projected bracket
+
+#### Scenario: Prediction updates knockout qualification
+- **WHEN** a user changes a group-stage prediction that affects standings
+- **THEN** the Bracket tab knockout qualification table MUST update without a page reload
+
+### Requirement: Performance view shows rank-adjusted fixture performances
+The system SHALL display individual fixture performances in the Performance view using rank-adjusted credit derived from FIFA rankings, authoritative results, and active predictions.
+
+#### Scenario: User views fixture performances
+- **WHEN** a user opens the Performance view
+- **THEN** the app MUST show the fixture performance baseline and rank-factor rules and a result list with team, opponent, fixture, scoreline, result type, FIFA ranking context, actual points, baseline points, rank factor, fixture credit, and whether the score comes from a final result or active prediction
+
+#### Scenario: Fixture tab summarizes teams first
+- **WHEN** a user opens the fixture-level Performance sub-tab
+- **THEN** the app MUST show a team summary table before the individual result list with games played, actual points, baseline points, total credit, and final/predicted row counts
+
+#### Scenario: User switches performance analysis type
+- **WHEN** a user opens the Performance view
+- **THEN** the app MUST provide sub-tabs for team-level performance and fixture-level performance so each analysis can be viewed without scrolling through the other table
+
+#### Scenario: Formula explanation is readable
+- **WHEN** the fixture performance baseline rules are displayed
+- **THEN** the app MUST explain how baseline points, rank factor, and credit are derived from FIFA ranking and actual match points in user-facing language
+
+#### Scenario: Prediction changes fixture performance table
+- **WHEN** a user changes a complete group-stage prediction
+- **THEN** the fixture performance table MUST update without a page reload
+
+#### Scenario: Static hosting remains compatible
+- **WHEN** the app is built for static hosting
+- **THEN** fixture performance entries MUST be renderable from bundled tournament data and deterministic browser calculations without runtime server access
