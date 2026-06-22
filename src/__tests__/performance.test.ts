@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { calculateFixturePerformanceEntries, calculateFixturePerformanceSummaries, calculatePerformanceRows } from "../engine/performance";
+import {
+  calculateFixturePerformanceEntries,
+  calculateFixturePerformanceSummaries,
+  calculatePerformanceRows,
+  eloExpectedResult,
+  fifaRankSeedRating,
+  fixtureSuccessScore
+} from "../engine/performance";
 import type { PredictionMap, TournamentData } from "../types";
 
 function performanceTournament(): TournamentData {
@@ -228,6 +235,8 @@ describe("performance analysis", () => {
 
   it("calculates rank-adjusted fixture performance for completed fixtures", () => {
     const rows = calculateFixturePerformanceEntries(performanceTournament(), {});
+    const betaExpectedResult = eloExpectedResult(fifaRankSeedRating(20), fifaRankSeedRating(1));
+    const hotelExpectedResult = eloExpectedResult(fifaRankSeedRating(90), fifaRankSeedRating(5));
 
     expect(rows.find((row) => row.fixtureId === "hotel-india" && row.teamId === "hotel")).toMatchObject({
       fixtureId: "hotel-india",
@@ -235,31 +244,38 @@ describe("performance analysis", () => {
       opponentId: "india",
       result: "win",
       resultPoints: 3,
+      fifaRanking: 90,
+      opponentFifaRanking: 5,
       rankingGap: 85,
-      baselinePoints: 0,
-      rankingFactor: 4,
-      performanceScore: 12,
+      teamSeedRating: 1666,
+      opponentSeedRating: 2176,
+      actualResult: 1,
       source: "final"
     });
+    expect(rows.find((row) => row.fixtureId === "hotel-india" && row.teamId === "hotel")?.expectedResult).toBeCloseTo(hotelExpectedResult);
+    expect(rows.find((row) => row.fixtureId === "hotel-india" && row.teamId === "hotel")?.successScore).toBeCloseTo(fixtureSuccessScore(1, hotelExpectedResult));
     expect(rows.find((row) => row.fixtureId === "echo-foxtrot" && row.teamId === "echo")).toMatchObject({
       result: "loss",
       resultPoints: 0,
-      baselinePoints: 3,
-      rankingFactor: 4,
-      performanceScore: -12
+      teamSeedRating: 2194,
+      opponentSeedRating: 1726,
+      actualResult: 0
     });
     expect(rows.find((row) => row.fixtureId === "alpha-beta" && row.teamId === "beta")).toMatchObject({
       goalsFor: 2,
       goalsAgainst: 0,
       opponentFifaRanking: 1,
-      baselinePoints: 0,
-      rankingFactor: 3,
-      performanceScore: 9
+      teamSeedRating: 2086,
+      opponentSeedRating: 2200,
+      actualResult: 1
     });
+    expect(rows.find((row) => row.fixtureId === "alpha-beta" && row.teamId === "beta")?.expectedResult).toBeCloseTo(betaExpectedResult);
+    expect(rows.find((row) => row.fixtureId === "alpha-beta" && row.teamId === "beta")?.successScore).toBeCloseTo(fixtureSuccessScore(1, betaExpectedResult));
   });
 
-  it("gives an underdog more credit than a favorite for the same draw", () => {
-    const rows = calculateFixturePerformanceEntries(performanceTournament(), {
+  it("gives an underdog positive success and a favorite negative success for the same draw", () => {
+    const data = performanceTournament();
+    const rows = calculateFixturePerformanceEntries(data, {
       "beta-delta": { home: 1, away: 1 }
     });
 
@@ -270,21 +286,58 @@ describe("performance analysis", () => {
       result: "draw",
       rankingGap: 30,
       resultPoints: 1,
-      baselinePoints: 0,
-      rankingFactor: 4,
-      performanceScore: 4,
+      actualResult: 0.5,
       source: "prediction"
     });
     expect(favorite).toMatchObject({
       result: "draw",
       rankingGap: -30,
       resultPoints: 1,
-      baselinePoints: 3,
-      rankingFactor: 4,
-      performanceScore: -8,
+      actualResult: 0.5,
       source: "prediction"
     });
-    expect(underdog!.performanceScore).toBeGreaterThan(favorite!.performanceScore);
+    expect(underdog!.successScore).toBeGreaterThan(0);
+    expect(favorite!.successScore).toBeLessThan(0);
+    expect(underdog!.successScore).toBeGreaterThan(favorite!.successScore);
+    expect(data.fixtures.find((fixture) => fixture.id === "beta-delta")?.result).toBeUndefined();
+  });
+
+  it("scores close-ranked favorite wins above routine heavy-favorite wins", () => {
+    const data = performanceTournament();
+    data.fixtures.push(
+      {
+        id: "alpha-echo",
+        matchNumber: 9,
+        stage: "group",
+        group: "A",
+        date: "2026-06-18T12:00:00.000Z",
+        venueId: "venue",
+        home: "alpha",
+        away: "echo",
+        status: "completed",
+        result: { home: 1, away: 0 }
+      },
+      {
+        id: "alpha-foxtrot",
+        matchNumber: 10,
+        stage: "group",
+        group: "A",
+        date: "2026-06-19T12:00:00.000Z",
+        venueId: "venue",
+        home: "alpha",
+        away: "foxtrot",
+        status: "completed",
+        result: { home: 1, away: 0 }
+      }
+    );
+
+    const rows = calculateFixturePerformanceEntries(data, {});
+    const closeWin = rows.find((row) => row.fixtureId === "alpha-echo" && row.teamId === "alpha");
+    const routineWin = rows.find((row) => row.fixtureId === "alpha-foxtrot" && row.teamId === "alpha");
+
+    expect(closeWin!.successScore).toBeGreaterThan(routineWin!.successScore);
+    expect(closeWin!.successScore).toBeGreaterThan(0);
+    expect(routineWin!.successScore).toBeGreaterThan(0);
   });
 
   it("skips unresolved fixtures and fixtures with missing rankings", () => {
@@ -326,7 +379,7 @@ describe("performance analysis", () => {
     );
 
     const tiedFavoriteDraws = calculateFixturePerformanceEntries(data, {})
-      .filter((row) => row.performanceScore === -8 && row.result === "draw" && row.teamId === "india")
+      .filter((row) => row.result === "draw" && row.teamId === "india")
       .map((row) => row.fixtureId);
 
     expect(tiedFavoriteDraws).toEqual(["india-juliet", "india-juliet-rematch"]);
@@ -347,17 +400,25 @@ describe("performance analysis", () => {
       goalsAgainst: 0,
       goalDifference: 4,
       actualPoints: 6,
-      baselinePoints: 0,
-      totalCredit: 21,
+      actualResultTotal: 2,
       finalCount: 2,
       predictionCount: 0
     });
+    expect(rows[0].expectedResultTotal).toBeCloseTo(
+      eloExpectedResult(fifaRankSeedRating(90), fifaRankSeedRating(5)) +
+      eloExpectedResult(fifaRankSeedRating(90), fifaRankSeedRating(70))
+    );
+    expect(rows[0].totalSuccessScore).toBeCloseTo(
+      fixtureSuccessScore(1, eloExpectedResult(fifaRankSeedRating(90), fifaRankSeedRating(5))) +
+      fixtureSuccessScore(1, eloExpectedResult(fifaRankSeedRating(90), fifaRankSeedRating(70)))
+    );
   });
 
-  it("breaks summary credit ties with actual football performance before FIFA rank", () => {
+  it("sorts summaries by total success score", () => {
     const rows = calculateFixturePerformanceSummaries(performanceTournament(), {});
-    const tiedCreditRows = rows.filter((row) => row.totalCredit === 9).map((row) => row.teamId);
 
-    expect(tiedCreditRows).toEqual(["beta"]);
+    for (let index = 1; index < rows.length; index += 1) {
+      expect(rows[index - 1].totalSuccessScore).toBeGreaterThanOrEqual(rows[index].totalSuccessScore);
+    }
   });
 });

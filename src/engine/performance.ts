@@ -6,6 +6,10 @@ export type PerformanceMode = "raw" | "per-match" | "group-delta";
 export type FixturePerformanceSource = "final" | "prediction";
 export type FixturePerformanceResult = "win" | "draw" | "loss";
 
+export const FIFA_RANK_SEED_RATING_BASE = 2200;
+export const FIFA_RANK_SEED_RATING_STEP = 6;
+export const ELO_EXPECTED_RESULT_SCALE = 400;
+
 export interface PerformanceRow extends StandingRow {
   group: GroupId;
   currentRank: number;
@@ -27,12 +31,14 @@ export interface FixturePerformanceEntry {
   goalDifference: number;
   result: FixturePerformanceResult;
   resultPoints: number;
-  baselinePoints: number;
   fifaRanking: number;
   opponentFifaRanking: number;
   rankingGap: number;
-  rankingFactor: number;
-  performanceScore: number;
+  teamSeedRating: number;
+  opponentSeedRating: number;
+  actualResult: number;
+  expectedResult: number;
+  successScore: number;
   source: FixturePerformanceSource;
 }
 
@@ -48,8 +54,9 @@ export interface FixturePerformanceSummary {
   goalsAgainst: number;
   goalDifference: number;
   actualPoints: number;
-  baselinePoints: number;
-  totalCredit: number;
+  actualResultTotal: number;
+  expectedResultTotal: number;
+  totalSuccessScore: number;
   finalCount: number;
   predictionCount: number;
 }
@@ -113,8 +120,9 @@ export function calculateFixturePerformanceSummaries(data: TournamentData, predi
         goalsAgainst: entry.goalsAgainst,
         goalDifference: entry.goalDifference,
         actualPoints: entry.resultPoints,
-        baselinePoints: entry.baselinePoints,
-        totalCredit: entry.performanceScore,
+        actualResultTotal: entry.actualResult,
+        expectedResultTotal: entry.expectedResult,
+        totalSuccessScore: entry.successScore,
         finalCount: entry.source === "final" ? 1 : 0,
         predictionCount: entry.source === "prediction" ? 1 : 0
       });
@@ -129,18 +137,19 @@ export function calculateFixturePerformanceSummaries(data: TournamentData, predi
     current.goalsAgainst += entry.goalsAgainst;
     current.goalDifference += entry.goalDifference;
     current.actualPoints += entry.resultPoints;
-    current.baselinePoints += entry.baselinePoints;
-    current.totalCredit += entry.performanceScore;
+    current.actualResultTotal += entry.actualResult;
+    current.expectedResultTotal += entry.expectedResult;
+    current.totalSuccessScore += entry.successScore;
     current.finalCount += entry.source === "final" ? 1 : 0;
     current.predictionCount += entry.source === "prediction" ? 1 : 0;
   }
 
   return Array.from(summaries.values()).sort((left, right) => (
-    right.totalCredit - left.totalCredit ||
-    right.actualPoints - left.actualPoints ||
+    right.totalSuccessScore - left.totalSuccessScore ||
+    right.actualResultTotal - left.actualResultTotal ||
     right.goalDifference - left.goalDifference ||
     right.goalsFor - left.goalsFor ||
-    left.baselinePoints - right.baselinePoints ||
+    left.expectedResultTotal - right.expectedResultTotal ||
     left.fifaRanking - right.fifaRanking ||
     compareTeamName(left.teamId, right.teamId, teamById)
   ));
@@ -200,8 +209,11 @@ function buildFixturePerformanceEntry(
 ): FixturePerformanceEntry {
   const resultPoints = goalsFor > goalsAgainst ? 3 : goalsFor === goalsAgainst ? 1 : 0;
   const rankingGap = team.fifaRanking! - opponent.fifaRanking!;
-  const baselinePoints = baselineFixturePoints(team.fifaRanking!, opponent.fifaRanking!);
-  const rankingFactor = fixtureRankingFactor(rankingGap);
+  const teamSeedRating = fifaRankSeedRating(team.fifaRanking!);
+  const opponentSeedRating = fifaRankSeedRating(opponent.fifaRanking!);
+  const result = fixtureResult(goalsFor, goalsAgainst);
+  const actualResult = fixtureActualResult(result);
+  const expectedResult = eloExpectedResult(teamSeedRating, opponentSeedRating);
 
   return {
     fixtureId: fixture.id,
@@ -212,30 +224,42 @@ function buildFixturePerformanceEntry(
     goalsFor,
     goalsAgainst,
     goalDifference: goalsFor - goalsAgainst,
-    result: goalsFor > goalsAgainst ? "win" : goalsFor === goalsAgainst ? "draw" : "loss",
+    result,
     resultPoints,
-    baselinePoints,
     fifaRanking: team.fifaRanking!,
     opponentFifaRanking: opponent.fifaRanking!,
     rankingGap,
-    rankingFactor,
-    performanceScore: (resultPoints - baselinePoints) * rankingFactor,
+    teamSeedRating,
+    opponentSeedRating,
+    actualResult,
+    expectedResult,
+    successScore: fixtureSuccessScore(actualResult, expectedResult),
     source
   };
 }
 
-function baselineFixturePoints(teamRanking: number, opponentRanking: number) {
-  if (teamRanking < opponentRanking) return 3;
-  if (teamRanking > opponentRanking) return 0;
-  return 1;
+export function fifaRankSeedRating(fifaRanking: number) {
+  return FIFA_RANK_SEED_RATING_BASE - ((fifaRanking - 1) * FIFA_RANK_SEED_RATING_STEP);
 }
 
-function fixtureRankingFactor(rankingGap: number) {
-  const gap = Math.abs(rankingGap);
-  if (gap >= 30) return 4;
-  if (gap >= 15) return 3;
-  if (gap >= 5) return 2;
-  return 1;
+export function eloExpectedResult(teamSeedRating: number, opponentSeedRating: number) {
+  return 1 / (1 + (10 ** ((opponentSeedRating - teamSeedRating) / ELO_EXPECTED_RESULT_SCALE)));
+}
+
+export function fixtureActualResult(result: FixturePerformanceResult) {
+  if (result === "win") return 1;
+  if (result === "draw") return 0.5;
+  return 0;
+}
+
+export function fixtureSuccessScore(actualResult: number, expectedResult: number) {
+  return (actualResult - expectedResult) * 3;
+}
+
+function fixtureResult(goalsFor: number, goalsAgainst: number): FixturePerformanceResult {
+  if (goalsFor > goalsAgainst) return "win";
+  if (goalsFor === goalsAgainst) return "draw";
+  return "loss";
 }
 
 function isCompleteScore(score: Score | undefined): score is Score {
@@ -244,8 +268,8 @@ function isCompleteScore(score: Score | undefined): score is Score {
 
 function compareFixturePerformanceEntries(teamById: Map<TeamId, Team>) {
   return (left: FixturePerformanceEntry, right: FixturePerformanceEntry) => (
-    right.performanceScore - left.performanceScore ||
-    right.resultPoints - left.resultPoints ||
+    right.successScore - left.successScore ||
+    right.actualResult - left.actualResult ||
     right.goalDifference - left.goalDifference ||
     left.opponentFifaRanking - right.opponentFifaRanking ||
     left.matchNumber - right.matchNumber ||

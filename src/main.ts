@@ -51,6 +51,7 @@ function render() {
         </div>
         <div class="topbar-actions">
           <button class="source-pill share-pill" type="button" data-share-predictions>Share predictions</button>
+          <button class="source-pill clear-predictions-pill" type="button" data-clear-predictions ${Object.keys(predictions).length === 0 ? "disabled" : ""}>Clear predictions</button>
           <span class="share-status" aria-live="polite" data-share-status></span>
           <a class="source-pill" href="${tournamentData.sources[0].url}" target="_blank" rel="noreferrer">Fixture source</a>
         </div>
@@ -106,6 +107,10 @@ function render() {
 
   appRoot.querySelectorAll<HTMLButtonElement>("[data-share-predictions]").forEach((button) => {
     button.addEventListener("click", handleSharePredictions);
+  });
+
+  appRoot.querySelectorAll<HTMLButtonElement>("[data-clear-predictions]").forEach((button) => {
+    button.addEventListener("click", handleClearPredictions);
   });
 }
 
@@ -227,12 +232,12 @@ function renderFixturePerformancePanel(summaryRows: FixturePerformanceSummary[],
       <div class="stats-panel-heading">
         <div>
           <h3 id="fixture-performance-heading">Fixture Performances</h3>
-        <p>Credit compares actual points with a ranking baseline, then scales by how far apart the teams are in FIFA ranking.</p>
+        <p>Success compares each result with an Elo-style expectation derived from FIFA ranking.</p>
         </div>
         <span>${fixtureRows.length} entries</span>
       </div>
-      ${renderFixturePerformanceSummaryTable(summaryRows)}
       ${renderFixturePerformanceFormula()}
+      ${renderFixturePerformanceSummaryTable(summaryRows)}
       <div class="fixture-performance-detail-heading">
         <h4>Results & Credit</h4>
         <span>${fixtureRows.length} rows</span>
@@ -336,9 +341,9 @@ function renderFixturePerformanceSummaryTable(rows: FixturePerformanceSummary[])
         ${renderHeaderTooltip("Record", "Wins-draws-losses across included fixture rows.")}
         ${renderHeaderTooltip("GD", "Goal difference across included fixture rows.")}
         ${renderHeaderTooltip("GF", "Goals scored across included fixture rows.")}
-        ${renderHeaderTooltip("Actual", "Actual match points earned: win 3, draw 1, loss 0.")}
-        ${renderHeaderTooltip("Base", "Baseline points expected from FIFA ranking: favorite 3, underdog 0, equal rank 1.")}
-        ${renderHeaderTooltip("Credit", "Total fixture credit: (Actual - Base) times the rank-gap factor for each row.")}
+        ${renderHeaderTooltip("Actual", "Total actual result value: win 1, draw 0.5, loss 0.")}
+        ${renderHeaderTooltip("Expected", "Total Elo-style expected result from FIFA-rank seed ratings.")}
+        ${renderHeaderTooltip("Success", "Total success score: (Actual result - Expected result) x 3.")}
         ${renderHeaderTooltip("Final", "Number of authoritative final results included.")}
         ${renderHeaderTooltip("Pred", "Number of complete user predictions included.")}
       </div>
@@ -360,9 +365,9 @@ function renderFixturePerformanceSummaryRow(row: FixturePerformanceSummary, inde
       <span>${row.won}-${row.drawn}-${row.lost}</span>
       <span>${formatSignedNumber(row.goalDifference)}</span>
       <span>${row.goalsFor}</span>
-      <span>${row.actualPoints}</span>
-      <span>${row.baselinePoints}</span>
-      <span class="fixture-performance-score">${formatSignedNumber(row.totalCredit)}</span>
+      <span>${formatDecimal(row.actualResultTotal)}</span>
+      <span>${formatDecimal(row.expectedResultTotal)}</span>
+      <span class="fixture-performance-score">${formatSignedDecimal(row.totalSuccessScore)}</span>
       <span>${row.finalCount}</span>
       <span>${row.predictionCount}</span>
     </div>
@@ -382,11 +387,11 @@ function renderFixturePerformanceTable(rows: FixturePerformanceEntry[]) {
         ${renderHeaderTooltip("Score", "Score from this team's perspective, plus W/D/L result.")}
         ${renderHeaderTooltip("Rank", "Team FIFA ranking. Lower numbers are stronger.")}
         ${renderHeaderTooltip("Opp", "Opponent FIFA ranking. Lower numbers are stronger.")}
-        ${renderHeaderTooltip("Gap", "Team rank minus opponent rank. Positive means underdog; negative means favorite.")}
-        ${renderHeaderTooltip("Pts", "Actual points earned from this fixture: win 3, draw 1, loss 0.")}
-        ${renderHeaderTooltip("Base", "Baseline points expected from ranking: favorite 3, underdog 0, equal rank 1.")}
-        ${renderHeaderTooltip("Factor", "Rank-gap multiplier: 0-4 = x1, 5-14 = x2, 15-29 = x3, 30+ = x4.")}
-        ${renderHeaderTooltip("Credit", "Fixture credit: (Pts - Base) x Factor.")}
+        ${renderHeaderTooltip("Seed", "Team seed rating: 2200 - ((FIFA rank - 1) x 6).")}
+        ${renderHeaderTooltip("Opp seed", "Opponent seed rating from the same FIFA-rank conversion.")}
+        ${renderHeaderTooltip("Expected", "Elo-style expected result for this team before the match.")}
+        ${renderHeaderTooltip("Actual", "Actual result value: win 1, draw 0.5, loss 0.")}
+        ${renderHeaderTooltip("Success", "Success score: (Actual result - Expected result) x 3.")}
         ${renderHeaderTooltip("Source", "Whether the score is an authoritative final result or active prediction.")}
       </div>
       ${rows.map((row, index) => renderFixturePerformanceRow(row, index)).join("")}
@@ -486,11 +491,11 @@ function renderFixturePerformanceRow(row: FixturePerformanceEntry, index: number
       <span>${row.goalsFor}-${row.goalsAgainst} ${fixtureResultLabel(row)}</span>
       <span>${row.fifaRanking}</span>
       <span>${row.opponentFifaRanking}</span>
-      <span>${formatSignedNumber(row.rankingGap)}</span>
-      <span>${row.resultPoints}</span>
-      <span>${row.baselinePoints}</span>
-      <span>x${row.rankingFactor}</span>
-      <span class="fixture-performance-score">${formatSignedNumber(row.performanceScore)}</span>
+      <span>${row.teamSeedRating}</span>
+      <span>${row.opponentSeedRating}</span>
+      <span>${formatDecimal(row.expectedResult)}</span>
+      <span>${formatDecimal(row.actualResult)}</span>
+      <span class="fixture-performance-score">${formatSignedDecimal(row.successScore)}</span>
       <span><span class="fixture-performance-source">${row.source === "final" ? "Final" : "Predicted"}</span></span>
     </div>
   `;
@@ -498,20 +503,20 @@ function renderFixturePerformanceRow(row: FixturePerformanceEntry, index: number
 
 function renderFixturePerformanceFormula() {
   return `
-    <div class="fixture-performance-formula">
-      <div>
-        <strong>How Fixture Credit Works</strong>
-        <p>Each team gets a baseline for every ranked fixture. Credit is actual points versus baseline points, scaled by ranking gap.</p>
-      </div>
+    <details class="fixture-performance-formula">
+      <summary>
+        <span>How Fixture Success Works</span>
+        <span>Formula</span>
+      </summary>
       <div class="formula-grid">
-        <span><strong>Baseline</strong>: if your FIFA rank is better than your opponent's, you are expected to win and get 3 baseline points.</span>
-        <span><strong>Underdog</strong>: if your FIFA rank is worse, you are expected to lose and get 0 baseline points.</span>
-        <span><strong>Even ranks</strong>: equal-ranked teams use a 1 point baseline, matching a draw.</span>
-        <span><strong>Rank factor</strong>: ranking gap 0-4 = x1, 5-14 = x2, 15-29 = x3, 30+ = x4.</span>
-        <span><strong>Credit</strong> = (actual points - baseline points) x rank factor. Positive means better than expected; negative means worse than expected.</span>
-        <span><strong>Table</strong>: totals add fixture credit across played final results and complete predictions.</span>
+        <span><strong>Seed rating</strong>: 2200 - ((FIFA rank - 1) x 6). Lower FIFA rank means a higher seed rating.</span>
+        <span><strong>Expected result</strong>: 1 / (1 + 10 ^ ((opponent seed - team seed) / 400)).</span>
+        <span><strong>Actual result</strong>: win = 1, draw = 0.5, loss = 0.</span>
+        <span><strong>Success</strong> = (actual result - expected result) x 3. Positive means better than expected.</span>
+        <span><strong>Close wins</strong>: beating a nearby strong team scores higher than a routine win over a much weaker team.</span>
+        <span><strong>Table</strong>: totals add success across played final results and complete predictions.</span>
       </div>
-    </div>
+    </details>
   `;
 }
 
@@ -1052,6 +1057,11 @@ function formatSignedNumber(value: number) {
   return value > 0 ? `+${value}` : String(value);
 }
 
+function formatSignedDecimal(value: number) {
+  const formatted = formatDecimal(value);
+  return value > 0 ? `+${formatted}` : formatted;
+}
+
 function performanceStatusLabel(row: PerformanceRow) {
   if (row.performanceStatus === "overperforming") return "Over";
   if (row.performanceStatus === "underperforming") return "Under";
@@ -1183,6 +1193,19 @@ async function handleSharePredictions() {
     window.prompt("Copy prediction link", url);
     if (status) status.textContent = "Link ready";
   }
+}
+
+function handleClearPredictions() {
+  if (Object.keys(predictions).length === 0) return;
+
+  predictions = {};
+  recentPredictionChange = undefined;
+  hideTooltip();
+  savePredictions(predictions);
+  render();
+
+  const status = appRoot.querySelector<HTMLElement>("[data-share-status]");
+  if (status) status.textContent = "Cleared predictions";
 }
 
 function renderPreservingPredictionInput(input: HTMLInputElement | HTMLSelectElement) {

@@ -1,7 +1,5 @@
-## Purpose
+## MODIFIED Requirements
 
-Define rank-adjusted fixture performance calculations that compare actual or predicted match points against FIFA-ranking expectations.
-## Requirements
 ### Requirement: Rank-adjusted fixture performance entries are calculated
 The system SHALL calculate fixture-level performance entries for each team side of resolved group fixtures using authoritative results plus complete active predictions.
 
