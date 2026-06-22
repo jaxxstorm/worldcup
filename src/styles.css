@@ -329,7 +329,7 @@ h2 {
 
 .standing-row {
   display: grid;
-  grid-template-columns: 32px minmax(120px, 1fr) repeat(6, minmax(28px, 36px));
+  grid-template-columns: 32px minmax(120px, 1fr) repeat(4, minmax(28px, 36px)) repeat(2, minmax(52px, 64px));
   gap: 8px;
   padding: 6px 0;
   border-top: 1px solid #edf0ec;
@@ -405,6 +405,18 @@ h2 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.standing-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.standing-value .change-badge {
+  margin-left: 4px;
+  padding-inline: 4px;
 }
 
 .team-hover-target {

@@ -11,7 +11,7 @@ import { recentResultsForTeam, type TeamRecentResult } from "./engine/team-detai
 import { buildPredictionShareUrl, sharedPredictionsFromUrl } from "./storage/share";
 import { loadPredictions, savePredictions } from "./storage/session";
 import type { Fixture, MatchStage, PredictionMap, ProjectedMatch, QualifiedTeam, Score, StatLeaderboard, Team, TeamRef, ThirdPlaceStandingRow } from "./types";
-import { capturePredictionChangeSnapshot, changeLabel, matchChange, matchChanged, participantChange, standingRowChange, thirdPlaceRowChange, winnerChange, type MatchChange, type PredictionChangeSnapshot, type RowChange } from "./ui/change-highlights";
+import { capturePredictionChangeSnapshot, changeLabel, matchChange, matchChanged, participantChange, standingRowChange, standingValueChange, thirdPlaceRowChange, winnerChange, type MatchChange, type PredictionChangeSnapshot, type RowChange } from "./ui/change-highlights";
 
 const validationIssues = validateTournamentData(tournamentData);
 if (validationIssues.length > 0) {
@@ -720,6 +720,8 @@ function renderStandings() {
         ${rows.map((row) => {
           const team = teamById.get(row.teamId);
           const change = standingRowChange(recentPredictionChange, row);
+          const goalDifferenceChange = standingValueChange(recentPredictionChange, row, "goalDifference");
+          const pointsChange = standingValueChange(recentPredictionChange, row, "points");
           return `
             <div class="standing-row ${change ? "recent-change" : ""}">
               <span>${row.rank}</span>
@@ -728,8 +730,8 @@ function renderStandings() {
               <span>${row.won}</span>
               <span>${row.drawn}</span>
               <span>${row.lost}</span>
-              <span>${row.goalDifference}</span>
-              <span>${row.points}</span>
+              <span class="standing-value">${row.goalDifference}${renderChangeBadge(goalDifferenceChange)}</span>
+              <span class="standing-value">${row.points}${renderChangeBadge(pointsChange)}</span>
             </div>
           `;
         }).join("")}

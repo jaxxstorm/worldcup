@@ -30,6 +30,7 @@ export interface PredictionChangeSnapshot {
 export interface RowChange {
   changed: boolean;
   rankDelta?: number;
+  valueDelta?: number;
   previousSummary: string;
 }
 
@@ -81,15 +82,30 @@ export function standingRowChange(snapshot: PredictionChangeSnapshot | undefined
   const previous = snapshot?.standings.get(row.teamId);
   if (!previous) return undefined;
 
-  const changed = previous.rank !== row.rank
-    || previous.points !== row.points
-    || previous.goalDifference !== row.goalDifference;
+  const changed = previous.rank !== row.rank;
 
   if (!changed) return undefined;
   return {
     changed,
     rankDelta: previous.rank - row.rank,
     previousSummary: `Previous: #${previous.rank}, ${previous.points} pts, GD ${formatSignedNumber(previous.goalDifference)}`
+  };
+}
+
+export function standingValueChange(snapshot: PredictionChangeSnapshot | undefined, row: StandingRow, value: "goalDifference" | "points"): RowChange | undefined {
+  const previous = snapshot?.standings.get(row.teamId);
+  if (!previous) return undefined;
+
+  const previousValue = previous[value];
+  const currentValue = row[value];
+  if (previousValue === currentValue) return undefined;
+
+  return {
+    changed: true,
+    valueDelta: currentValue - previousValue,
+    previousSummary: value === "points"
+      ? `Previous: ${previousValue} pts`
+      : `Previous: GD ${formatSignedNumber(previousValue)}`
   };
 }
 
@@ -160,6 +176,7 @@ export function winnerChange(snapshot: PredictionChangeSnapshot | undefined, mat
 
 export function changeLabel(change: RowChange | undefined): string {
   if (!change) return "";
+  if (change.valueDelta !== undefined) return formatSignedNumber(change.valueDelta);
   if (!change.rankDelta) return "Changed";
   return change.rankDelta > 0 ? `+${change.rankDelta}` : String(change.rankDelta);
 }

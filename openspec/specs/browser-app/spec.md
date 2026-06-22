@@ -79,9 +79,17 @@ The system SHALL let users edit predictions for unresolved matches and immediate
 - **WHEN** a complete prediction edit causes standings and projected outcomes to recalculate
 - **THEN** the app MUST preserve the user's scroll position and restore focus to the edited prediction input when it is still present
 
-#### Scenario: Prediction edit highlights table changes
-- **WHEN** a complete prediction edit changes a team's visible standing rank, points, or goal difference
+#### Scenario: Prediction edit highlights table movement
+- **WHEN** a complete prediction edit changes a team's visible standing rank
 - **THEN** the affected standings row MUST be visually distinguished from unchanged rows after recalculation
+
+#### Scenario: Prediction edit highlights points and goal changes
+- **WHEN** a complete prediction edit changes a team's displayed points or goal-related standings values without changing that team's visible standing rank
+- **THEN** the affected points or goal-related values MUST show the change without marking the whole standings row as changed
+
+#### Scenario: Prediction edit does not highlight unchanged table rows
+- **WHEN** a complete prediction edit is added and the affected group's visible standing ranks are unchanged
+- **THEN** standings rows whose only differences are points or goal-related values MUST NOT display a row-level "Changed" badge or row-level previous-standing tooltip
 
 #### Scenario: Prediction edit highlights bracket changes
 - **WHEN** a complete prediction edit changes a projected knockout participant, source slot, matchup, or winner
@@ -89,7 +97,7 @@ The system SHALL let users edit predictions for unresolved matches and immediate
 
 #### Scenario: Change highlight explains previous value
 - **WHEN** a user hovers or focuses a recent-change badge
-- **THEN** the app MUST show the previous standing, participant, matchup, or winner value that was replaced by the latest completed prediction edit
+- **THEN** the app MUST show the previous standing value, points value, goal-related value, participant, matchup, or winner value that was replaced by the latest completed prediction edit
 
 #### Scenario: Initial model has no change highlights
 - **WHEN** the app first renders restored predictions from session storage
