@@ -53,7 +53,26 @@ select {
   border: 1px solid #b9d9c3;
   border-radius: 6px;
   color: #f9fff9;
+  background: transparent;
   text-decoration: none;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 10px;
+}
+
+.share-pill {
+  cursor: pointer;
+}
+
+.share-status {
+  min-width: 72px;
+  color: #d7e9dc;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .view-tabs {
@@ -1331,6 +1350,11 @@ h2 {
   .topbar {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .topbar-actions {
+    align-items: flex-start;
+    flex-wrap: wrap;
   }
 
   .layout {

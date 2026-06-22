@@ -7,6 +7,7 @@ import { drawSidesForProjection, projectTournament } from "./engine/knockout";
 import { calculateFixturePerformanceEntries, calculateFixturePerformanceSummaries, calculatePerformanceRows, type FixturePerformanceEntry, type FixturePerformanceSummary, type PerformanceMode, type PerformanceRow } from "./engine/performance";
 import { interpretPredictionInput, isEditableFixture, setPrediction } from "./engine/predictions";
 import { calculateGroupStandings, thirdPlaceRankings } from "./engine/standings";
+import { buildPredictionShareUrl, sharedPredictionsFromUrl } from "./storage/share";
 import { loadPredictions, savePredictions } from "./storage/session";
 import type { Fixture, MatchStage, PredictionMap, ProjectedMatch, QualifiedTeam, Score, StatLeaderboard, Team, TeamRef, ThirdPlaceStandingRow } from "./types";
 import { capturePredictionChangeSnapshot, changeLabel, matchChange, matchChanged, participantChange, standingRowChange, thirdPlaceRowChange, winnerChange, type MatchChange, type PredictionChangeSnapshot, type RowChange } from "./ui/change-highlights";
@@ -21,12 +22,19 @@ const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) throw new Error("App root missing");
 
 const appRoot = app;
-let predictions: PredictionMap = loadPredictions(tournamentData);
+const sharedPredictions = sharedPredictionsFromUrl(tournamentData, window.location.href);
+let predictions: PredictionMap = sharedPredictions ?? loadPredictions(tournamentData);
 let activeView: "main" | "bracket" | "stats" | "performance" = "main";
 let activePerformanceTab: "teams" | "fixtures" = "teams";
 let activePerformanceMode: PerformanceMode = "raw";
 let activeTooltip: HTMLDivElement | undefined;
-let recentPredictionChange: PredictionChangeSnapshot | undefined;
+let recentPredictionChange: PredictionChangeSnapshot | undefined = sharedPredictions && Object.keys(sharedPredictions).length > 0
+  ? capturePredictionChangeSnapshot(tournamentData, {})
+  : undefined;
+
+if (sharedPredictions) {
+  savePredictions(sharedPredictions);
+}
 
 const bracketRounds: MatchStage[] = ["round-of-32", "round-of-16", "quarter-final", "semi-final", "third-place", "final"];
 const fixtureById = new Map(tournamentData.fixtures.map((fixture) => [fixture.id, fixture]));
@@ -40,7 +48,11 @@ function render() {
           <h1>World Cup 2026 Predictor</h1>
           <p>As-it-stands tables and bracket paths use real results plus your predictions. Change future scores and the projected tournament updates instantly.</p>
         </div>
-        <a class="source-pill" href="${tournamentData.sources[0].url}" target="_blank" rel="noreferrer">Fixture source</a>
+        <div class="topbar-actions">
+          <button class="source-pill share-pill" type="button" data-share-predictions>Share predictions</button>
+          <span class="share-status" aria-live="polite" data-share-status></span>
+          <a class="source-pill" href="${tournamentData.sources[0].url}" target="_blank" rel="noreferrer">Fixture source</a>
+        </div>
       </header>
       <nav class="view-tabs" aria-label="Views">
         <button class="${activeView === "main" ? "active" : ""}" type="button" data-view="main">Fixtures</button>
@@ -82,6 +94,10 @@ function render() {
 
   appRoot.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-prediction]").forEach((input) => {
     input.addEventListener(input instanceof HTMLSelectElement ? "change" : "input", handlePredictionInput);
+  });
+
+  appRoot.querySelectorAll<HTMLButtonElement>("[data-share-predictions]").forEach((button) => {
+    button.addEventListener("click", handleSharePredictions);
   });
 }
 
@@ -1091,6 +1107,19 @@ function handlePredictionInput(event: Event) {
 
   savePredictions(predictions);
   renderPreservingPredictionInput(input);
+}
+
+async function handleSharePredictions() {
+  const url = buildPredictionShareUrl(tournamentData, window.location.href, predictions);
+  const status = appRoot.querySelector<HTMLElement>("[data-share-status]");
+
+  try {
+    await navigator.clipboard.writeText(url);
+    if (status) status.textContent = Object.keys(predictions).length === 0 ? "Copied empty model link" : "Copied link";
+  } catch {
+    window.prompt("Copy prediction link", url);
+    if (status) status.textContent = "Link ready";
+  }
 }
 
 function renderPreservingPredictionInput(input: HTMLInputElement | HTMLSelectElement) {
