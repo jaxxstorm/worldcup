@@ -1495,13 +1495,7 @@
       "sourceResult": {
         "name": "FIFA World Cup 2026 match calendar API",
         "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
-<<<<<<< HEAD
-        "accessedAt": "2026-06-23T01:01:54.506Z",
-||||||| parent of 3adac01 (update stats and results)
-      "status": "scheduled"
-=======
         "accessedAt": "2026-06-23T01:05:07.357Z",
->>>>>>> 3adac01 (update stats and results)
         "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
       }
     },
@@ -2553,13 +2547,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-<<<<<<< HEAD
-        "accessedAt": "2026-06-23T01:01:55.139Z",
-||||||| parent of 3adac01 (update stats and results)
-        "accessedAt": "2026-06-22T21:06:21.133Z",
-=======
         "accessedAt": "2026-06-23T01:05:13.061Z",
->>>>>>> 3adac01 (update stats and results)
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2642,13 +2630,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-<<<<<<< HEAD
-        "accessedAt": "2026-06-23T01:01:55.139Z",
-||||||| parent of 3adac01 (update stats and results)
-        "accessedAt": "2026-06-22T21:06:21.133Z",
-=======
         "accessedAt": "2026-06-23T01:05:13.061Z",
->>>>>>> 3adac01 (update stats and results)
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2731,13 +2713,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-<<<<<<< HEAD
-        "accessedAt": "2026-06-23T01:01:55.139Z",
-||||||| parent of 3adac01 (update stats and results)
-        "accessedAt": "2026-06-22T21:06:21.133Z",
-=======
         "accessedAt": "2026-06-23T01:05:13.061Z",
->>>>>>> 3adac01 (update stats and results)
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
