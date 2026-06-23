@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-23T05:28:32.781Z",
+  "generatedAt": "2026-06-23T09:18:00.450Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -2567,7 +2567,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-23T05:28:32.781Z",
+        "accessedAt": "2026-06-23T09:18:00.450Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2650,7 +2650,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-23T05:28:32.781Z",
+        "accessedAt": "2026-06-23T09:18:00.450Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2733,7 +2733,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-23T05:28:32.781Z",
+        "accessedAt": "2026-06-23T09:18:00.450Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
