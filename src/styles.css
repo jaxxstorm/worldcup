@@ -1507,24 +1507,6 @@ h2 {
   font-weight: 700;
 }
 
-.knockout-match.recent-change,
-.diagram-node.recent-change,
-.bracket-team.recent-change,
-.diagram-team.recent-change {
-  border-color: #d39b2a;
-  background: #fff7df;
-  box-shadow: 0 0 0 2px rgba(197, 138, 31, 0.15);
-}
-
-.diagram-team.winner-team.recent-change {
-  background: #f8edc9;
-}
-
-.bracket-fixture-row.recent-change {
-  border-left: 4px solid #c58a1f;
-  background: #fff7df;
-}
-
 @media (max-width: 900px) {
   .topbar {
     align-items: flex-start;
