@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-23T16:56:02.777Z",
+  "generatedAt": "2026-06-23T20:50:38.679Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -1699,7 +1699,17 @@
       "venueId": "nrg-stadium",
       "home": "portugal",
       "away": "uzbekistan",
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 5,
+        "away": 0
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-23T20:50:37.998Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m064",
@@ -2567,7 +2577,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-23T16:56:02.777Z",
+        "accessedAt": "2026-06-23T20:50:38.679Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2629,17 +2639,17 @@
         },
         {
           "rank": 9,
+          "player": "Cristiano Ronaldo",
+          "teamId": "portugal",
+          "value": 2,
+          "detail": "Portugal"
+        },
+        {
+          "rank": 10,
           "player": "Crysencio Summerville",
           "teamId": "netherlands",
           "value": 2,
           "detail": "Netherlands"
-        },
-        {
-          "rank": 10,
-          "player": "Cyle Larin",
-          "teamId": "canada",
-          "value": 2,
-          "detail": "Canada"
         }
       ]
     },
@@ -2650,7 +2660,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-23T16:56:02.777Z",
+        "accessedAt": "2026-06-23T20:50:38.679Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2677,52 +2687,52 @@
         },
         {
           "rank": 4,
-          "player": "Vinicius Junior",
-          "teamId": "brazil",
-          "value": 2,
-          "detail": "Brazil"
-        },
-        {
-          "rank": 5,
           "player": "Ayase Ueda",
           "teamId": "japan",
           "value": 1,
           "detail": "Japan"
         },
         {
-          "rank": 6,
+          "rank": 5,
           "player": "Breel Embolo",
           "teamId": "switzerland",
           "value": 1,
           "detail": "Switzerland"
         },
         {
-          "rank": 7,
+          "rank": 6,
           "player": "Cody Gakpo",
           "teamId": "netherlands",
           "value": 1,
           "detail": "Netherlands"
         },
         {
-          "rank": 8,
+          "rank": 7,
           "player": "Crysencio Summerville",
           "teamId": "netherlands",
           "value": 1,
           "detail": "Netherlands"
         },
         {
-          "rank": 9,
+          "rank": 8,
           "player": "Felix Kalu Nmecha",
           "teamId": "germany",
           "value": 1,
           "detail": "Germany"
         },
         {
-          "rank": 10,
+          "rank": 9,
           "player": "In-beom Hwang",
           "teamId": "south-korea",
           "value": 1,
           "detail": "South Korea"
+        },
+        {
+          "rank": 10,
+          "player": "Keito Nakamura",
+          "teamId": "japan",
+          "value": 1,
+          "detail": "Japan"
         }
       ]
     },
@@ -2733,7 +2743,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-23T16:56:02.777Z",
+        "accessedAt": "2026-06-23T20:50:38.679Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
