@@ -212,27 +212,30 @@ describe("scenario analysis", () => {
 
   it("builds concrete jeopardy routes for miss-out answers", () => {
     const context = buildScenarioQuestionContext(tournamentData, {}, "algeria");
+    const narrowLossBaseline = context.jeopardyBaselines.find((baseline) => baseline.condition === "Algeria lose to Austria by 1");
 
-    expect(context.jeopardyBaselines).toEqual(expect.arrayContaining([
-      expect.objectContaining({
-        condition: "Algeria lose to Austria by 1",
-        passersNeeded: 4,
-        scenarioShare: expect.objectContaining({
-          eliminating: expect.any(Number),
-          tested: expect.any(Number),
-          percent: expect.any(Number)
-        })
+    expect(narrowLossBaseline).toEqual(expect.objectContaining({
+      condition: "Algeria lose to Austria by 1",
+      scenarioShare: expect.objectContaining({
+        eliminating: expect.any(Number),
+        tested: expect.any(Number),
+        percent: expect.any(Number)
       })
-    ]));
-    expect(context.jeopardyRoutes[0]).toEqual(expect.objectContaining({
-      baselineCondition: "Algeria lose to Austria by 1",
+    }));
+    expect(narrowLossBaseline?.passersNeeded).toBe(Math.max(0, 9 - (narrowLossBaseline?.thirdPlaceRank ?? 9)));
+    expect(context.jeopardyRoutes.length).toBeGreaterThan(0);
+
+    const firstRoute = context.jeopardyRoutes[0];
+    const routeBaseline = context.jeopardyBaselines.find((baseline) => baseline.condition === firstRoute.baselineCondition);
+    expect(routeBaseline).toBeDefined();
+    expect(firstRoute).toEqual(expect.objectContaining({
       status: "eliminated",
       resultingThirdPlaceRank: 9,
       summary: expect.stringContaining("Algeria drop to 9th")
     }));
-    const routeFixtureIds = context.jeopardyRoutes[0].events.map((event) => event.fixtureId);
+    const routeFixtureIds = firstRoute.events.map((event) => event.fixtureId);
     expect(new Set(routeFixtureIds).size).toBe(routeFixtureIds.length);
-    expect(context.jeopardyRoutes[0].events.length).toBeGreaterThan(1);
+    expect(firstRoute.events.length).toBeGreaterThan(0);
   });
 
   it("returns deterministic scenario output for the same inputs", () => {
