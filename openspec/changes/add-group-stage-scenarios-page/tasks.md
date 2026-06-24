@@ -41,3 +41,5 @@
 - [x] 5.7 Run `npm test`, `npm run typecheck`, and `npm run build`
 - [x] 5.8 Use a reasoning-capable default Workers AI model with an environment override
 - [x] 5.9 Update AI prompt/spec language so deterministic answer briefs and pressure summaries remain the source of truth
+- [x] 5.10 Include selected-result plus same-group fixture combinations in compact AI context
+- [x] 5.11 Include all named passing-team pressure examples and prompt the explainer to answer overtake follow-ups from them

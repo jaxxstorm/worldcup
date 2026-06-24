@@ -8,7 +8,7 @@ The scheduled refresh workflow already runs generated result and stat updates be
 
 Natural-language scenario questions need a small server-side layer because Workers AI credentials and bindings must not be exposed in browser code. The browser should send the user's question and compact deterministic scenario context to a Cloudflare Pages Function. The Function uses a Workers AI binding named `AI`, asks the model to explain only from the supplied context, and returns a concise answer.
 
-The AI layer is an explainer, not a simulator. The deterministic scenario context should include precomputed answer material such as direct qualification routes, projected third-place routes, eliminated routes, pressure summaries, and relevant dependency notes. The default Workers AI model should favor reasoning and instruction-following quality, while still allowing an environment override for local experimentation or future model changes.
+The AI layer is an explainer, not a simulator. The deterministic scenario context should include precomputed answer material such as direct qualification routes, projected third-place routes, eliminated routes, pressure summaries, same-group result combinations, all relevant passing-team pressure examples, and dependency notes. The default Workers AI model should favor reasoning and instruction-following quality, while still allowing an environment override for local experimentation or future model changes.
 
 ## Goals / Non-Goals
 
@@ -42,11 +42,13 @@ The AI layer is an explainer, not a simulator. The deterministic scenario contex
 
 2. Use bounded outcome categories instead of exhaustive scoreline simulation.
    - The engine should evaluate useful match-result classes for unresolved relevant fixtures: selected team win/draw/loss, group competitors' win/draw/loss effects, and active predictions as the baseline where present.
+   - Compact AI context should combine the selected team's active or possible result with other unresolved fixtures in the same group, so questions like "what if they draw and Morocco win?" can be answered from supplied facts.
    - Rationale: users need actionable explanations, not a massive list of permutations with unlikely score details.
    - Alternative considered: brute-force all scorelines within an arbitrary range. Rejected because it creates misleading precision and unnecessary browser work.
 
 3. Model dependencies as named fixture/team conditions.
    - Scenario results should name the dependent teams and fixtures, such as another group's third-place total or another group fixture that changes the round-of-32 opponent.
+   - Third-place pressure should identify the team that can pass the selected team and the fixture result or margin that causes it, rather than only saying "chasing teams".
    - Rationale: text like "Scotland qualify if X happens" is more useful than only showing a table position.
    - Alternative considered: show only final projected standings. Rejected because the feature exists to explain why the projection changes.
 

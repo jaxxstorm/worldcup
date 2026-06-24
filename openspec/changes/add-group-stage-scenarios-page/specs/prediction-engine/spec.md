@@ -11,6 +11,10 @@ The system SHALL calculate deterministic team-centered group-stage scenario summ
 - **WHEN** another fixture or third-place table outcome can change the selected team's qualification status or round-of-32 assignment
 - **THEN** the scenario analysis MUST identify the dependent fixture, affected teams, and the condition that changes the selected team's path
 
+#### Scenario: Same-group branches include other group games
+- **WHEN** the selected team's own group has unresolved fixtures that do not involve the selected team
+- **THEN** the scenario context MUST include bounded combinations of the selected team's active or possible result plus those other group-game results, including the resulting qualification status and round-of-32 effect
+
 #### Scenario: Direct qualification is available
 - **WHEN** a selected team can finish in a group position that qualifies directly for the round of 32
 - **THEN** the scenario analysis MUST include the group finish and projected round-of-32 slot associated with that direct qualification path
@@ -36,11 +40,15 @@ The system SHALL expose compact selected-team scenario context suitable for serv
 
 #### Scenario: Context is compact
 - **WHEN** the app prepares context for a scenario question
-- **THEN** the context MUST include the selected team's current state, user-facing summary, answer brief, pressure summary, chasing-team examples, outcomes, dependencies, margin notes, possible opponents, and fixed results without including the full tournament dataset
+- **THEN** the context MUST include the selected team's current state, user-facing summary, answer brief, pressure summary, chasing-team examples, group outcome combinations, outcomes, dependencies, margin notes, possible opponents, and fixed results without including the full tournament dataset
 
 #### Scenario: Context reflects active predictions
 - **WHEN** active predictions affect the selected team's scenario
 - **THEN** the context sent for AI explanation MUST reflect those active predictions
+
+#### Scenario: Context preserves active-prediction group dependencies
+- **WHEN** the selected team's own remaining fixture has an active prediction and another fixture in the selected team's group remains unresolved
+- **THEN** the context sent for AI explanation MUST include the active-prediction baseline combined with bounded outcomes for the other group fixture
 
 #### Scenario: AI answer remains grounded
 - **WHEN** the server-side explainer receives a scenario question
@@ -53,6 +61,10 @@ The system SHALL expose compact selected-team scenario context suitable for serv
 #### Scenario: AI answers chasing-team follow-ups
 - **WHEN** the user asks about another team winning or another group producing a large result
 - **THEN** the supplied context MUST include enough chasing-team detail for the explainer to name the result, margin, third-place team moved above, and remaining buffer impact
+
+#### Scenario: AI answers who can pass the selected team
+- **WHEN** the user asks which teams can pass or overtake the selected team
+- **THEN** the supplied context and prompt MUST lead with the named passing teams and the specific fixture result or margin that puts each team above the selected team
 
 #### Scenario: AI reasoning is not rendered
 - **WHEN** a model response includes role labels, analysis text, scratchpad text, or final-answer markers
