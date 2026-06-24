@@ -98,23 +98,39 @@ describe("scenario analysis", () => {
     expect(context.team).toEqual({ id: "scotland", name: "Scotland", group: "C" });
     expect(context.activePredictionCount).toBe(1);
     expect(context.qualificationRules).toContain("The top two teams in each group qualify directly.");
-    expect(context.answerBrief).toEqual(expect.arrayContaining([
+    expect(currentContext.userFacingSummary).toEqual(expect.arrayContaining([
+      expect.stringContaining("Any listed win qualifies Scotland directly"),
+      expect.stringContaining("A draw currently projects Scotland through"),
+      expect.stringContaining("miss out if enough chasing third-place teams pass")
+    ]));
+    expect(currentContext.answerBrief).toEqual(expect.arrayContaining([
       expect.stringContaining("Scotland are currently"),
       expect.stringContaining("If Scotland win"),
       expect.stringContaining("currently projected through third place"),
       expect.stringContaining("No listed selected-match outcome eliminates Scotland")
     ]));
-    expect(context.pressureSummary).toEqual(expect.arrayContaining([
+    expect(currentContext.pressureSummary).toEqual(expect.arrayContaining([
       expect.stringContaining("Lose by 1"),
       expect.stringContaining("Lose by 2+"),
       expect.stringContaining("Czechia")
     ]));
-    expect(context.pressureNotes[0]).toEqual(expect.objectContaining({
+    expect(currentContext.pressureNotes[0]).toEqual(expect.objectContaining({
       lossMargin: 1,
       thirdPlaceRank: expect.any(Number),
       sparePlaces: expect.any(Number),
-      singleResultExamples: expect.any(Array)
+      singleResultExamples: expect.arrayContaining([
+        expect.objectContaining({
+          winnerName: expect.any(String),
+          margin: expect.any(Number),
+          thirdPlaceTeamName: expect.any(String),
+          summary: expect.any(String)
+        })
+      ])
     }));
+    expect(currentContext.chasingTeams).toEqual(expect.arrayContaining([
+      expect.stringContaining("Czechia")
+    ]));
+    expect(currentContext.chasingTeams.length).toBeGreaterThan(0);
     expect(context.selectedGroupStandings.map((row) => row.teamName)).toContain("Scotland");
     expect(context.thirdPlaceTable.length).toBeGreaterThan(0);
     expect(currentContext.thirdPlaceTable.some((row) => row.teamName === "Scotland" && row.qualifies)).toBe(true);
@@ -124,7 +140,22 @@ describe("scenario analysis", () => {
       homeName: "Morocco",
       awayName: "Haiti"
     }));
-    expect(context.outcomes.length).toBeGreaterThan(0);
+    expect(currentContext.groupOutcomeCombinations).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        selectedCondition: expect.stringContaining("Scotland draw"),
+        dependencyFixtureId: "m018",
+        dependencyCondition: expect.stringContaining("Morocco")
+      })
+    ]));
+    expect(context.groupOutcomeCombinations).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        selectedCondition: "Current real results and active predictions hold",
+        dependencyFixtureId: "m018",
+        dependencyCondition: expect.stringContaining("Morocco")
+      })
+    ]));
+    expect(currentContext.outcomes.length).toBeGreaterThan(0);
+    expect(context.outcomes).toEqual([]);
     expect(context.dependencies.length).toBeLessThanOrEqual(12);
     expect(context.possibleOpponents.length).toBeLessThanOrEqual(8);
     expect(JSON.stringify(context)).not.toContain("\"fixtures\"");

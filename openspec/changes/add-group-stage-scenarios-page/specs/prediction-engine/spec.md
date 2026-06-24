@@ -36,7 +36,7 @@ The system SHALL expose compact selected-team scenario context suitable for serv
 
 #### Scenario: Context is compact
 - **WHEN** the app prepares context for a scenario question
-- **THEN** the context MUST include the selected team's current state, answer brief, pressure summary, outcomes, dependencies, margin notes, possible opponents, and fixed results without including the full tournament dataset
+- **THEN** the context MUST include the selected team's current state, user-facing summary, answer brief, pressure summary, chasing-team examples, outcomes, dependencies, margin notes, possible opponents, and fixed results without including the full tournament dataset
 
 #### Scenario: Context reflects active predictions
 - **WHEN** active predictions affect the selected team's scenario
@@ -46,6 +46,22 @@ The system SHALL expose compact selected-team scenario context suitable for serv
 - **WHEN** the server-side explainer receives a scenario question
 - **THEN** it MUST instruct the model to answer only from supplied context and to say when the context is insufficient
 
+#### Scenario: AI answer determines logical scenarios
+- **WHEN** the user asks how a team can qualify, miss out, or reach danger
+- **THEN** the server-side explainer MUST instruct the model to determine all logical scenarios supported by the supplied deterministic context rather than quote raw context or show reasoning
+
+#### Scenario: AI answers chasing-team follow-ups
+- **WHEN** the user asks about another team winning or another group producing a large result
+- **THEN** the supplied context MUST include enough chasing-team detail for the explainer to name the result, margin, third-place team moved above, and remaining buffer impact
+
+#### Scenario: AI reasoning is not rendered
+- **WHEN** a model response includes role labels, analysis text, scratchpad text, or final-answer markers
+- **THEN** the server-side explainer MUST return only the final fan-facing answer
+
+#### Scenario: AI avoids vague tie-breaker caveats
+- **WHEN** the supplied context does not identify a specific tie-breaker comparison between named teams
+- **THEN** the server-side explainer MUST NOT include generic caveats such as "if tie-breakers go against them"
+
 #### Scenario: AI distinguishes projection from certainty
 - **WHEN** the supplied scenario context contains a third-place qualification route
 - **THEN** the server-side explainer MUST instruct the model to describe it as a current projection or dependency unless the context explicitly marks it guaranteed
@@ -53,3 +69,7 @@ The system SHALL expose compact selected-team scenario context suitable for serv
 #### Scenario: AI model favors reasoning quality
 - **WHEN** the server-side explainer calls Workers AI
 - **THEN** it MUST use a reasoning-capable default model and allow an environment-provided model override
+
+#### Scenario: AI calls use Cloudflare Gateway
+- **WHEN** the server-side explainer calls Workers AI
+- **THEN** it MUST route the request through Cloudflare AI Gateway using the configured gateway id and keep system instructions separate from the user question/context in a chat messages payload

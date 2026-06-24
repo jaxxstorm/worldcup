@@ -67,8 +67,10 @@ The AI layer is an explainer, not a simulator. The deterministic scenario contex
 7. Use Cloudflare Pages Functions plus Workers AI for natural-language answers.
    - Add a POST endpoint such as `/api/scenario-question` that receives `{ question, team, context }`.
    - Configure a Workers AI binding named `AI` in `wrangler.toml` and call `context.env.AI.run(...)` from the Function.
+   - Route calls through Cloudflare AI Gateway using gateway id `worldcup2026`, with `SCENARIO_AI_GATEWAY_ID` available as an environment override.
    - The default model should be a stronger reasoning-capable Workers AI text model, currently `@cf/openai/gpt-oss-120b`, with `SCENARIO_AI_MODEL` available as an environment override.
-   - The system prompt should be strict and situation-aware: answer from supplied deterministic context, distinguish direct qualification from projected third-place qualification, use pressure summaries for danger/panic questions, avoid restating the user's question, and keep answers concise.
+   - The endpoint should use a chat-style `messages` payload so system instructions and user question/context stay separated.
+   - The system prompt should be strict and situation-aware: determine all logical scenarios supported by supplied deterministic context, distinguish direct qualification from projected third-place qualification, use pressure summaries for danger/panic questions, avoid restating the user's question, never expose reasoning text, and keep answers concise.
    - Rationale: this keeps credentials server-side, matches the Cloudflare Pages deployment, and lets the deterministic engine remain the factual input.
    - Alternative considered: call an AI provider directly from the browser. Rejected because browser calls would expose credentials and make abuse control difficult.
 
@@ -80,5 +82,6 @@ The AI layer is an explainer, not a simulator. The deterministic scenario contex
 - [Risk] Stats-only data changes could skip a scenario rebuild if workflow checks are scoped too narrowly. -> Mitigation: changed-data detection should treat result and stat updates to the generated dataset as deployment-triggering changes.
 - [Risk] The Scenarios tab can become too verbose on small screens. -> Mitigation: use grouped sections, short headings, and responsive layouts that preserve readable text without nested cards.
 - [Risk] AI answers may hallucinate unsupported permutations. -> Mitigation: send only compact deterministic context, use a strict grounding prompt, and render a fallback/error state when the endpoint is unavailable.
+- [Risk] Reasoning models can expose analysis text or role markers. -> Mitigation: instruct final-answer-only output and sanitize responses before returning them to the browser.
 - [Risk] A weaker or deprecated model may produce vague scenario answers even with good context. -> Mitigation: use a reasoning-capable default model and keep a model override for local testing and future provider changes.
 - [Risk] Workers AI bindings are unavailable in local/static-only previews. -> Mitigation: keep deterministic scenario panels usable and make the question box fail gracefully.

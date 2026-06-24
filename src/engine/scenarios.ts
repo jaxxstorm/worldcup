@@ -84,13 +84,16 @@ export interface ScenarioQuestionContext {
   };
   activePredictionCount: number;
   qualificationRules: string[];
+  userFacingSummary: string[];
   answerBrief: string[];
   pressureSummary: string[];
+  chasingTeams: string[];
   current: ScenarioTeamPosition;
   currentPath?: ScenarioRoundOf32Path;
   selectedGroupStandings: ScenarioContextStandingRow[];
   thirdPlaceTable: ScenarioContextThirdPlaceRow[];
   remainingGroupFixtures: ScenarioContextFixture[];
+  groupOutcomeCombinations: ScenarioGroupOutcomeCombination[];
   outcomes: ScenarioOutcome[];
   dependencies: ScenarioDependency[];
   marginNotes: ScenarioMarginNote[];
@@ -130,10 +133,34 @@ export interface ScenarioPressureNote {
   lossMargin: number;
   thirdPlaceRank: number;
   sparePlaces: number;
-  singleResultExamples: string[];
+  singleResultExamples: ScenarioPressureExample[];
   condition: string;
   effect: string;
   severity: "info" | "warning" | "danger";
+}
+
+export interface ScenarioPressureExample {
+  fixtureId: FixtureId;
+  winnerTeamId: TeamId;
+  winnerName: string;
+  margin: number;
+  thirdPlaceTeamId: TeamId;
+  thirdPlaceTeamName: string;
+  summary: string;
+}
+
+export interface ScenarioGroupOutcomeCombination {
+  selectedCondition: string;
+  dependencyFixtureId: FixtureId;
+  dependencyCondition: string;
+  effect: string;
+  status: ScenarioQualificationStatus;
+  groupFinish: number;
+  points: number;
+  goalDifference: number;
+  goalsFor: number;
+  roundOf32FixtureId?: FixtureId;
+  opponentLabel?: string;
 }
 
 interface ScenarioState {
@@ -160,7 +187,7 @@ export function analyzeTeamScenarios(data: TournamentData, predictions: Predicti
   if (!team?.group) throw new Error(`Team ${teamId} is not a group-stage team`);
 
   const current = scenarioState(data, predictions, teamId);
-  const selectedFixtures = unresolvedGroupFixturesForTeam(data, teamId);
+  const selectedFixtures = unresolvedGroupFixturesForTeam(data, predictions, teamId);
   const outcomes = selectedFixtures.flatMap((fixture) => outcomeClasses.map((outcome) => {
     const branchPredictions = {
       ...predictions,
@@ -213,13 +240,16 @@ export function buildScenarioQuestionContext(data: TournamentData, predictions: 
       "The eight best third-place teams qualify through the third-place table.",
       "Third-place ranking is points, goal difference, goals for, then the tournament tie-breakers."
     ],
+    userFacingSummary: scenarioUserFacingSummary(teamNameValue, analysis),
     answerBrief: scenarioAnswerBrief(teamNameValue, analysis, thirdPlaceTable),
     pressureSummary: thirdPlacePressureSummary(teamNameValue, analysis.pressureNotes),
+    chasingTeams: thirdPlaceChasingTeams(teamNameValue, analysis.pressureNotes),
     current: analysis.current,
     ...(analysis.currentPath ? { currentPath: analysis.currentPath } : {}),
     selectedGroupStandings,
     thirdPlaceTable,
     remainingGroupFixtures: remainingGroupFixtures(data, predictions),
+    groupOutcomeCombinations: groupOutcomeCombinations(data, predictions, teamId),
     outcomes: analysis.outcomes,
     dependencies: analysis.dependencies.slice(0, 12),
     marginNotes: analysis.marginNotes,
@@ -263,6 +293,88 @@ function remainingGroupFixtures(data: TournamentData, predictions: PredictionMap
       ...(typeof fixture.away === "string" ? { awayTeamId: fixture.away } : {}),
       awayName: teamRefName(data, fixture.away)
     }));
+}
+
+function groupOutcomeCombinations(data: TournamentData, predictions: PredictionMap, teamId: TeamId): ScenarioGroupOutcomeCombination[] {
+  const selectedFixtures = unresolvedGroupFixturesForTeam(data, predictions, teamId);
+  const group = groupForTeam(data, teamId);
+  const dependentFixtures = data.fixtures.filter((fixture) => fixture.stage === "group" && fixture.group === group && !getAppliedScore(fixture, predictions) && fixture.home !== teamId && fixture.away !== teamId);
+  const combinations: ScenarioGroupOutcomeCombination[] = [];
+  const selectedBranches = selectedFixtures.length > 0
+    ? selectedFixtures.flatMap((selectedFixture) => outcomeClasses.map((selectedOutcome) => {
+      const branchPredictions = {
+        ...predictions,
+        [selectedFixture.id]: scoreForOutcome(selectedFixture, teamId, selectedOutcome)
+      };
+      return {
+        condition: selectedTeamOutcomeCondition(data, selectedFixture, teamId, selectedOutcome.kind),
+        predictions: branchPredictions,
+        state: scenarioState(data, branchPredictions, teamId)
+      };
+    }))
+    : [{
+      condition: "Current real results and active predictions hold",
+      predictions,
+      state: scenarioState(data, predictions, teamId)
+    }];
+
+  for (const selectedBranch of selectedBranches) {
+    for (const dependentFixture of dependentFixtures) {
+      for (const dependentOutcome of outcomeClasses) {
+        const combinedState = scenarioState(data, {
+          ...selectedBranch.predictions,
+          [dependentFixture.id]: scoreForFixtureOutcome(dependentFixture, dependentOutcome)
+        }, teamId);
+        const effect = dependencyEffect(selectedBranch.state, combinedState) ?? "no qualification or round-of-32 path change";
+
+        combinations.push({
+          selectedCondition: selectedBranch.condition,
+          dependencyFixtureId: dependentFixture.id,
+          dependencyCondition: fixtureOutcomeCondition(data, dependentFixture, dependentOutcome),
+          effect,
+          status: combinedState.position.status,
+          groupFinish: combinedState.position.rank,
+          points: combinedState.position.points,
+          goalDifference: combinedState.position.goalDifference,
+          goalsFor: combinedState.position.goalsFor,
+          ...(combinedState.path?.fixtureId ? { roundOf32FixtureId: combinedState.path.fixtureId } : {}),
+          ...(combinedState.path?.opponentLabel ? { opponentLabel: combinedState.path.opponentLabel } : {})
+        });
+      }
+    }
+  }
+
+  return combinations;
+}
+
+function scenarioUserFacingSummary(team: string, analysis: TeamScenarioAnalysis) {
+  const summary: string[] = [];
+  const winOutcomes = analysis.outcomes.filter((outcome) => outcome.kind === "win" || outcome.kind === "big-win");
+  const drawOutcomes = analysis.outcomes.filter((outcome) => outcome.kind === "draw");
+  const lossOutcomes = analysis.outcomes.filter((outcome) => outcome.kind === "loss" || outcome.kind === "heavy-loss");
+  const directWins = winOutcomes.filter((outcome) => outcome.status === "direct");
+  const projectedDraws = drawOutcomes.filter((outcome) => outcome.status === "third-place");
+  const projectedLosses = lossOutcomes.filter((outcome) => outcome.status === "third-place");
+  const eliminatedOutcomes = analysis.outcomes.filter((outcome) => outcome.status === "eliminated");
+
+  if (directWins.length > 0) {
+    summary.push(`Any listed win qualifies ${team} directly${directWins[0].roundOf32FixtureId ? ` (${directWins[0].roundOf32FixtureId}${directWins[0].opponentLabel ? ` vs ${directWins[0].opponentLabel}` : ""})` : ""}.`);
+  }
+  if (projectedDraws.length > 0) {
+    summary.push(`A draw currently projects ${team} through the third-place table${projectedDraws[0].roundOf32FixtureId ? ` (${projectedDraws[0].roundOf32FixtureId}${projectedDraws[0].opponentLabel ? ` vs ${projectedDraws[0].opponentLabel}` : ""})` : ""}, but it depends on other third-place results.`);
+  }
+  if (projectedLosses.length > 0) {
+    const lossConditions = projectedLosses.map((outcome) => outcome.condition.replace(`${team} `, "")).join(" or ");
+    summary.push(`Even ${lossConditions} currently keeps ${team} in a projected third-place slot, but only while enough chasing third-place teams stay below them.`);
+  }
+  if (eliminatedOutcomes.length > 0) {
+    summary.push(`${team} miss out if: ${eliminatedOutcomes.map((outcome) => outcome.condition).join("; ")}.`);
+  } else if (analysis.pressureNotes.length > 0) {
+    const tightest = analysis.pressureNotes.find((note) => note.sparePlaces <= 3) ?? analysis.pressureNotes[0];
+    summary.push(`${team} miss out if enough chasing third-place teams pass them; after ${tightest.condition}, ${tightest.sparePlaces} more team${tightest.sparePlaces === 1 ? "" : "s"} can pass before they fall out of the top 8.`);
+  }
+
+  return summary;
 }
 
 function scenarioAnswerBrief(team: string, analysis: TeamScenarioAnalysis, thirdPlaceTable: ScenarioContextThirdPlaceRow[]) {
@@ -323,13 +435,30 @@ function thirdPlacePressureSummary(team: string, pressureNotes: ScenarioPressure
   return summary;
 }
 
-function preferredPressureExamples(examples: string[]) {
-  const preferred = examples.filter((example) => /\b(Czechia|DR Congo|Congo)\b/.test(example)).slice(0, 2);
-  return (preferred.length > 0 ? preferred : examples.slice(0, 2)).map((example) => example.replace(/^(.+?) win (m\d+) by (\d)\+ \((.+)\)$/, "$1 by $3+"));
+function thirdPlaceChasingTeams(team: string, pressureNotes: ScenarioPressureNote[]) {
+  const examples = pressureNotes.flatMap((note) => note.singleResultExamples.map((example) => ({ ...example, lossMargin: note.lossMargin, sparePlaces: note.sparePlaces })));
+  if (examples.length === 0) return [];
+
+  const byPassingTeam = new Map<TeamId, typeof examples[number]>();
+  for (const example of examples) {
+    const existing = byPassingTeam.get(example.thirdPlaceTeamId);
+    if (!existing || example.margin < existing.margin || example.lossMargin < existing.lossMargin) {
+      byPassingTeam.set(example.thirdPlaceTeamId, example);
+    }
+  }
+
+  return Array.from(byPassingTeam.values())
+    .sort((left, right) => left.margin - right.margin || left.thirdPlaceTeamName.localeCompare(right.thirdPlaceTeamName))
+    .map((example) => `${example.thirdPlaceTeamName} can pass ${team} if ${example.winnerName} win ${example.fixtureId} by ${example.margin}+ after ${team} lose by ${example.lossMargin}; that uses one of the ${example.sparePlaces} remaining buffer places.`);
+}
+
+function preferredPressureExamples(examples: ScenarioPressureExample[]) {
+  const preferred = examples.filter((example) => /\b(Czechia|DR Congo|Congo)\b/.test(example.winnerName)).slice(0, 2);
+  return (preferred.length > 0 ? preferred : examples.slice(0, 2)).map((example) => `${example.winnerName} by ${example.margin}+`);
 }
 
 function thirdPlacePressureNotes(data: TournamentData, predictions: PredictionMap, teamId: TeamId): ScenarioPressureNote[] {
-  const selectedFixture = unresolvedGroupFixturesForTeam(data, teamId)[0];
+  const selectedFixture = unresolvedGroupFixturesForTeam(data, predictions, teamId)[0];
   if (!selectedFixture) return [];
 
   const notes: ScenarioPressureNote[] = [];
@@ -359,7 +488,7 @@ function thirdPlacePressureNotes(data: TournamentData, predictions: PredictionMa
       condition: `${teamName(data, teamId)} lose to ${opponentNameForFixture(data, selectedFixture, teamId)} by ${lossMargin}`,
       effect: rowAfterLoss.thirdPlaceRank > 8
         ? `They drop to ${ordinal(rowAfterLoss.thirdPlaceRank)} in the third-place table and miss out.`
-        : `They are ${ordinal(rowAfterLoss.thirdPlaceRank)} in the third-place table; ${sparePlaces} more team${sparePlaces === 1 ? "" : "s"} can pass them before they fall out of the top 8.${overtakes.length > 0 ? ` Single-result pressure includes ${overtakes.slice(0, 3).join("; ")}.` : ""}`,
+        : `They are ${ordinal(rowAfterLoss.thirdPlaceRank)} in the third-place table; ${sparePlaces} more team${sparePlaces === 1 ? "" : "s"} can pass them before they fall out of the top 8.${overtakes.length > 0 ? ` Single-result pressure includes ${overtakes.slice(0, 3).map((example) => example.summary).join("; ")}.` : ""}`,
       severity
     });
   }
@@ -376,7 +505,7 @@ function firstOvertakingResults(
   alreadyAbove: Set<TeamId>,
   selectedFixtureId: FixtureId
 ) {
-  const results: string[] = [];
+  const results: ScenarioPressureExample[] = [];
   const seen = new Set<string>();
   const remainingFixtures = data.fixtures.filter((fixture) => fixture.stage === "group" && fixture.id !== selectedFixtureId && !getAppliedScore(fixture, basePredictions));
 
@@ -393,7 +522,17 @@ function firstOvertakingResults(
         const newThirdPlaceTeam = rows.find((row) => row.thirdPlaceRank < selectedRow.thirdPlaceRank && !alreadyAbove.has(row.teamId) && !seen.has(row.teamId) && row.teamId !== teamId);
         if (!newThirdPlaceTeam) break;
         seen.add(newThirdPlaceTeam.teamId);
-        results.push(`${teamName(data, winner)} win ${fixture.id} by ${margin}+ (${teamName(data, newThirdPlaceTeam.teamId)} move above)`);
+        const winnerName = teamName(data, winner);
+        const thirdPlaceTeamName = teamName(data, newThirdPlaceTeam.teamId);
+        results.push({
+          fixtureId: fixture.id,
+          winnerTeamId: winner,
+          winnerName,
+          margin,
+          thirdPlaceTeamId: newThirdPlaceTeam.teamId,
+          thirdPlaceTeamName,
+          summary: `${winnerName} win ${fixture.id} by ${margin}+ (${thirdPlaceTeamName} move above)`
+        });
         break;
       }
     }
@@ -416,7 +555,7 @@ function scenarioStatusText(status: ScenarioQualificationStatus) {
 }
 
 function marginSwingNotes(data: TournamentData, predictions: PredictionMap, teamId: TeamId): ScenarioMarginNote[] {
-  const selectedFixtures = unresolvedGroupFixturesForTeam(data, teamId);
+  const selectedFixtures = unresolvedGroupFixturesForTeam(data, predictions, teamId);
   const group = groupForTeam(data, teamId);
   const dependentFixtures = data.fixtures.filter((fixture) => fixture.stage === "group" && fixture.group === group && !getAppliedScore(fixture, predictions));
   const notes: ScenarioMarginNote[] = [];
@@ -621,8 +760,8 @@ function roundOf32PathForTeam(data: TournamentData, projection: ProjectedMatch[]
   return undefined;
 }
 
-function unresolvedGroupFixturesForTeam(data: TournamentData, teamId: TeamId) {
-  return data.fixtures.filter((fixture) => fixture.stage === "group" && (fixture.home === teamId || fixture.away === teamId) && !fixture.result);
+function unresolvedGroupFixturesForTeam(data: TournamentData, predictions: PredictionMap, teamId: TeamId) {
+  return data.fixtures.filter((fixture) => fixture.stage === "group" && (fixture.home === teamId || fixture.away === teamId) && !getAppliedScore(fixture, predictions));
 }
 
 function completedGroupFixturesForTeam(data: TournamentData, teamId: TeamId) {
