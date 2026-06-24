@@ -72,6 +72,32 @@ describe("stats refresh", () => {
     });
   });
 
+  it("does not change data when scorer leaderboards only have a new access time", () => {
+    const feed = {
+      scorers: [
+        {
+          player: { name: "Example Striker" },
+          team: { name: "Korea Republic", tla: "KOR" },
+          goals: 3,
+          assists: 1,
+          penalties: 1
+        }
+      ]
+    };
+    const initial = mergeStatsFeed(tournamentData, feed, source);
+    const laterSource = {
+      ...source,
+      accessedAt: "2026-06-20T16:00:00.000Z"
+    };
+
+    const result = mergeStatsFeed(initial.data, feed, laterSource);
+
+    expect(result.changed).toBe(false);
+    expect(result.imported).toBe(0);
+    expect(result.summary).toEqual([]);
+    expect(result.data).toEqual(initial.data);
+  });
+
   it("limits the goal scorer leaderboard to the top 10", () => {
     const scorers = Array.from({ length: 12 }, (_, index) => ({
       player: { name: `Player ${String(index + 1).padStart(2, "0")}` },

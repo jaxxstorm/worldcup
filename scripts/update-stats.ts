@@ -47,7 +47,7 @@ const outputPath = resolve("src/data/tournament.generated.json");
 export function mergeStatsFeed(baseData: TournamentData, feed: FootballDataScorersFeed, source: SourceMetadata): StatsMergeResult {
   const data = structuredClone(baseData) as TournamentData;
   const statLeaderboards = feed.scorers ? buildStatLeaderboards(data, feed, source) : data.statLeaderboards ?? [];
-  const statLeaderboardsChanged = JSON.stringify(data.statLeaderboards ?? []) !== JSON.stringify(statLeaderboards);
+  const statLeaderboardsChanged = !sameStatLeaderboards(data.statLeaderboards ?? [], statLeaderboards);
   const fairPlayChanges = mergeFairPlayData(data, feed);
   const changed = statLeaderboardsChanged || fairPlayChanges.length > 0;
 
@@ -168,6 +168,21 @@ function buildLeaderboard(
     .map((entry, index) => ({ rank: index + 1, ...entry }));
 
   return { id, label, valueLabel, source, entries };
+}
+
+function sameStatLeaderboards(left: StatLeaderboard[], right: StatLeaderboard[]): boolean {
+  return JSON.stringify(left.map(stableLeaderboardForComparison)) === JSON.stringify(right.map(stableLeaderboardForComparison));
+}
+
+function stableLeaderboardForComparison(leaderboard: StatLeaderboard) {
+  return {
+    ...leaderboard,
+    source: {
+      name: leaderboard.source.name,
+      url: leaderboard.source.url,
+      notes: leaderboard.source.notes
+    }
+  };
 }
 
 function findTeam(teams: Team[], incoming: FootballDataScorer["team"] | FootballDataTeamRef | undefined): Team | undefined {
