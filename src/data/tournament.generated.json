@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-24T20:40:47.611Z",
+  "generatedAt": "2026-06-24T22:44:17.760Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -787,7 +787,17 @@
       "venueId": "bc-place",
       "home": "switzerland",
       "away": "canada",
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 2,
+        "away": 1
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-24T22:44:17.760Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m012",
@@ -798,7 +808,17 @@
       "venueId": "lumen-field",
       "home": "bosnia",
       "away": "qatar",
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 3,
+        "away": 1
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-24T22:44:17.760Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m013",
@@ -2607,7 +2627,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-24T20:40:47.611Z",
+        "accessedAt": "2026-06-24T22:44:11.667Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2655,31 +2675,31 @@
         },
         {
           "rank": 7,
+          "player": "Vinicius Junior",
+          "teamId": "brazil",
+          "value": 3,
+          "detail": "Brazil"
+        },
+        {
+          "rank": 8,
           "player": "Ayase Ueda",
           "teamId": "japan",
           "value": 2,
           "detail": "Japan"
         },
         {
-          "rank": 8,
+          "rank": 9,
           "player": "Brian Brobbey",
           "teamId": "netherlands",
           "value": 2,
           "detail": "Netherlands"
         },
         {
-          "rank": 9,
+          "rank": 10,
           "player": "Cody Gakpo",
           "teamId": "netherlands",
           "value": 2,
           "detail": "Netherlands"
-        },
-        {
-          "rank": 10,
-          "player": "Cristiano Ronaldo",
-          "teamId": "portugal",
-          "value": 2,
-          "detail": "Portugal"
         }
       ]
     },
@@ -2690,7 +2710,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-24T20:40:47.611Z",
+        "accessedAt": "2026-06-24T22:44:11.667Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2773,7 +2793,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-24T20:40:47.611Z",
+        "accessedAt": "2026-06-24T22:44:11.667Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
