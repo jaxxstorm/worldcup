@@ -44,3 +44,10 @@
 - [x] 5.10 Include selected-result plus same-group fixture combinations in compact AI context
 - [x] 5.11 Include all named passing-team pressure examples and prompt the explainer to answer overtake follow-ups from them
 - [x] 5.12 Add miss-out-specific context so miss-out answers include named third-place chasers instead of generic buffer text
+- [x] 5.13 Add concrete qualification paths, finish paths, jeopardy baselines, jeopardy chasers, jeopardy routes, and deterministic answer seed context
+- [x] 5.14 Replace single-result pressure-only answers with bounded compatible multi-result jeopardy route search
+- [x] 5.15 Add bounded scenario-share support for chance/percent/likelihood questions
+- [x] 5.16 Update AI prompt and fallback to prioritize answer seed, concrete jeopardy routes, chasers, and finish paths
+- [x] 5.17 Render AI answers in a block container that preserves multi-line structured text
+- [x] 5.18 Render deterministic visual summaries for qualification paths, shortest jeopardy route, chasers, and finish paths beside scenario answers
+- [x] 5.19 Add UI assertions for visual scenario summaries and run `npm test`, `npm run typecheck`, and `npm run build`

@@ -42,3 +42,7 @@ The system SHALL provide a Scenarios tab that lets users choose a team and view 
 #### Scenario: Scenario answer is presented as explanation
 - **WHEN** the server-side endpoint returns an AI scenario answer
 - **THEN** the app MUST present it as explanatory text while leaving the deterministic scenario panels visible as the source context
+
+#### Scenario: Scenario answer includes visual implications
+- **WHEN** a user asks a scenario question and the deterministic context includes qualification paths, jeopardy routes, chasers, or finish paths
+- **THEN** the app MUST render a compact visual summary of those deterministic implications alongside the answer so users can quickly scan the route, chasing teams, and likely round-of-32 outcomes

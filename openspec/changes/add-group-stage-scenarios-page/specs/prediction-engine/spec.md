@@ -70,6 +70,22 @@ The system SHALL expose compact selected-team scenario context suitable for serv
 - **WHEN** the user asks what needs to happen for the selected team to miss out
 - **THEN** the supplied context and prompt MUST NOT stop at generic buffer language and MUST include named third-place teams that can pass the selected team when those teams are present in the deterministic context
 
+#### Scenario: Context includes concrete jeopardy routes
+- **WHEN** multiple compatible third-place chaser results can cause the selected team to miss out
+- **THEN** the context MUST include minimal concrete result combinations, required margins, the passing teams, and the resulting third-place rank
+
+#### Scenario: Chasers can jump into third place
+- **WHEN** an unresolved result causes a team that is not currently third in its group to become that group's third-place team and pass the selected team
+- **THEN** the context MUST identify that passing team and the result that puts them above the selected team
+
+#### Scenario: Context includes finish paths
+- **WHEN** a selected team can finish first, second, or third with a resolvable round-of-32 assignment
+- **THEN** the context MUST include the likely round-of-32 fixture and opponent for each resolvable finish
+
+#### Scenario: AI describes bounded scenario share
+- **WHEN** the user asks for chance, percentage, or likelihood
+- **THEN** the explainer MUST label percentages as bounded scenario share over tested compatible chaser combinations and MUST NOT present them as real probabilities
+
 #### Scenario: AI reasoning is not rendered
 - **WHEN** a model response includes role labels, analysis text, scratchpad text, or final-answer markers
 - **THEN** the server-side explainer MUST return only the final fan-facing answer

@@ -6,7 +6,7 @@ import { formatFixtureKickoff, sectionFixturesForDisplay } from "./engine/fixtur
 import { drawSidesForProjection, projectTournament } from "./engine/knockout";
 import { calculateFixturePerformanceEntries, calculateFixturePerformanceSummaries, calculatePerformanceRows, type FixturePerformanceEntry, type FixturePerformanceSummary, type PerformanceMode, type PerformanceRow } from "./engine/performance";
 import { interpretPredictionInput, isEditableFixture, setPrediction } from "./engine/predictions";
-import { analyzeTeamScenarios, buildScenarioQuestionContext, type ScenarioDependency, type ScenarioMarginNote, type ScenarioOutcome, type TeamScenarioAnalysis } from "./engine/scenarios";
+import { analyzeTeamScenarios, buildScenarioQuestionContext, type ScenarioDependency, type ScenarioMarginNote, type ScenarioOutcome, type ScenarioQuestionContext, type TeamScenarioAnalysis } from "./engine/scenarios";
 import { calculateGroupStandings, thirdPlaceRankings } from "./engine/standings";
 import { recentResultsForTeam, type TeamRecentResult } from "./engine/team-details";
 import { buildPredictionShareUrl, sharedPredictionsFromUrl } from "./storage/share";
@@ -32,6 +32,7 @@ let activePerformanceMode: PerformanceMode = "raw";
 let selectedScenarioTeamId = scenarioTeams()[0]?.id ?? "";
 let scenarioQuestion = "";
 let scenarioAnswer = "";
+let scenarioAnswerContext: ScenarioQuestionContext | undefined;
 let scenarioQuestionError = "";
 let scenarioQuestionLoading = false;
 let activeTooltip: HTMLDivElement | undefined;
@@ -98,6 +99,7 @@ function render() {
     select.addEventListener("change", () => {
       selectedScenarioTeamId = select.value;
       scenarioAnswer = "";
+      scenarioAnswerContext = undefined;
       scenarioQuestionError = "";
       render();
     });
@@ -199,7 +201,7 @@ function renderScenarioQuestionBox(selectedTeam: Team) {
   return `
     <form class="scenario-question-box" data-scenario-question-form>
       <label for="scenario-question">Ask about ${escapeHtml(selectedTeam.name)}</label>
-      <div>
+      <div class="scenario-question-row">
         <input
           id="scenario-question"
           type="search"
@@ -210,9 +212,169 @@ function renderScenarioQuestionBox(selectedTeam: Team) {
         >
         <button type="submit" ${scenarioQuestionLoading ? "disabled" : ""}>${scenarioQuestionLoading ? "Asking..." : "Ask"}</button>
       </div>
-      ${scenarioAnswer ? `<p class="scenario-ai-answer" aria-live="polite">${escapeHtml(scenarioAnswer)}</p>` : ""}
+      ${scenarioAnswerContext ? renderScenarioVisualAnswer(scenarioAnswerContext) : ""}
+      ${scenarioAnswer ? `<div class="scenario-ai-answer" aria-live="polite">${escapeHtml(scenarioAnswer)}</div>` : ""}
       ${scenarioQuestionError ? `<p class="scenario-ai-error" aria-live="polite">${escapeHtml(scenarioQuestionError)}</p>` : ""}
     </form>
+  `;
+}
+
+function renderScenarioVisualAnswer(context: ScenarioQuestionContext) {
+  const route = context.jeopardyRoutes[0];
+  const pathMarkup = renderScenarioQuickPaths(context);
+  const routeMarkup = route ? renderScenarioRouteMap(context, route) : "";
+  const chaserMarkup = renderScenarioChaserMap(context, route);
+  const finishMarkup = renderScenarioFinishMap(context);
+
+  if (!pathMarkup && !routeMarkup && !chaserMarkup && !finishMarkup) return "";
+
+  return `
+    <div class="scenario-visual-answer" aria-label="Scenario implications">
+      ${pathMarkup}
+      ${routeMarkup}
+      ${chaserMarkup}
+      ${finishMarkup}
+    </div>
+  `;
+}
+
+function renderScenarioQuickPaths(context: ScenarioQuestionContext) {
+  const paths = context.qualificationPaths.slice(0, 5);
+  if (paths.length === 0) return "";
+
+  return `
+    <div class="scenario-visual-block">
+      <div class="scenario-visual-heading">
+        <span>Paths</span>
+        <strong>${escapeHtml(context.team.name)}</strong>
+      </div>
+      <div class="scenario-quick-paths">
+        ${paths.map((path) => `
+          <span class="scenario-path-chip ${path.status}">
+            <strong>${escapeHtml(path.condition)}</strong>
+            <em>${scenarioStatusLabel(path.status)} · ${ordinal(path.groupFinish)} · ${path.points} pts</em>
+          </span>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderScenarioRouteMap(context: ScenarioQuestionContext, route: ScenarioQuestionContext["jeopardyRoutes"][number]) {
+  const routeCount = context.jeopardyRoutes.length;
+  const routeRank = route.resultingThirdPlaceRank ? `${ordinal(route.resultingThirdPlaceRank)} in third-place` : scenarioStatusLabel(route.status);
+  const routeShare = renderScenarioRouteShare(route.scenarioShare);
+
+  return `
+    <div class="scenario-visual-block">
+      <div class="scenario-visual-heading">
+        <span>Shortest miss-out route</span>
+        <strong>${route.events.length} ${route.events.length === 1 ? "result" : "results"} needed${routeCount > 1 ? ` · ${routeCount} routes found` : ""}</strong>
+      </div>
+      <div class="scenario-route-flow">
+        <span class="scenario-route-baseline">${escapeHtml(route.baselineCondition)}</span>
+        ${route.events.map((event) => `
+          <span class="scenario-route-event">
+            <span>${escapeHtml(event.fixtureId)}</span>
+            <strong>${escapeHtml(event.resultCondition)}</strong>
+            <em>${escapeHtml(event.passingTeams.join(", "))} pass</em>
+          </span>
+        `).join("")}
+        <span class="scenario-route-outcome ${route.status}">
+          <strong>${escapeHtml(routeRank)}</strong>
+          <em>${scenarioStatusLabel(route.status)}</em>
+        </span>
+      </div>
+      ${routeShare ? `<p class="scenario-visual-note">${routeShare}</p>` : ""}
+    </div>
+  `;
+}
+
+function renderScenarioRouteShare(share: ScenarioQuestionContext["jeopardyRoutes"][number]["scenarioShare"]) {
+  if (!questionAsksForShare() || share.tested === 0) return "";
+
+  const percent = Number.isInteger(share.percent) ? `${share.percent}%` : `${share.percent.toFixed(1)}%`;
+  return `${share.eliminating} of ${share.tested} tested compatible combinations (${percent} bounded scenario share, not a prediction probability).`;
+}
+
+function questionAsksForShare() {
+  return /\b(chance|percent|percentage|probability|probable|likely|likelihood)\b/i.test(scenarioQuestion);
+}
+
+function renderScenarioChaserMap(context: ScenarioQuestionContext, route: ScenarioQuestionContext["jeopardyRoutes"][number] | undefined) {
+  const routePassingTeams = new Set(route?.events.flatMap((event) => event.passingTeams) ?? []);
+  const chasers = scenarioVisualChasers(context, routePassingTeams);
+  if (chasers.length === 0) return "";
+
+  const visibleChasers = chasers.slice(0, 8);
+  const hiddenCount = chasers.length - visibleChasers.length;
+
+  return `
+    <div class="scenario-visual-block">
+      <div class="scenario-visual-heading">
+        <span>Chasing pack</span>
+        <strong>${chasers.length} ${chasers.length === 1 ? "team" : "teams"} can pass</strong>
+      </div>
+      <div class="scenario-chaser-grid">
+        ${visibleChasers.map((chaser) => `
+          <span class="scenario-chaser-chip ${routePassingTeams.has(chaser.passingTeamName) ? "route" : ""}">
+            <strong>${escapeHtml(chaser.passingTeamName)}</strong>
+            <span>${escapeHtml(chaser.resultCondition)}</span>
+            <em>${ordinal(chaser.thirdPlaceRank)} · ${chaser.points} pts · GD ${formatSignedNumber(chaser.goalDifference)}</em>
+          </span>
+        `).join("")}
+        ${hiddenCount > 0 ? `<span class="scenario-chaser-chip more">+${hiddenCount} more</span>` : ""}
+      </div>
+    </div>
+  `;
+}
+
+function scenarioVisualChasers(context: ScenarioQuestionContext, routePassingTeams: Set<string>) {
+  const byTeam = new Map<string, ScenarioQuestionContext["jeopardyChasers"][number]>();
+
+  for (const chaser of context.jeopardyChasers) {
+    const current = byTeam.get(chaser.passingTeamId);
+    if (!current || scenarioChaserSortValue(chaser, routePassingTeams) < scenarioChaserSortValue(current, routePassingTeams)) {
+      byTeam.set(chaser.passingTeamId, chaser);
+    }
+  }
+
+  return Array.from(byTeam.values()).sort((left, right) => {
+    const leftRoute = routePassingTeams.has(left.passingTeamName) ? 0 : 1;
+    const rightRoute = routePassingTeams.has(right.passingTeamName) ? 0 : 1;
+    return leftRoute - rightRoute ||
+      left.thirdPlaceRank - right.thirdPlaceRank ||
+      (left.margin ?? 99) - (right.margin ?? 99) ||
+      left.passingTeamName.localeCompare(right.passingTeamName);
+  });
+}
+
+function scenarioChaserSortValue(chaser: ScenarioQuestionContext["jeopardyChasers"][number], routePassingTeams: Set<string>) {
+  return (routePassingTeams.has(chaser.passingTeamName) ? 0 : 100000) +
+    chaser.thirdPlaceRank * 1000 +
+    (chaser.margin ?? 99);
+}
+
+function renderScenarioFinishMap(context: ScenarioQuestionContext) {
+  const paths = [...context.finishPaths].sort((left, right) => left.groupFinish - right.groupFinish);
+  if (paths.length === 0) return "";
+
+  return `
+    <div class="scenario-visual-block">
+      <div class="scenario-visual-heading">
+        <span>Round of 32</span>
+        <strong>By finish</strong>
+      </div>
+      <div class="scenario-finish-strip">
+        ${paths.map((path) => `
+          <span class="scenario-finish-chip ${path.status}">
+            <strong>${ordinal(path.groupFinish)}</strong>
+            <span>${escapeHtml(path.roundOf32FixtureId ?? "TBD")} ${path.opponentLabel ? `vs ${renderScenarioOpponent(path.opponentTeamId, path.opponentLabel)}` : "opponent unresolved"}</span>
+            <em>${escapeHtml(path.condition)}</em>
+          </span>
+        `).join("")}
+      </div>
+    </div>
   `;
 }
 
@@ -1451,6 +1613,9 @@ function handlePredictionInput(event: Event) {
     predictions = setPrediction(tournamentData, predictions, fixtureId, decision.score);
   }
 
+  scenarioAnswer = "";
+  scenarioAnswerContext = undefined;
+  scenarioQuestionError = "";
   savePredictions(predictions);
   renderPreservingPredictionInput(input);
 }
@@ -1473,6 +1638,7 @@ async function handleScenarioQuestion(event: Event) {
 
   const question = scenarioQuestion.trim();
   scenarioAnswer = "";
+  scenarioAnswerContext = undefined;
   scenarioQuestionError = "";
 
   if (!question) {
@@ -1481,18 +1647,20 @@ async function handleScenarioQuestion(event: Event) {
     return;
   }
 
-  scenarioQuestionLoading = true;
-  render();
-
   try {
     const selectedTeam = teamById.get(selectedScenarioTeamId);
+    const context = buildScenarioQuestionContext(tournamentData, predictions, selectedScenarioTeamId);
+    scenarioAnswerContext = context;
+    scenarioQuestionLoading = true;
+    render();
+
     const response = await fetch("/api/scenario-question", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         question,
         team: selectedTeam?.name ?? selectedScenarioTeamId,
-        context: buildScenarioQuestionContext(tournamentData, predictions, selectedScenarioTeamId)
+        context
       })
     });
     const payload = await parseScenarioQuestionResponse(response);
@@ -1524,6 +1692,9 @@ function handleClearPredictions() {
 
   predictions = {};
   recentPredictionChange = undefined;
+  scenarioAnswer = "";
+  scenarioAnswerContext = undefined;
+  scenarioQuestionError = "";
   hideTooltip();
   savePredictions(predictions);
   render();

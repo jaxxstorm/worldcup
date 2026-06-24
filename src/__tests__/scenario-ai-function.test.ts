@@ -17,7 +17,7 @@ describe("scenario question function", () => {
     expect(await response.json()).toEqual({ answer: "- Scotland qualify if the listed outcomes hold." });
     expect(run).toHaveBeenCalledWith("@cf/openai/gpt-oss-120b", expect.objectContaining({
       messages: expect.arrayContaining([
-        expect.objectContaining({ role: "system", content: expect.stringContaining("Always use answerBrief as the primary source") }),
+        expect.objectContaining({ role: "system", content: expect.stringContaining("Always use answerSeed and answerBrief as primary sources") }),
         expect.objectContaining({ role: "user", content: expect.stringContaining("Scotland beat Brazil 1-0") })
       ]),
       temperature: 0.2
@@ -26,20 +26,27 @@ describe("scenario question function", () => {
     const aiInput = calls[0]?.[1];
     const systemMessage = aiInput?.messages?.find((message) => message.role === "system")?.content ?? "";
     expect(systemMessage).toContain("determine all logical scenarios");
+    expect(systemMessage).toContain("answerSeed");
+    expect(systemMessage).toContain("jeopardyRoutes");
+    expect(systemMessage).toContain("jeopardyChasers");
+    expect(systemMessage).toContain("finishPaths");
+    expect(systemMessage).toContain("Treat answerSeed, jeopardyRoutes, jeopardyChasers, qualificationPaths, and finishPaths as the source-of-truth");
     expect(systemMessage).toContain("missOutSummary");
-    expect(systemMessage).toContain("use missOutSummary and chasingTeams before userFacingSummary");
+    expect(systemMessage).toContain("use jeopardyRoutes and jeopardyChasers before missOutSummary");
     expect(systemMessage).toContain("Never answer a miss-out question with only generic wording");
     expect(systemMessage).toContain("Never output role labels, hidden reasoning");
     expect(systemMessage).toContain("Do not use vague tie-breaker caveats");
     expect(systemMessage).toContain("Do not restate the user's question");
     expect(systemMessage).toContain("use pressureSummary first");
-    expect(systemMessage).toContain("use all chasingTeams, pressureNotes");
+    expect(systemMessage).toContain("use all jeopardyChasers, jeopardyRoutes");
     expect(systemMessage).toContain("groupOutcomeCombinations");
     expect(systemMessage).toContain("if they draw but someone else wins");
     expect(systemMessage).toContain("which teams can pass them?");
     expect(systemMessage).toContain("Do not bound third-place pressure to one fixture or one example");
     expect(systemMessage).toContain("Third-place qualification must be described as a live/current projection");
     expect(systemMessage).toContain("For qualification questions, answer in this order");
+    expect(systemMessage).toContain("bounded scenario share");
+    expect(systemMessage).toContain("Do not force the answer into four bullets");
     expect(calls[0]?.[2]).toEqual({ gateway: { id: "worldcup2026" } });
   });
 
@@ -98,6 +105,7 @@ describe("scenario question function", () => {
         question: "How could Algeria miss out?",
         team: "Algeria",
         context: {
+          answerSeed: ["Qualification paths", "Algeria qualify directly through: any win.", "Jeopardy routes", "If Algeria lose and Czechia win, Algeria are in trouble."],
           userFacingSummary: ["Any win qualifies Algeria directly.", "A draw or loss currently projects Algeria through third place."],
           answerBrief: ["No listed selected-match outcome eliminates Algeria."],
           pressureSummary: ["Lose by 1: Algeria are 5th in the third-place table."],
@@ -109,7 +117,7 @@ describe("scenario question function", () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
-      answer: "- Any win qualifies Algeria directly.\n- A draw or loss currently projects Algeria through third place.\n- Lose by 1: Algeria are 5th in the third-place table.\n- South Korea can pass Algeria if Czechia win m005 by 1+."
+      answer: "Qualification paths\nAlgeria qualify directly through: any win.\nJeopardy routes\nIf Algeria lose and Czechia win, Algeria are in trouble."
     });
   });
 
@@ -121,6 +129,13 @@ describe("scenario question function", () => {
         team: "Scotland",
         context: {
           userFacingSummary: ["Scotland are currently projected through third place."],
+          jeopardyChasers: [
+            {
+              passingTeamName: "South Korea",
+              resultCondition: "Czechia win m005 by 1+",
+              baselineCondition: "Scotland lose by 1"
+            }
+          ],
           chasingTeams: [
             "South Korea can pass Scotland if Czechia win m005 by 1+ after Scotland lose by 1.",
             "Qatar can pass Scotland if Qatar win m012 by 1+ after Scotland lose by 1."
@@ -132,7 +147,7 @@ describe("scenario question function", () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
-      answer: "- South Korea can pass Scotland if Czechia win m005 by 1+ after Scotland lose by 1.\n- Qatar can pass Scotland if Qatar win m012 by 1+ after Scotland lose by 1."
+      answer: "- South Korea can pass if Czechia win m005 by 1+ after Scotland lose by 1."
     });
   });
 
@@ -143,6 +158,11 @@ describe("scenario question function", () => {
         question: "What needs to happen for Scotland to miss out?",
         team: "Scotland",
         context: {
+          jeopardyRoutes: [
+            {
+              summary: "If Scotland lose to Brazil by 2 and Czechia plus Senegal win, Scotland drop to 9th and miss out."
+            }
+          ],
           missOutSummary: [
             "No listed selected-match outcome alone eliminates Scotland.",
             "Scotland's miss-out route is third-place pressure.",
@@ -158,7 +178,32 @@ describe("scenario question function", () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
-      answer: "- No listed selected-match outcome alone eliminates Scotland.\n- Scotland's miss-out route is third-place pressure.\n- Named third-place teams that can pass Scotland:\n- South Korea can pass Scotland if Czechia win m005 by 1+ after Scotland lose by 1.\n- DR Congo can pass Scotland if DR Congo win m066 by 1+ after Scotland lose by 1."
+      answer: "- If Scotland lose to Brazil by 2 and Czechia plus Senegal win, Scotland drop to 9th and miss out."
+    });
+  });
+
+  it("falls back to bounded scenario share for chance questions", async () => {
+    const run = vi.fn(async () => ({ reasoning: "hidden" }));
+    const response = await onRequestPost({
+      request: jsonRequest({
+        question: "What percent chance do Scotland have of missing out?",
+        team: "Scotland",
+        context: {
+          jeopardyBaselines: [
+            {
+              condition: "Scotland lose to Brazil by 2",
+              scenarioShare: { eliminating: 3, tested: 16, percent: 19 }
+            }
+          ],
+          answerSeed: ["This should not be used for chance questions."]
+        }
+      }),
+      env: { AI: { run } }
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      answer: "- Scotland lose to Brazil by 2: bounded scenario share 3 of 16 tested compatible chaser combinations (19%). This is not a real probability model."
     });
   });
 

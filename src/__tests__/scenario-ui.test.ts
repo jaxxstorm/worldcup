@@ -20,6 +20,15 @@ describe("scenario UI integration", () => {
     expect(mainSource).toContain("Alternative opponents");
     expect(mainSource).toContain("sameScenarioOpponent");
     expect(mainSource).toContain("data-scenario-question");
+    expect(mainSource).toContain("<div class=\"scenario-ai-answer\"");
+    expect(mainSource).toContain("let scenarioAnswerContext");
+    expect(mainSource).toContain("renderScenarioVisualAnswer");
+    expect(mainSource).toContain("renderScenarioRouteMap");
+    expect(mainSource).toContain("renderScenarioChaserMap");
+    expect(mainSource).toContain("renderScenarioFinishMap");
+    expect(mainSource).toContain("scenario-route-event");
+    expect(mainSource).toContain("scenario-chaser-chip");
+    expect(mainSource).toContain("scenario-finish-chip");
     expect(mainSource).toContain("buildScenarioQuestionContext(tournamentData, predictions");
     expect(mainSource).toContain("\"/api/scenario-question\"");
   });
@@ -34,6 +43,12 @@ describe("scenario UI integration", () => {
     expect(styles).toContain(".scenario-path-panel");
     expect(styles).toContain(".scenario-opponent-row");
     expect(styles).toContain(".scenario-question-box");
+    expect(styles).toContain(".scenario-question-row");
+    expect(styles).toContain(".scenario-visual-answer");
+    expect(styles).toContain(".scenario-route-flow");
+    expect(styles).toContain(".scenario-chaser-grid");
+    expect(styles).toContain(".scenario-finish-strip");
+    expect(styles).toContain("white-space: pre-wrap");
     expect(styles).toContain(".scenario-team-selector");
     expect(styles).toContain("@media (max-width: 900px)");
   });

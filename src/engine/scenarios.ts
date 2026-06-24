@@ -32,6 +32,8 @@ export interface ScenarioOutcome {
   status: ScenarioQualificationStatus;
   groupFinish: number;
   points: number;
+  goalDifference: number;
+  goalsFor: number;
   slot?: string;
   roundOf32FixtureId?: FixtureId;
   opponentTeamId?: TeamId;
@@ -84,6 +86,12 @@ export interface ScenarioQuestionContext {
   };
   activePredictionCount: number;
   qualificationRules: string[];
+  qualificationPaths: ScenarioQualificationPath[];
+  finishPaths: ScenarioFinishPath[];
+  jeopardyBaselines: ScenarioJeopardyBaseline[];
+  jeopardyChasers: ScenarioJeopardyChaser[];
+  jeopardyRoutes: ScenarioJeopardyRoute[];
+  answerSeed: string[];
   missOutSummary: string[];
   userFacingSummary: string[];
   answerBrief: string[];
@@ -150,6 +158,75 @@ export interface ScenarioPressureExample {
   summary: string;
 }
 
+export interface ScenarioQualificationPath {
+  condition: string;
+  status: ScenarioQualificationStatus;
+  groupFinish: number;
+  points: number;
+  goalDifference: number;
+  goalsFor: number;
+  roundOf32FixtureId?: FixtureId;
+  slot?: string;
+  opponentTeamId?: TeamId;
+  opponentLabel?: string;
+}
+
+export interface ScenarioFinishPath {
+  groupFinish: 1 | 2 | 3;
+  condition: string;
+  status: ScenarioQualificationStatus;
+  roundOf32FixtureId?: FixtureId;
+  slot?: string;
+  opponentTeamId?: TeamId;
+  opponentLabel?: string;
+}
+
+export interface ScenarioShare {
+  eliminating: number;
+  tested: number;
+  percent: number;
+}
+
+export interface ScenarioJeopardyBaseline {
+  condition: string;
+  status: ScenarioQualificationStatus;
+  groupFinish: number;
+  points: number;
+  goalDifference: number;
+  goalsFor: number;
+  thirdPlaceRank?: number;
+  passersNeeded: number;
+  scenarioShare: ScenarioShare;
+}
+
+export interface ScenarioJeopardyChaser {
+  baselineCondition: string;
+  fixtureId: FixtureId;
+  resultCondition: string;
+  margin?: number;
+  passingTeamId: TeamId;
+  passingTeamName: string;
+  thirdPlaceRank: number;
+  points: number;
+  goalDifference: number;
+  goalsFor: number;
+}
+
+export interface ScenarioJeopardyRoute {
+  baselineCondition: string;
+  summary: string;
+  status: ScenarioQualificationStatus;
+  resultingThirdPlaceRank?: number;
+  scenarioShare: ScenarioShare;
+  events: ScenarioJeopardyRouteEvent[];
+}
+
+export interface ScenarioJeopardyRouteEvent {
+  fixtureId: FixtureId;
+  resultCondition: string;
+  passingTeams: string[];
+}
+
 export interface ScenarioGroupOutcomeCombination {
   selectedCondition: string;
   dependencyFixtureId: FixtureId;
@@ -161,12 +238,36 @@ export interface ScenarioGroupOutcomeCombination {
   goalDifference: number;
   goalsFor: number;
   roundOf32FixtureId?: FixtureId;
+  slot?: string;
   opponentLabel?: string;
 }
 
 interface ScenarioState {
   position: ScenarioTeamPosition;
   path?: ScenarioRoundOf32Path;
+}
+
+interface ScenarioJeopardyAnalysis {
+  baselines: ScenarioJeopardyBaseline[];
+  chasers: ScenarioJeopardyChaser[];
+  routes: ScenarioJeopardyRoute[];
+}
+
+interface JeopardyBaselineWork {
+  condition: string;
+  predictions: PredictionMap;
+  selectedFixtureId?: FixtureId;
+  state: ScenarioState;
+  context: ScenarioJeopardyBaseline;
+}
+
+interface JeopardyCandidateEvent {
+  fixtureId: FixtureId;
+  score: Score;
+  resultCondition: string;
+  margin?: number;
+  passingTeams: ScenarioJeopardyChaser[];
+  passingTeamIds: Set<TeamId>;
 }
 
 interface OutcomeClass {
@@ -228,6 +329,10 @@ export function buildScenarioQuestionContext(data: TournamentData, predictions: 
   const standings = calculateGroupStandings(data, predictions);
   const thirdPlaceTable = thirdPlaceRankings(standings, data).map((row) => contextThirdPlaceRow(data, row));
   const selectedGroupStandings = standings[analysis.group].map((row) => contextStandingRow(data, analysis.group, row));
+  const qualificationPaths = scenarioQualificationPaths(analysis);
+  const groupCombinations = groupOutcomeCombinations(data, predictions, teamId);
+  const finishPaths = scenarioFinishPaths(data, predictions, analysis, groupCombinations);
+  const jeopardy = scenarioJeopardyAnalysis(data, predictions, teamId);
 
   return {
     team: {
@@ -241,6 +346,12 @@ export function buildScenarioQuestionContext(data: TournamentData, predictions: 
       "The eight best third-place teams qualify through the third-place table.",
       "Third-place ranking is points, goal difference, goals for, then the tournament tie-breakers."
     ],
+    answerSeed: scenarioAnswerSeed(teamNameValue, qualificationPaths, finishPaths, jeopardy),
+    qualificationPaths,
+    finishPaths,
+    jeopardyRoutes: jeopardy.routes.slice(0, 8),
+    jeopardyBaselines: jeopardy.baselines,
+    jeopardyChasers: jeopardy.chasers,
     missOutSummary: scenarioMissOutSummary(teamNameValue, analysis),
     userFacingSummary: scenarioUserFacingSummary(teamNameValue, analysis),
     answerBrief: scenarioAnswerBrief(teamNameValue, analysis, thirdPlaceTable),
@@ -251,7 +362,7 @@ export function buildScenarioQuestionContext(data: TournamentData, predictions: 
     selectedGroupStandings,
     thirdPlaceTable,
     remainingGroupFixtures: remainingGroupFixtures(data, predictions),
-    groupOutcomeCombinations: groupOutcomeCombinations(data, predictions, teamId),
+    groupOutcomeCombinations: groupCombinations,
     outcomes: analysis.outcomes,
     dependencies: analysis.dependencies.slice(0, 12),
     marginNotes: analysis.marginNotes,
@@ -337,16 +448,391 @@ function groupOutcomeCombinations(data: TournamentData, predictions: PredictionM
           status: combinedState.position.status,
           groupFinish: combinedState.position.rank,
           points: combinedState.position.points,
-          goalDifference: combinedState.position.goalDifference,
-          goalsFor: combinedState.position.goalsFor,
-          ...(combinedState.path?.fixtureId ? { roundOf32FixtureId: combinedState.path.fixtureId } : {}),
-          ...(combinedState.path?.opponentLabel ? { opponentLabel: combinedState.path.opponentLabel } : {})
-        });
+            goalDifference: combinedState.position.goalDifference,
+            goalsFor: combinedState.position.goalsFor,
+            ...(combinedState.path?.fixtureId ? { roundOf32FixtureId: combinedState.path.fixtureId } : {}),
+            ...(combinedState.path?.slot ? { slot: combinedState.path.slot } : {}),
+            ...(combinedState.path?.opponentLabel ? { opponentLabel: combinedState.path.opponentLabel } : {})
+          });
       }
     }
   }
 
   return combinations;
+}
+
+function scenarioQualificationPaths(analysis: TeamScenarioAnalysis): ScenarioQualificationPath[] {
+  return analysis.outcomes.map((outcome) => ({
+    condition: outcome.condition,
+    status: outcome.status,
+    groupFinish: outcome.groupFinish,
+    points: outcome.points,
+    goalDifference: outcome.goalDifference,
+    goalsFor: outcome.goalsFor,
+    ...(outcome.roundOf32FixtureId ? { roundOf32FixtureId: outcome.roundOf32FixtureId } : {}),
+    ...(outcome.slot ? { slot: outcome.slot } : {}),
+    ...(outcome.opponentTeamId ? { opponentTeamId: outcome.opponentTeamId } : {}),
+    ...(outcome.opponentLabel ? { opponentLabel: outcome.opponentLabel } : {})
+  }));
+}
+
+function scenarioFinishPaths(data: TournamentData, predictions: PredictionMap, analysis: TeamScenarioAnalysis, groupCombinations: ScenarioGroupOutcomeCombination[]): ScenarioFinishPath[] {
+  const paths = new Map<number, ScenarioFinishPath>();
+  const addPath = (path: ScenarioFinishPath) => {
+    if (path.status === "eliminated" || paths.has(path.groupFinish)) return;
+    paths.set(path.groupFinish, path);
+  };
+
+  if (analysis.currentPath && analysis.current.rank <= 3) {
+    addPath({
+      groupFinish: analysis.current.rank as 1 | 2 | 3,
+      condition: "Current real results and active predictions hold",
+      status: analysis.current.status,
+      roundOf32FixtureId: analysis.currentPath.fixtureId,
+      slot: analysis.currentPath.slot,
+      ...(analysis.currentPath.opponentTeamId ? { opponentTeamId: analysis.currentPath.opponentTeamId } : {}),
+      opponentLabel: analysis.currentPath.opponentLabel
+    });
+  }
+
+  for (const outcome of analysis.outcomes) {
+    if (outcome.groupFinish > 3 || !outcome.roundOf32FixtureId) continue;
+    addPath({
+      groupFinish: outcome.groupFinish as 1 | 2 | 3,
+      condition: outcome.condition,
+      status: outcome.status,
+      roundOf32FixtureId: outcome.roundOf32FixtureId,
+      ...(outcome.slot ? { slot: outcome.slot } : {}),
+      ...(outcome.opponentTeamId ? { opponentTeamId: outcome.opponentTeamId } : {}),
+      ...(outcome.opponentLabel ? { opponentLabel: outcome.opponentLabel } : {})
+    });
+  }
+
+  for (const combination of groupCombinations) {
+    if (combination.groupFinish > 3 || !combination.roundOf32FixtureId) continue;
+    addPath({
+      groupFinish: combination.groupFinish as 1 | 2 | 3,
+      condition: `${combination.selectedCondition}; ${combination.dependencyCondition}`,
+      status: combination.status,
+      roundOf32FixtureId: combination.roundOf32FixtureId,
+      ...(combination.slot ? { slot: combination.slot } : {}),
+      ...(combination.opponentLabel ? { opponentLabel: combination.opponentLabel } : {})
+    });
+  }
+
+  return Array.from(paths.values()).sort((left, right) => left.groupFinish - right.groupFinish);
+}
+
+function scenarioJeopardyAnalysis(data: TournamentData, predictions: PredictionMap, teamId: TeamId): ScenarioJeopardyAnalysis {
+  const baselineWorks = jeopardyBaselinesForTeam(data, predictions, teamId);
+  const baselines: ScenarioJeopardyBaseline[] = [];
+  const allChasers: ScenarioJeopardyChaser[] = [];
+  const routes: ScenarioJeopardyRoute[] = [];
+
+  for (const baseline of baselineWorks) {
+    const candidates = jeopardyCandidateEvents(data, predictions, teamId, baseline);
+    allChasers.push(...candidates.flatMap((candidate) => candidate.passingTeams));
+    const routeResult = jeopardyRoutesForBaseline(data, teamId, baseline, candidates);
+    baselines.push({
+      ...baseline.context,
+      scenarioShare: routeResult.scenarioShare
+    });
+    routes.push(...routeResult.routes);
+  }
+
+  return {
+    baselines,
+    chasers: dedupeJeopardyChasers(allChasers),
+    routes: dedupeJeopardyRoutes(routes).slice(0, 12)
+  };
+}
+
+function jeopardyBaselinesForTeam(data: TournamentData, predictions: PredictionMap, teamId: TeamId): JeopardyBaselineWork[] {
+  const selectedFixtures = unresolvedGroupFixturesForTeam(data, predictions, teamId);
+  const works: JeopardyBaselineWork[] = [];
+
+  if (selectedFixtures.length === 0) {
+    const state = scenarioState(data, predictions, teamId);
+    if (state.position.status !== "direct") {
+      works.push(jeopardyBaselineWork("Current real results and active predictions hold", predictions, state));
+    }
+    return works;
+  }
+
+  for (const fixture of selectedFixtures) {
+    const drawPredictions = {
+      ...predictions,
+      [fixture.id]: scoreForOutcome(fixture, teamId, outcomeClasses.find((outcome) => outcome.kind === "draw")!)
+    };
+    const drawState = scenarioState(data, drawPredictions, teamId);
+    if (drawState.position.status !== "direct") {
+      works.push(jeopardyBaselineWork(selectedTeamOutcomeCondition(data, fixture, teamId, "draw"), drawPredictions, drawState, fixture.id));
+    }
+
+    for (let margin = 1; margin <= 8; margin += 1) {
+      const lossPredictions = {
+        ...predictions,
+        [fixture.id]: losingScoreForTeam(fixture, teamId, margin)
+      };
+      const lossState = scenarioState(data, lossPredictions, teamId);
+      if (lossState.position.status !== "direct") {
+        works.push(jeopardyBaselineWork(`${teamName(data, teamId)} lose to ${opponentNameForFixture(data, fixture, teamId)} by ${margin}`, lossPredictions, lossState, fixture.id));
+      }
+    }
+  }
+
+  return works;
+}
+
+function jeopardyBaselineWork(condition: string, predictions: PredictionMap, state: ScenarioState, selectedFixtureId?: FixtureId): JeopardyBaselineWork {
+  const thirdPlaceRank = state.position.thirdPlaceRank;
+  const passersNeeded = state.position.status === "eliminated"
+    ? 0
+    : thirdPlaceRank
+      ? Math.max(0, 9 - thirdPlaceRank)
+      : 0;
+
+  return {
+    condition,
+    predictions,
+    ...(selectedFixtureId ? { selectedFixtureId } : {}),
+    state,
+    context: {
+      condition,
+      status: state.position.status,
+      groupFinish: state.position.rank,
+      points: state.position.points,
+      goalDifference: state.position.goalDifference,
+      goalsFor: state.position.goalsFor,
+      ...(thirdPlaceRank ? { thirdPlaceRank } : {}),
+      passersNeeded,
+      scenarioShare: { eliminating: 0, tested: 0, percent: 0 }
+    }
+  };
+}
+
+function jeopardyCandidateEvents(data: TournamentData, basePredictions: PredictionMap, teamId: TeamId, baseline: JeopardyBaselineWork): JeopardyCandidateEvent[] {
+  if (baseline.context.passersNeeded === 0) return [];
+
+  const table = thirdPlaceRankings(calculateGroupStandings(data, baseline.predictions), data);
+  const selectedRow = table.find((row) => row.teamId === teamId);
+  if (!selectedRow) return [];
+
+  const alreadyAbove = new Set(table.filter((row) => row.thirdPlaceRank < selectedRow.thirdPlaceRank).map((row) => row.teamId));
+  const remainingFixtures = data.fixtures.filter((fixture) => fixture.stage === "group" && fixture.id !== baseline.selectedFixtureId && !getAppliedScore(fixture, baseline.predictions) && !getAppliedScore(fixture, basePredictions));
+  const candidates: JeopardyCandidateEvent[] = [];
+
+  for (const fixture of remainingFixtures) {
+    for (const outcome of boundedFixtureScores(data, fixture)) {
+      const rows = thirdPlaceRankings(calculateGroupStandings(data, {
+        ...baseline.predictions,
+        [fixture.id]: outcome.score
+      }), data);
+      const selected = rows.find((row) => row.teamId === teamId);
+      if (!selected) continue;
+
+      const passingRows = rows.filter((row) => row.thirdPlaceRank < selected.thirdPlaceRank && !alreadyAbove.has(row.teamId) && row.teamId !== teamId);
+      if (passingRows.length === 0) continue;
+
+      candidates.push({
+        fixtureId: fixture.id,
+        score: outcome.score,
+        resultCondition: outcome.condition,
+        ...(outcome.margin ? { margin: outcome.margin } : {}),
+        passingTeamIds: new Set(passingRows.map((row) => row.teamId)),
+        passingTeams: passingRows.map((row) => ({
+          baselineCondition: baseline.condition,
+          fixtureId: fixture.id,
+          resultCondition: outcome.condition,
+          ...(outcome.margin ? { margin: outcome.margin } : {}),
+          passingTeamId: row.teamId,
+          passingTeamName: teamName(data, row.teamId),
+          thirdPlaceRank: row.thirdPlaceRank,
+          points: row.points,
+          goalDifference: row.goalDifference,
+          goalsFor: row.goalsFor
+        }))
+      });
+    }
+  }
+
+  return dedupeJeopardyCandidateEvents(candidates)
+    .sort((left, right) => (left.margin ?? 0) - (right.margin ?? 0) || left.resultCondition.localeCompare(right.resultCondition));
+}
+
+function boundedFixtureScores(data: TournamentData, fixture: Fixture): Array<{ score: Score; condition: string; margin?: number }> {
+  const [home, away] = fixtureTeamIds(fixture);
+  if (!home || !away) return [];
+  const scores: Array<{ score: Score; condition: string; margin?: number }> = [{
+    score: { home: 1, away: 1 },
+    condition: `${teamName(data, home)} draw with ${teamName(data, away)} 1-1`
+  }];
+
+  for (const winner of [home, away]) {
+    for (let margin = 1; margin <= 8; margin += 1) {
+      scores.push({
+        score: winningScoreForTeam(fixture, winner, margin),
+        condition: `${teamName(data, winner)} beat ${opponentNameForFixture(data, fixture, winner)} by ${margin}+`,
+        margin
+      });
+    }
+  }
+
+  return scores;
+}
+
+function jeopardyRoutesForBaseline(data: TournamentData, teamId: TeamId, baseline: JeopardyBaselineWork, candidates: JeopardyCandidateEvent[]) {
+  const target = baseline.context.passersNeeded;
+  const pool = routeCandidatePool(candidates);
+  const routes: ScenarioJeopardyRoute[] = [];
+  let tested = 0;
+  let eliminating = 0;
+  let foundDepth: number | undefined;
+  const maxDepth = Math.min(6, pool.length);
+
+  const visit = (depth: number, start: number, selected: JeopardyCandidateEvent[], usedFixtures: Set<FixtureId>, passingTeams: Set<TeamId>) => {
+    if (selected.length === depth) {
+      if (passingTeams.size < target) return;
+      tested += 1;
+      const state = scenarioState(data, selected.reduce<PredictionMap>((next, event) => ({
+        ...next,
+        [event.fixtureId]: event.score
+      }), baseline.predictions), teamId);
+      if (state.position.status !== "eliminated") return;
+
+      eliminating += 1;
+      routes.push(routeFromEvents(data, teamId, baseline, selected, state, { eliminating: 0, tested: 0, percent: 0 }));
+      foundDepth = depth;
+      return;
+    }
+
+    for (let index = start; index < pool.length; index += 1) {
+      const event = pool[index];
+      if (usedFixtures.has(event.fixtureId)) continue;
+      const nextPassingTeams = new Set([...passingTeams, ...event.passingTeamIds]);
+      if (nextPassingTeams.size + (depth - selected.length - 1) < target) continue;
+      usedFixtures.add(event.fixtureId);
+      visit(depth, index + 1, [...selected, event], usedFixtures, nextPassingTeams);
+      usedFixtures.delete(event.fixtureId);
+      if (routes.length >= 5 && foundDepth === depth) return;
+    }
+  };
+
+  for (let depth = 1; depth <= maxDepth; depth += 1) {
+    visit(depth, 0, [], new Set(), new Set());
+    if (routes.length >= 5 && foundDepth === depth) break;
+  }
+
+  const scenarioShare = shareFromCounts(eliminating, tested);
+  return {
+    scenarioShare,
+    routes: routes.map((route) => ({ ...route, scenarioShare }))
+  };
+}
+
+function routeCandidatePool(candidates: JeopardyCandidateEvent[]) {
+  const perTeam = new Map<TeamId, number>();
+  const pool: JeopardyCandidateEvent[] = [];
+  for (const candidate of candidates) {
+    const hasUsefulTeam = Array.from(candidate.passingTeamIds).some((teamId) => (perTeam.get(teamId) ?? 0) < 2);
+    if (!hasUsefulTeam) continue;
+    pool.push(candidate);
+    for (const teamId of candidate.passingTeamIds) {
+      perTeam.set(teamId, (perTeam.get(teamId) ?? 0) + 1);
+    }
+    if (pool.length >= 16) break;
+  }
+  return pool;
+}
+
+function routeFromEvents(data: TournamentData, teamId: TeamId, baseline: JeopardyBaselineWork, events: JeopardyCandidateEvent[], state: ScenarioState, scenarioShare: ScenarioShare): ScenarioJeopardyRoute {
+  const team = teamName(data, teamId);
+  const eventText = events.map((event) => `${event.resultCondition} (${event.passingTeams.map((passingTeam) => passingTeam.passingTeamName).join(", ")} pass)`).join("; ");
+  const rankText = state.position.thirdPlaceRank ? `${ordinal(state.position.thirdPlaceRank)} in the third-place table` : `${ordinal(state.position.rank)} in Group ${state.position.group}`;
+  return {
+    baselineCondition: baseline.condition,
+    summary: `If ${baseline.condition}, and ${eventText}, ${team} drop to ${rankText} and miss out.`,
+    status: state.position.status,
+    ...(state.position.thirdPlaceRank ? { resultingThirdPlaceRank: state.position.thirdPlaceRank } : {}),
+    scenarioShare,
+    events: events.map((event) => ({
+      fixtureId: event.fixtureId,
+      resultCondition: event.resultCondition,
+      passingTeams: event.passingTeams.map((team) => team.passingTeamName)
+    }))
+  };
+}
+
+function shareFromCounts(eliminating: number, tested: number): ScenarioShare {
+  return {
+    eliminating,
+    tested,
+    percent: tested > 0 ? Math.round((eliminating / tested) * 100) : 0
+  };
+}
+
+function dedupeJeopardyCandidateEvents(candidates: JeopardyCandidateEvent[]) {
+  const byKey = new Map<string, JeopardyCandidateEvent>();
+  for (const candidate of candidates) {
+    const key = `${candidate.fixtureId}:${candidate.score.home}-${candidate.score.away}:${Array.from(candidate.passingTeamIds).sort().join(",")}`;
+    if (!byKey.has(key)) byKey.set(key, candidate);
+  }
+  return Array.from(byKey.values());
+}
+
+function dedupeJeopardyChasers(chasers: ScenarioJeopardyChaser[]) {
+  const byKey = new Map<string, ScenarioJeopardyChaser>();
+  for (const chaser of chasers) {
+    const key = chaser.passingTeamId;
+    const existing = byKey.get(key);
+    const margin = chaser.margin ?? 0;
+    const existingMargin = existing?.margin ?? 0;
+    if (!existing || margin < existingMargin || (margin === existingMargin && chaser.baselineCondition.localeCompare(existing.baselineCondition) < 0)) {
+      byKey.set(key, chaser);
+    }
+  }
+  return Array.from(byKey.values())
+    .sort((left, right) => left.passingTeamName.localeCompare(right.passingTeamName));
+}
+
+function dedupeJeopardyRoutes(routes: ScenarioJeopardyRoute[]) {
+  const byKey = new Map<string, ScenarioJeopardyRoute>();
+  for (const route of routes) {
+    const key = `${route.baselineCondition}:${route.events.map((event) => `${event.fixtureId}:${event.resultCondition}`).sort().join("|")}`;
+    if (!byKey.has(key)) byKey.set(key, route);
+  }
+  return Array.from(byKey.values())
+    .sort((left, right) => left.events.length - right.events.length || left.summary.localeCompare(right.summary));
+}
+
+function scenarioAnswerSeed(team: string, qualificationPaths: ScenarioQualificationPath[], finishPaths: ScenarioFinishPath[], jeopardy: ScenarioJeopardyAnalysis) {
+  const lines: string[] = [];
+  const directPaths = qualificationPaths.filter((path) => path.status === "direct");
+  const thirdPlacePaths = qualificationPaths.filter((path) => path.status === "third-place");
+  const eliminatedPaths = qualificationPaths.filter((path) => path.status === "eliminated");
+
+  lines.push("Qualification paths");
+  if (directPaths.length > 0) lines.push(`${team} qualify directly through: ${directPaths.map((path) => path.condition).join("; ")}.`);
+  if (thirdPlacePaths.length > 0) lines.push(`${team} are currently projected through third place through: ${thirdPlacePaths.map((path) => path.condition).join("; ")}.`);
+  if (eliminatedPaths.length > 0) lines.push(`${team} are eliminated through: ${eliminatedPaths.map((path) => path.condition).join("; ")}.`);
+  if (directPaths.length === 0 && thirdPlacePaths.length === 0 && eliminatedPaths.length === 0) lines.push("No unresolved selected-team branch is available; use the current table and active predictions.");
+
+  lines.push("Jeopardy routes");
+  if (jeopardy.routes.length > 0) {
+    lines.push(...jeopardy.routes.slice(0, 5).map((route) => route.summary));
+  } else if (jeopardy.chasers.length > 0) {
+    lines.push(`No tested compatible multi-result route eliminates ${team}, but these teams can reduce the buffer:`);
+    lines.push(...jeopardy.chasers.slice(0, 8).map((chaser) => `${chaser.passingTeamName} can pass if ${chaser.resultCondition} after ${chaser.baselineCondition}.`));
+  } else {
+    lines.push(`No concrete third-place chaser route is identified for ${team} in the bounded checks.`);
+  }
+
+  if (finishPaths.length > 0) {
+    lines.push("Likely round of 32");
+    lines.push(...finishPaths.map((path) => `${ordinal(path.groupFinish)} in group: ${path.roundOf32FixtureId ?? "no resolved fixture"}${path.opponentLabel ? ` vs ${path.opponentLabel}` : ""} (${path.condition}).`));
+  }
+
+  return lines;
 }
 
 function scenarioMissOutSummary(team: string, analysis: TeamScenarioAnalysis) {
@@ -678,6 +1164,8 @@ function scenarioOutcome(data: TournamentData, predictions: PredictionMap, teamI
     status: state.position.status,
     groupFinish: state.position.rank,
     points: state.position.points,
+    goalDifference: state.position.goalDifference,
+    goalsFor: state.position.goalsFor,
     ...(path?.slot ? { slot: path.slot } : {}),
     ...(path?.fixtureId ? { roundOf32FixtureId: path.fixtureId } : {}),
     ...(path?.opponentTeamId ? { opponentTeamId: path.opponentTeamId } : {}),

@@ -98,6 +98,48 @@ describe("scenario analysis", () => {
     expect(context.team).toEqual({ id: "scotland", name: "Scotland", group: "C" });
     expect(context.activePredictionCount).toBe(1);
     expect(context.qualificationRules).toContain("The top two teams in each group qualify directly.");
+    expect(currentContext.qualificationPaths).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        condition: "Scotland beat Brazil 3-0",
+        status: "direct",
+        roundOf32FixtureId: expect.any(String)
+      }),
+      expect.objectContaining({
+        condition: "Scotland lose to Brazil 0-1",
+        status: "third-place"
+      })
+    ]));
+    expect(currentContext.finishPaths).toEqual(expect.arrayContaining([
+      expect.objectContaining({ groupFinish: 1, opponentLabel: expect.any(String) }),
+      expect.objectContaining({ groupFinish: 2, opponentLabel: expect.any(String) }),
+      expect.objectContaining({ groupFinish: 3, opponentLabel: expect.any(String) })
+    ]));
+    expect(currentContext.jeopardyChasers).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        passingTeamName: "South Korea",
+        resultCondition: expect.stringContaining("Czechia")
+      }),
+      expect.objectContaining({
+        passingTeamName: "Cote d'Ivoire",
+        resultCondition: expect.stringContaining("Cote d'Ivoire")
+      })
+    ]));
+    expect(currentContext.jeopardyRoutes[0]).toEqual(expect.objectContaining({
+      baselineCondition: expect.stringContaining("Scotland lose to Brazil"),
+      status: "eliminated",
+      summary: expect.stringContaining("miss out"),
+      events: expect.arrayContaining([
+        expect.objectContaining({
+          fixtureId: "m005",
+          passingTeams: expect.arrayContaining(["South Korea"])
+        })
+      ])
+    }));
+    expect(currentContext.answerSeed).toEqual(expect.arrayContaining([
+      "Qualification paths",
+      "Jeopardy routes",
+      "Likely round of 32"
+    ]));
     expect(currentContext.missOutSummary).toEqual(expect.arrayContaining([
       "No listed selected-match outcome alone eliminates Scotland.",
       expect.stringContaining("Named third-place teams that can pass Scotland:"),
@@ -166,6 +208,31 @@ describe("scenario analysis", () => {
     expect(context.possibleOpponents.length).toBeLessThanOrEqual(8);
     expect(JSON.stringify(context)).not.toContain("\"fixtures\"");
     expect(JSON.stringify(context)).not.toContain("\"teams\"");
+  });
+
+  it("builds concrete jeopardy routes for miss-out answers", () => {
+    const context = buildScenarioQuestionContext(tournamentData, {}, "algeria");
+
+    expect(context.jeopardyBaselines).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        condition: "Algeria lose to Austria by 1",
+        passersNeeded: 4,
+        scenarioShare: expect.objectContaining({
+          eliminating: expect.any(Number),
+          tested: expect.any(Number),
+          percent: expect.any(Number)
+        })
+      })
+    ]));
+    expect(context.jeopardyRoutes[0]).toEqual(expect.objectContaining({
+      baselineCondition: "Algeria lose to Austria by 1",
+      status: "eliminated",
+      resultingThirdPlaceRank: 9,
+      summary: expect.stringContaining("Algeria drop to 9th")
+    }));
+    const routeFixtureIds = context.jeopardyRoutes[0].events.map((event) => event.fixtureId);
+    expect(new Set(routeFixtureIds).size).toBe(routeFixtureIds.length);
+    expect(context.jeopardyRoutes[0].events.length).toBeGreaterThan(1);
   });
 
   it("returns deterministic scenario output for the same inputs", () => {
