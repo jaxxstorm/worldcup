@@ -66,15 +66,17 @@ function buildMessages(question: string, team: string, context: unknown) {
     "The user asked a scenario question. Your job is to determine all logical scenarios that answer it using the information at your disposal in the supplied JSON context.",
     "You are not chatting, brainstorming, or showing your work. Return only the final fan-facing answer.",
     "Use only the supplied JSON context. Do not invent teams, fixtures, scores, or probabilities. Do not browse.",
-    "The context includes userFacingSummary, answerBrief, pressureSummary, chasingTeams, qualificationRules, selectedGroupStandings, thirdPlaceTable, remainingGroupFixtures, groupOutcomeCombinations, outcomes, dependencies, marginNotes, and possibleOpponents.",
-    "Use userFacingSummary as the preferred answer shape when it addresses the question.",
+    "The context includes missOutSummary, userFacingSummary, answerBrief, pressureSummary, chasingTeams, qualificationRules, selectedGroupStandings, thirdPlaceTable, remainingGroupFixtures, groupOutcomeCombinations, outcomes, dependencies, marginNotes, and possibleOpponents.",
+    "For miss-out, not-qualify, pass, overtake, or danger questions, use missOutSummary and chasingTeams before userFacingSummary.",
+    "Use userFacingSummary as the preferred answer shape only when it directly answers the question without generic dependency language.",
     "If userFacingSummary says chasing teams can pass the selected team, include the concrete teams and margins from chasingTeams unless the user's question is only asking for a one-line status.",
     "Always use answerBrief as the primary source. If answerBrief answers the question, do not say information is missing.",
     "Use groupOutcomeCombinations whenever the user asks about same-group dependencies, another group game, or branches like 'if they draw but someone else wins'. These are precomputed selected-team result plus other group-result combinations.",
     "When groupOutcomeCombinations are relevant, name the selected condition, the other fixture condition, and the resulting qualification status or round-of-32 effect.",
     "For panic, danger, or how-many-goals questions, use pressureSummary first and keep the answer especially short.",
     "For qualification questions, answer in this order: direct route, projected third-place route, eliminated routes, then the named teams/results that can change the projected route.",
-    "For 'how could they miss out' questions, identify every logical miss-out route supported by context: selected-match elimination outcomes first, then table-pressure combinations from pressureSummary/pressureNotes. If the context finds no direct selected-match elimination, say so and describe the required third-place-table pressure.",
+    "For 'how could they miss out' questions, identify every logical miss-out route supported by context: selected-match elimination outcomes first, then table-pressure combinations from missOutSummary/chasingTeams. If the context finds no direct selected-match elimination, say so and name the third-place teams that can pass them and the fixture/margin required.",
+    "Never answer a miss-out question with only generic wording such as 'enough chasing teams pass them' or only the number of buffer places. If chasingTeams or missOutSummary name teams, include those names.",
     "For questions like 'which teams can pass them?', 'who can overtake them?', or 'how?', answer from chasingTeams first. Name each listed team/result and required margin concisely.",
     "For follow-up examples such as 'what if Czechia win?' or 'someone else wins big?', use all chasingTeams, pressureNotes, and thirdPlaceTable rows below the selected team to name the specific result, margin, third-place team moved above, and whether it is one buffer place or enough to eliminate.",
     "Do not bound third-place pressure to one fixture or one example when the context lists more chasing teams. Summarize the full set concisely, grouping similar cases when needed.",
@@ -84,9 +86,9 @@ function buildMessages(question: string, team: string, context: unknown) {
     "Never output role labels, hidden reasoning, analysis text, 'assistantanalysis', 'assistantfinal', scratchpad text, or planning notes.",
     "Do not restate the user's question as a heading or first sentence.",
     "Do not say standings, third-place table, tie-breaker rules, or other results are missing when those keys are present.",
-    "For 'miss out' or 'not qualify' questions: say whether any listed selected-match outcome eliminates the team. If none do, say that plainly. Then explain third-place pressure using answerBrief and thirdPlaceTable.",
+    "For 'miss out' or 'not qualify' questions: say whether any listed selected-match outcome eliminates the team. If none do, say that plainly. Then explain third-place pressure using missOutSummary and chasingTeams.",
     "For 'what do they need to win by' questions: answer the win/draw/loss branches from answerBrief. If any win is enough, say 'any win' rather than inventing a larger margin.",
-    "Be concise: 1-3 bullets maximum. Each bullet should contain a concrete condition or conclusion.",
+    "Be concise: usually 1-3 bullets. For miss-out or overtake questions, use up to 6 compact bullets if needed to name the relevant passing teams.",
     "Mention score margins only when answerBrief, marginNotes, or outcomes contain them.",
     "If the supplied context genuinely cannot answer the question, name the exact missing key."
   ].join("\n");
@@ -157,6 +159,7 @@ function extractAnswer(result: unknown): string {
 function fallbackAnswer(question: string, context: unknown) {
   if (!context || typeof context !== "object") return "";
   const record = context as Record<string, unknown>;
+  const missOutSummary = Array.isArray(record.missOutSummary) ? record.missOutSummary.filter((value): value is string => typeof value === "string") : [];
   const userFacingSummary = Array.isArray(record.userFacingSummary) ? record.userFacingSummary.filter((value): value is string => typeof value === "string") : [];
   const answerBrief = Array.isArray(record.answerBrief) ? record.answerBrief.filter((value): value is string => typeof value === "string") : [];
   const pressureSummary = Array.isArray(record.pressureSummary) ? record.pressureSummary.filter((value): value is string => typeof value === "string") : [];
@@ -164,7 +167,10 @@ function fallbackAnswer(question: string, context: unknown) {
   if (/\b(who can|which teams?|pass|overtak)\b/i.test(question) && chasingTeams.length > 0) {
     return chasingTeams.slice(0, 6).map((line) => `- ${line}`).join("\n");
   }
-  const source = [...userFacingSummary, ...pressureSummary, ...chasingTeams, ...answerBrief.filter((line) => /miss out|eliminat|lose|pressure|fall out|top 8/i.test(line))].slice(0, 4);
+  if (/\b(miss out|not qualify|eliminat|danger)\b/i.test(question) && missOutSummary.length > 0) {
+    return missOutSummary.slice(0, 6).map((line) => `- ${line}`).join("\n");
+  }
+  const source = [...missOutSummary, ...userFacingSummary, ...pressureSummary, ...chasingTeams, ...answerBrief.filter((line) => /miss out|eliminat|lose|pressure|fall out|top 8/i.test(line))].slice(0, 4);
   return source.length > 0 ? source.map((line) => `- ${line}`).join("\n") : "";
 }
 

@@ -43,3 +43,4 @@
 - [x] 5.9 Update AI prompt/spec language so deterministic answer briefs and pressure summaries remain the source of truth
 - [x] 5.10 Include selected-result plus same-group fixture combinations in compact AI context
 - [x] 5.11 Include all named passing-team pressure examples and prompt the explainer to answer overtake follow-ups from them
+- [x] 5.12 Add miss-out-specific context so miss-out answers include named third-place chasers instead of generic buffer text

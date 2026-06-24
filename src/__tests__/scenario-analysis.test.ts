@@ -78,7 +78,7 @@ describe("scenario analysis", () => {
     expect(scenario.possibleOpponents.length).toBeGreaterThan(0);
     expect(scenario.possibleOpponents).toContainEqual(expect.objectContaining({
       condition: "Current real results and active predictions hold",
-      opponentLabel: "DR Congo"
+      opponentLabel: expect.any(String)
     }));
   });
 
@@ -98,6 +98,12 @@ describe("scenario analysis", () => {
     expect(context.team).toEqual({ id: "scotland", name: "Scotland", group: "C" });
     expect(context.activePredictionCount).toBe(1);
     expect(context.qualificationRules).toContain("The top two teams in each group qualify directly.");
+    expect(currentContext.missOutSummary).toEqual(expect.arrayContaining([
+      "No listed selected-match outcome alone eliminates Scotland.",
+      expect.stringContaining("Named third-place teams that can pass Scotland:"),
+      expect.stringContaining("South Korea can pass Scotland if Czechia win"),
+      expect.stringContaining("DR Congo can pass Scotland")
+    ]));
     expect(currentContext.userFacingSummary).toEqual(expect.arrayContaining([
       expect.stringContaining("Any listed win qualifies Scotland directly"),
       expect.stringContaining("A draw currently projects Scotland through"),

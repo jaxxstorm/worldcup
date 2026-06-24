@@ -40,7 +40,7 @@ The system SHALL expose compact selected-team scenario context suitable for serv
 
 #### Scenario: Context is compact
 - **WHEN** the app prepares context for a scenario question
-- **THEN** the context MUST include the selected team's current state, user-facing summary, answer brief, pressure summary, chasing-team examples, group outcome combinations, outcomes, dependencies, margin notes, possible opponents, and fixed results without including the full tournament dataset
+- **THEN** the context MUST include the selected team's current state, miss-out summary, user-facing summary, answer brief, pressure summary, chasing-team examples, group outcome combinations, outcomes, dependencies, margin notes, possible opponents, and fixed results without including the full tournament dataset
 
 #### Scenario: Context reflects active predictions
 - **WHEN** active predictions affect the selected team's scenario
@@ -65,6 +65,10 @@ The system SHALL expose compact selected-team scenario context suitable for serv
 #### Scenario: AI answers who can pass the selected team
 - **WHEN** the user asks which teams can pass or overtake the selected team
 - **THEN** the supplied context and prompt MUST lead with the named passing teams and the specific fixture result or margin that puts each team above the selected team
+
+#### Scenario: AI answers miss-out questions with named chasers
+- **WHEN** the user asks what needs to happen for the selected team to miss out
+- **THEN** the supplied context and prompt MUST NOT stop at generic buffer language and MUST include named third-place teams that can pass the selected team when those teams are present in the deterministic context
 
 #### Scenario: AI reasoning is not rendered
 - **WHEN** a model response includes role labels, analysis text, scratchpad text, or final-answer markers

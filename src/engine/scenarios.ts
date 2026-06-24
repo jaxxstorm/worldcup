@@ -84,6 +84,7 @@ export interface ScenarioQuestionContext {
   };
   activePredictionCount: number;
   qualificationRules: string[];
+  missOutSummary: string[];
   userFacingSummary: string[];
   answerBrief: string[];
   pressureSummary: string[];
@@ -240,6 +241,7 @@ export function buildScenarioQuestionContext(data: TournamentData, predictions: 
       "The eight best third-place teams qualify through the third-place table.",
       "Third-place ranking is points, goal difference, goals for, then the tournament tie-breakers."
     ],
+    missOutSummary: scenarioMissOutSummary(teamNameValue, analysis),
     userFacingSummary: scenarioUserFacingSummary(teamNameValue, analysis),
     answerBrief: scenarioAnswerBrief(teamNameValue, analysis, thirdPlaceTable),
     pressureSummary: thirdPlacePressureSummary(teamNameValue, analysis.pressureNotes),
@@ -345,6 +347,33 @@ function groupOutcomeCombinations(data: TournamentData, predictions: PredictionM
   }
 
   return combinations;
+}
+
+function scenarioMissOutSummary(team: string, analysis: TeamScenarioAnalysis) {
+  const summary: string[] = [];
+  const eliminatedOutcomes = analysis.outcomes.filter((outcome) => outcome.status === "eliminated");
+  const chasingTeams = thirdPlaceChasingTeams(team, analysis.pressureNotes);
+  const firstPressure = analysis.pressureNotes[0];
+  const tightestPressure = analysis.pressureNotes.find((note) => note.sparePlaces <= 3) ?? firstPressure;
+
+  if (eliminatedOutcomes.length > 0) {
+    summary.push(`${team} miss out in these selected-match branches: ${eliminatedOutcomes.map((outcome) => outcome.condition).join("; ")}.`);
+  } else {
+    summary.push(`No listed selected-match outcome alone eliminates ${team}.`);
+  }
+
+  if (firstPressure) {
+    summary.push(`${team}'s miss-out route is third-place pressure: after ${firstPressure.condition}, they are ${ordinal(firstPressure.thirdPlaceRank)} in the third-place table with ${firstPressure.sparePlaces} buffer place${firstPressure.sparePlaces === 1 ? "" : "s"}.`);
+  }
+  if (tightestPressure && tightestPressure !== firstPressure) {
+    summary.push(`The pressure tightens after ${tightestPressure.condition}: only ${tightestPressure.sparePlaces} more team${tightestPressure.sparePlaces === 1 ? "" : "s"} can pass before ${team} fall out of the top 8.`);
+  }
+  if (chasingTeams.length > 0) {
+    summary.push(`Named third-place teams that can pass ${team}:`);
+    summary.push(...chasingTeams);
+  }
+
+  return summary;
 }
 
 function scenarioUserFacingSummary(team: string, analysis: TeamScenarioAnalysis) {

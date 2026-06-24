@@ -8,7 +8,7 @@ The scheduled refresh workflow already runs generated result and stat updates be
 
 Natural-language scenario questions need a small server-side layer because Workers AI credentials and bindings must not be exposed in browser code. The browser should send the user's question and compact deterministic scenario context to a Cloudflare Pages Function. The Function uses a Workers AI binding named `AI`, asks the model to explain only from the supplied context, and returns a concise answer.
 
-The AI layer is an explainer, not a simulator. The deterministic scenario context should include precomputed answer material such as direct qualification routes, projected third-place routes, eliminated routes, pressure summaries, same-group result combinations, all relevant passing-team pressure examples, and dependency notes. The default Workers AI model should favor reasoning and instruction-following quality, while still allowing an environment override for local experimentation or future model changes.
+The AI layer is an explainer, not a simulator. The deterministic scenario context should include precomputed answer material such as direct qualification routes, projected third-place routes, eliminated routes, miss-out summaries, pressure summaries, same-group result combinations, all relevant passing-team pressure examples, and dependency notes. The default Workers AI model should favor reasoning and instruction-following quality, while still allowing an environment override for local experimentation or future model changes.
 
 ## Goals / Non-Goals
 

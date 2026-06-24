@@ -26,6 +26,9 @@ describe("scenario question function", () => {
     const aiInput = calls[0]?.[1];
     const systemMessage = aiInput?.messages?.find((message) => message.role === "system")?.content ?? "";
     expect(systemMessage).toContain("determine all logical scenarios");
+    expect(systemMessage).toContain("missOutSummary");
+    expect(systemMessage).toContain("use missOutSummary and chasingTeams before userFacingSummary");
+    expect(systemMessage).toContain("Never answer a miss-out question with only generic wording");
     expect(systemMessage).toContain("Never output role labels, hidden reasoning");
     expect(systemMessage).toContain("Do not use vague tie-breaker caveats");
     expect(systemMessage).toContain("Do not restate the user's question");
@@ -130,6 +133,32 @@ describe("scenario question function", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
       answer: "- South Korea can pass Scotland if Czechia win m005 by 1+ after Scotland lose by 1.\n- Qatar can pass Scotland if Qatar win m012 by 1+ after Scotland lose by 1."
+    });
+  });
+
+  it("falls back to named miss-out context for miss-out questions", async () => {
+    const run = vi.fn(async () => ({ reasoning: "hidden" }));
+    const response = await onRequestPost({
+      request: jsonRequest({
+        question: "What needs to happen for Scotland to miss out?",
+        team: "Scotland",
+        context: {
+          missOutSummary: [
+            "No listed selected-match outcome alone eliminates Scotland.",
+            "Scotland's miss-out route is third-place pressure.",
+            "Named third-place teams that can pass Scotland:",
+            "South Korea can pass Scotland if Czechia win m005 by 1+ after Scotland lose by 1.",
+            "DR Congo can pass Scotland if DR Congo win m066 by 1+ after Scotland lose by 1."
+          ],
+          userFacingSummary: ["Scotland miss out if enough chasing third-place teams pass them."]
+        }
+      }),
+      env: { AI: { run } }
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      answer: "- No listed selected-match outcome alone eliminates Scotland.\n- Scotland's miss-out route is third-place pressure.\n- Named third-place teams that can pass Scotland:\n- South Korea can pass Scotland if Czechia win m005 by 1+ after Scotland lose by 1.\n- DR Congo can pass Scotland if DR Congo win m066 by 1+ after Scotland lose by 1."
     });
   });
 
