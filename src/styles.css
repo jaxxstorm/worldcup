@@ -592,6 +592,7 @@ h2 {
 }
 
 .scenario-quick-paths,
+.scenario-qualification-routes,
 .scenario-chaser-grid,
 .scenario-finish-strip {
   display: grid;
@@ -603,12 +604,116 @@ h2 {
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
 }
 
+.scenario-qualification-routes {
+  gap: 10px;
+}
+
+.scenario-shortest-qualification {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
 .scenario-chaser-grid {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
 .scenario-finish-strip {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.scenario-qualification-route {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.1fr) minmax(180px, 0.8fr) minmax(220px, 1fr);
+  gap: 10px;
+  align-items: stretch;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid #d9e3dc;
+  border-left: 4px solid #8ba496;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.scenario-qualification-route.direct {
+  border-left-color: #2f7d58;
+}
+
+.scenario-qualification-route.third-place {
+  border-left-color: #c58a1f;
+}
+
+.scenario-qualification-route.shortest {
+  border-color: #c9d7cc;
+  border-left-width: 6px;
+  background: #f8fbf8;
+}
+
+.scenario-qualification-route.direct:not(.shortest) {
+  border-color: #b9d7c5;
+  background: #f4fbf6;
+}
+
+.scenario-qualification-subheading {
+  padding-top: 2px;
+}
+
+.scenario-qualification-step {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 5px;
+  background: #f8faf7;
+  line-height: 1.25;
+}
+
+.scenario-qualification-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -12px;
+  width: 12px;
+  border-top: 2px solid #c9d7cc;
+}
+
+.scenario-qualification-step:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  top: calc(50% - 4px);
+  left: -5px;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid #c9d7cc;
+  border-right: 2px solid #c9d7cc;
+  transform: rotate(45deg);
+  background: #fff;
+}
+
+.scenario-qualification-step em {
+  color: #607268;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.scenario-qualification-step strong,
+.scenario-qualification-step span {
+  min-width: 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.scenario-qualification-step strong {
+  color: #17382a;
+}
+
+.scenario-qualification-step span {
+  color: #607268;
+  font-size: 12px;
 }
 
 .scenario-route-flow {
@@ -666,6 +771,7 @@ h2 {
 }
 
 .scenario-path-chip strong,
+.scenario-qualification-step strong,
 .scenario-route-event strong,
 .scenario-chaser-chip strong,
 .scenario-finish-chip strong {
@@ -2204,9 +2310,20 @@ h2 {
   }
 
   .scenario-quick-paths,
+  .scenario-qualification-routes,
   .scenario-chaser-grid,
   .scenario-finish-strip {
     grid-template-columns: 1fr;
+  }
+
+  .scenario-qualification-route {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .scenario-qualification-step::after,
+  .scenario-qualification-step::before {
+    display: none;
   }
 
   .scenario-route-flow {

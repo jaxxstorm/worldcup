@@ -57,6 +57,7 @@ The AI layer is an explainer, not a simulator. The deterministic scenario contex
 4. Render Scenarios as a text-first work surface with a compact team selector.
    - The tab should follow existing app navigation patterns, show country flags with team names, and use concise panels for "Current position", "Qualification paths", "Dependencies", and "Possible round-of-32 opponents".
    - Scenario question answers should also show a compact deterministic visual summary from the same context sent to the AI: qualification path chips, the shortest concrete jeopardy route, chasing-team chips, and likely round-of-32 outcomes by finish.
+   - The visual summary should react to the question intent: qualification questions lead with route chains from result to group-table state to outcome, while miss-out questions lead with jeopardy routes and chasers.
    - The visual summary should use plain escaped browser-rendered text and wrapping chips/rows instead of markdown or AI-generated formatting.
    - Rationale: scenario analysis is dense; it should be scannable without becoming a marketing-style page.
    - Alternative considered: add scenario snippets to every team row. Rejected because it would overload standings and fixture views.

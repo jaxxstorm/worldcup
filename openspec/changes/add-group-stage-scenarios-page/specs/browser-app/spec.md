@@ -46,3 +46,11 @@ The system SHALL provide a Scenarios tab that lets users choose a team and view 
 #### Scenario: Scenario answer includes visual implications
 - **WHEN** a user asks a scenario question and the deterministic context includes qualification paths, jeopardy routes, chasers, or finish paths
 - **THEN** the app MUST render a compact visual summary of those deterministic implications alongside the answer so users can quickly scan the route, chasing teams, and likely round-of-32 outcomes
+
+#### Scenario: Qualification questions lead with qualification routes
+- **WHEN** a user asks how the selected team qualifies
+- **THEN** the app MUST render qualification route chains from deterministic qualification paths before any miss-out or chasing-pack visualization
+
+#### Scenario: Qualification questions show shortest path
+- **WHEN** deterministic qualification paths include one or more qualifying branches
+- **THEN** the app MUST identify the shortest qualification path and render it before secondary qualifying branches

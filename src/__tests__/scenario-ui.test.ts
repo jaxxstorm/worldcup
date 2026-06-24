@@ -23,9 +23,16 @@ describe("scenario UI integration", () => {
     expect(mainSource).toContain("<div class=\"scenario-ai-answer\"");
     expect(mainSource).toContain("let scenarioAnswerContext");
     expect(mainSource).toContain("renderScenarioVisualAnswer");
+    expect(mainSource).toContain("scenarioVisualIntent");
+    expect(mainSource).toContain("renderScenarioQualificationRoutes");
+    expect(mainSource).toContain("renderScenarioQualificationRoute");
+    expect(mainSource).toContain("compareQualificationPaths");
+    expect(mainSource).toContain("qualificationPathEffort");
+    expect(mainSource).toContain("Shortest qualification path");
     expect(mainSource).toContain("renderScenarioRouteMap");
     expect(mainSource).toContain("renderScenarioChaserMap");
     expect(mainSource).toContain("renderScenarioFinishMap");
+    expect(mainSource).toContain("scenario-qualification-route");
     expect(mainSource).toContain("scenario-route-event");
     expect(mainSource).toContain("scenario-chaser-chip");
     expect(mainSource).toContain("scenario-finish-chip");
@@ -45,6 +52,9 @@ describe("scenario UI integration", () => {
     expect(styles).toContain(".scenario-question-box");
     expect(styles).toContain(".scenario-question-row");
     expect(styles).toContain(".scenario-visual-answer");
+    expect(styles).toContain(".scenario-qualification-routes");
+    expect(styles).toContain(".scenario-shortest-qualification");
+    expect(styles).toContain(".scenario-qualification-route");
     expect(styles).toContain(".scenario-route-flow");
     expect(styles).toContain(".scenario-chaser-grid");
     expect(styles).toContain(".scenario-finish-strip");

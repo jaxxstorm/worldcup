@@ -51,3 +51,5 @@
 - [x] 5.17 Render AI answers in a block container that preserves multi-line structured text
 - [x] 5.18 Render deterministic visual summaries for qualification paths, shortest jeopardy route, chasers, and finish paths beside scenario answers
 - [x] 5.19 Add UI assertions for visual scenario summaries and run `npm test`, `npm run typecheck`, and `npm run build`
+- [x] 5.20 Make visual summaries question-aware so qualification questions lead with qualification route chains instead of miss-out routes
+- [x] 5.21 Add a shortest qualification path visual that leads qualification-route answers before other qualifying branches

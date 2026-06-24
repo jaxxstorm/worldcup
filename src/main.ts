@@ -220,22 +220,126 @@ function renderScenarioQuestionBox(selectedTeam: Team) {
 }
 
 function renderScenarioVisualAnswer(context: ScenarioQuestionContext) {
+  const intent = scenarioVisualIntent();
   const route = context.jeopardyRoutes[0];
-  const pathMarkup = renderScenarioQuickPaths(context);
-  const routeMarkup = route ? renderScenarioRouteMap(context, route) : "";
-  const chaserMarkup = renderScenarioChaserMap(context, route);
+  const qualificationMarkup = intent !== "miss-out" ? renderScenarioQualificationRoutes(context) : "";
+  const pathMarkup = intent === "qualify" && qualificationMarkup ? "" : renderScenarioQuickPaths(context);
+  const routeMarkup = intent !== "qualify" && route ? renderScenarioRouteMap(context, route) : "";
+  const chaserMarkup = intent !== "qualify" ? renderScenarioChaserMap(context, route) : "";
   const finishMarkup = renderScenarioFinishMap(context);
 
-  if (!pathMarkup && !routeMarkup && !chaserMarkup && !finishMarkup) return "";
+  if (!pathMarkup && !qualificationMarkup && !routeMarkup && !chaserMarkup && !finishMarkup) return "";
 
   return `
     <div class="scenario-visual-answer" aria-label="Scenario implications">
       ${pathMarkup}
+      ${qualificationMarkup}
       ${routeMarkup}
       ${chaserMarkup}
       ${finishMarkup}
     </div>
   `;
+}
+
+function scenarioVisualIntent() {
+  const asksQualification = /\b(qualif|advance|through|go through|make it|round of 32|path|route)\b/i.test(scenarioQuestion);
+  const asksMissOut = /\b(miss|fail|eliminat|knock(?:ed)? out|out|danger|panic|jeopardy)\b/i.test(scenarioQuestion);
+  if (asksQualification && !asksMissOut) return "qualify";
+  if (asksMissOut && !asksQualification) return "miss-out";
+  return "balanced";
+}
+
+function renderScenarioQualificationRoutes(context: ScenarioQuestionContext) {
+  const qualifyingPaths = context.qualificationPaths
+    .filter((path) => path.status !== "eliminated")
+    .sort(compareQualificationPaths)
+    .slice(0, 5);
+  if (qualifyingPaths.length === 0) return "";
+
+  const shortestPath = qualifyingPaths[0];
+  const shortestDirectPath = qualifyingPaths.find((path) => path.status === "direct");
+  const featuredPaths = [shortestPath, shortestDirectPath]
+    .filter((path): path is ScenarioQuestionContext["qualificationPaths"][number] => Boolean(path))
+    .filter((path, index, paths) => paths.findIndex((candidate) => candidate.condition === path.condition && candidate.status === path.status) === index);
+  const remainingPaths = qualifyingPaths.filter((path) => !featuredPaths.some((featured) => featured.condition === path.condition && featured.status === path.status));
+
+  return `
+    <div class="scenario-visual-block">
+      <div class="scenario-visual-heading">
+        <span>Shortest qualification path</span>
+        <strong>${scenarioStatusLabel(shortestPath.status)}</strong>
+      </div>
+      <div class="scenario-shortest-qualification">
+        ${featuredPaths.map((path) => renderScenarioQualificationRoute(path, path === shortestPath ? "shortest" : "direct")).join("")}
+      </div>
+      ${remainingPaths.length > 0 ? `
+        <div class="scenario-visual-heading scenario-qualification-subheading">
+          <span>Other qualification routes</span>
+          <strong>${remainingPaths.length}</strong>
+        </div>
+        <div class="scenario-qualification-routes">
+          ${remainingPaths.map((path) => renderScenarioQualificationRoute(path)).join("")}
+        </div>
+      ` : ""}
+    </div>
+  `;
+}
+
+function renderScenarioQualificationRoute(path: ScenarioQuestionContext["qualificationPaths"][number], emphasis = "") {
+  const landing = path.roundOf32FixtureId
+    ? `${path.roundOf32FixtureId}${path.opponentLabel ? ` vs ${path.opponentLabel}` : ""}`
+    : path.status === "third-place" ? "Best third-place table" : "Round of 32 unresolved";
+  const routeLabel = emphasis === "shortest"
+    ? "Shortest"
+    : emphasis === "direct"
+      ? "Direct route"
+      : "Route";
+
+  return `
+    <article class="scenario-qualification-route ${path.status} ${emphasis}">
+      <span class="scenario-qualification-step">
+        <em>${routeLabel}</em>
+        <strong>${escapeHtml(path.condition)}</strong>
+      </span>
+      <span class="scenario-qualification-step">
+        <em>Group table</em>
+        <strong>${ordinal(path.groupFinish)} in group</strong>
+        <span>${path.points} pts · GD ${formatSignedNumber(path.goalDifference)} · GF ${path.goalsFor}</span>
+      </span>
+      <span class="scenario-qualification-step">
+        <em>Outcome</em>
+        <strong>${scenarioStatusLabel(path.status)}</strong>
+        <span>${escapeHtml(landing)}</span>
+      </span>
+    </article>
+  `;
+}
+
+function compareQualificationPaths(left: ScenarioQuestionContext["qualificationPaths"][number], right: ScenarioQuestionContext["qualificationPaths"][number]) {
+  return qualificationPathEffort(left) - qualificationPathEffort(right) ||
+    qualificationStatusEffort(left.status) - qualificationStatusEffort(right.status) ||
+    right.points - left.points ||
+    right.goalDifference - left.goalDifference ||
+    left.condition.localeCompare(right.condition);
+}
+
+function qualificationPathEffort(path: ScenarioQuestionContext["qualificationPaths"][number]) {
+  const condition = path.condition.toLowerCase();
+  const score = condition.match(/(\d+)-(\d+)/);
+  const homeGoals = score ? Number(score[1]) : 0;
+  const awayGoals = score ? Number(score[2]) : 0;
+  const margin = Math.abs(homeGoals - awayGoals);
+
+  if (condition.includes("lose")) return -margin;
+  if (condition.includes("draw")) return 100;
+  if (condition.includes("beat")) return 200 + margin;
+  return 300;
+}
+
+function qualificationStatusEffort(status: ScenarioQuestionContext["qualificationPaths"][number]["status"]) {
+  if (status === "direct") return 0;
+  if (status === "third-place") return 1;
+  return 2;
 }
 
 function renderScenarioQuickPaths(context: ScenarioQuestionContext) {
