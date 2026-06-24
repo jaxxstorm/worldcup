@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-24T04:02:25.123Z",
+  "generatedAt": "2026-06-24T20:40:47.611Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -2607,7 +2607,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-24T00:59:38.442Z",
+        "accessedAt": "2026-06-24T20:40:47.611Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2641,45 +2641,45 @@
         },
         {
           "rank": 5,
+          "player": "Johan Manzambi",
+          "teamId": "switzerland",
+          "value": 3,
+          "detail": "Switzerland"
+        },
+        {
+          "rank": 6,
           "player": "Jonathan David",
           "teamId": "canada",
           "value": 3,
           "detail": "Canada"
         },
         {
-          "rank": 6,
+          "rank": 7,
           "player": "Ayase Ueda",
           "teamId": "japan",
           "value": 2,
           "detail": "Japan"
         },
         {
-          "rank": 7,
+          "rank": 8,
           "player": "Brian Brobbey",
           "teamId": "netherlands",
           "value": 2,
           "detail": "Netherlands"
         },
         {
-          "rank": 8,
+          "rank": 9,
           "player": "Cody Gakpo",
           "teamId": "netherlands",
           "value": 2,
           "detail": "Netherlands"
         },
         {
-          "rank": 9,
+          "rank": 10,
           "player": "Cristiano Ronaldo",
           "teamId": "portugal",
           "value": 2,
           "detail": "Portugal"
-        },
-        {
-          "rank": 10,
-          "player": "Crysencio Summerville",
-          "teamId": "netherlands",
-          "value": 2,
-          "detail": "Netherlands"
         }
       ]
     },
@@ -2690,7 +2690,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-24T00:59:38.442Z",
+        "accessedAt": "2026-06-24T20:40:47.611Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2703,31 +2703,31 @@
         },
         {
           "rank": 2,
+          "player": "Breel Embolo",
+          "teamId": "switzerland",
+          "value": 2,
+          "detail": "Switzerland"
+        },
+        {
+          "rank": 3,
           "player": "Deniz Undav",
           "teamId": "germany",
           "value": 2,
           "detail": "Germany"
         },
         {
-          "rank": 3,
+          "rank": 4,
           "player": "Mohamed Salah",
           "teamId": "egypt",
           "value": 2,
           "detail": "Egypt"
         },
         {
-          "rank": 4,
+          "rank": 5,
           "player": "Ayase Ueda",
           "teamId": "japan",
           "value": 1,
           "detail": "Japan"
-        },
-        {
-          "rank": 5,
-          "player": "Breel Embolo",
-          "teamId": "switzerland",
-          "value": 1,
-          "detail": "Switzerland"
         },
         {
           "rank": 6,
@@ -2759,10 +2759,10 @@
         },
         {
           "rank": 10,
-          "player": "Keito Nakamura",
-          "teamId": "japan",
+          "player": "Johan Manzambi",
+          "teamId": "switzerland",
           "value": 1,
-          "detail": "Japan"
+          "detail": "Switzerland"
         }
       ]
     },
@@ -2773,7 +2773,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-24T00:59:38.442Z",
+        "accessedAt": "2026-06-24T20:40:47.611Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
