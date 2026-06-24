@@ -6,6 +6,7 @@ import { formatFixtureKickoff, sectionFixturesForDisplay } from "./engine/fixtur
 import { drawSidesForProjection, projectTournament } from "./engine/knockout";
 import { calculateFixturePerformanceEntries, calculateFixturePerformanceSummaries, calculatePerformanceRows, type FixturePerformanceEntry, type FixturePerformanceSummary, type PerformanceMode, type PerformanceRow } from "./engine/performance";
 import { interpretPredictionInput, isEditableFixture, setPrediction } from "./engine/predictions";
+import { analyzeTeamScenarios, buildScenarioQuestionContext, type ScenarioDependency, type ScenarioMarginNote, type ScenarioOutcome, type TeamScenarioAnalysis } from "./engine/scenarios";
 import { calculateGroupStandings, thirdPlaceRankings } from "./engine/standings";
 import { recentResultsForTeam, type TeamRecentResult } from "./engine/team-details";
 import { buildPredictionShareUrl, sharedPredictionsFromUrl } from "./storage/share";
@@ -25,9 +26,14 @@ if (!app) throw new Error("App root missing");
 const appRoot = app;
 const sharedPredictions = sharedPredictionsFromUrl(tournamentData, window.location.href);
 let predictions: PredictionMap = sharedPredictions ?? loadPredictions(tournamentData);
-let activeView: "main" | "bracket" | "stats" | "performance" = "main";
+let activeView: "main" | "bracket" | "stats" | "performance" | "scenarios" = "main";
 let activePerformanceTab: "teams" | "fixtures" = "teams";
 let activePerformanceMode: PerformanceMode = "raw";
+let selectedScenarioTeamId = scenarioTeams()[0]?.id ?? "";
+let scenarioQuestion = "";
+let scenarioAnswer = "";
+let scenarioQuestionError = "";
+let scenarioQuestionLoading = false;
 let activeTooltip: HTMLDivElement | undefined;
 let recentPredictionChange: PredictionChangeSnapshot | undefined = sharedPredictions && Object.keys(sharedPredictions).length > 0
   ? capturePredictionChangeSnapshot(tournamentData, {})
@@ -59,6 +65,7 @@ function render() {
       <nav class="view-tabs" aria-label="Views">
         <button class="${activeView === "main" ? "active" : ""}" type="button" data-view="main">Fixtures</button>
         <button class="${activeView === "bracket" ? "active" : ""}" type="button" data-view="bracket">Knockout Stages</button>
+        <button class="${activeView === "scenarios" ? "active" : ""}" type="button" data-view="scenarios">Scenarios</button>
         <button class="${activeView === "stats" ? "active" : ""}" type="button" data-view="stats">Stats</button>
         <button class="${activeView === "performance" ? "active" : ""}" type="button" data-view="performance">Performance</button>
       </nav>
@@ -85,6 +92,25 @@ function render() {
       activePerformanceTab = parsePerformanceTab(button.dataset.performanceTab);
       render();
     });
+  });
+
+  appRoot.querySelectorAll<HTMLSelectElement>("[data-scenario-team]").forEach((select) => {
+    select.addEventListener("change", () => {
+      selectedScenarioTeamId = select.value;
+      scenarioAnswer = "";
+      scenarioQuestionError = "";
+      render();
+    });
+  });
+
+  appRoot.querySelectorAll<HTMLInputElement>("[data-scenario-question]").forEach((input) => {
+    input.addEventListener("input", () => {
+      scenarioQuestion = input.value;
+    });
+  });
+
+  appRoot.querySelectorAll<HTMLFormElement>("[data-scenario-question-form]").forEach((form) => {
+    form.addEventListener("submit", handleScenarioQuestion);
   });
 
   appRoot.querySelectorAll<HTMLElement>("[data-tooltip]").forEach((element) => {
@@ -115,7 +141,7 @@ function render() {
 }
 
 function parseActiveView(view: string | undefined): typeof activeView {
-  if (view === "bracket" || view === "stats" || view === "performance") return view;
+  if (view === "bracket" || view === "stats" || view === "performance" || view === "scenarios") return view;
   return "main";
 }
 
@@ -131,9 +157,248 @@ function parsePerformanceTab(tab: string | undefined): typeof activePerformanceT
 
 function renderActiveView(view: typeof activeView, projection: ProjectedMatch[]) {
   if (view === "bracket") return renderBracketView(projection);
+  if (view === "scenarios") return renderScenariosView();
   if (view === "stats") return renderStatsView();
   if (view === "performance") return renderPerformanceView();
   return renderMainView(projection);
+}
+
+function renderScenariosView() {
+  const selectedTeam = teamById.get(selectedScenarioTeamId) ?? tournamentData.teams.find((team) => team.group);
+  if (!selectedTeam) return `<p class="empty-state">No group-stage teams are available.</p>`;
+
+  selectedScenarioTeamId = selectedTeam.id;
+  const scenario = analyzeTeamScenarios(tournamentData, predictions, selectedTeam.id);
+
+  return `
+    <div class="scenarios-page">
+      <section>
+        <div class="scenarios-heading">
+          <div>
+            <h2>Scenarios</h2>
+            <p class="section-note">Pick a team or ask a scenario question.</p>
+          </div>
+          ${renderScenarioTeamSelector(selectedTeam.id)}
+        </div>
+        ${renderScenarioQuestionBox(selectedTeam)}
+        <div class="scenarios-layout">
+          <div class="scenario-left-column">
+            ${renderScenarioCurrentPanel(scenario)}
+          </div>
+          <div class="scenario-right-column">
+            ${renderScenarioOutcomePanel(scenario)}
+            ${renderScenarioDependencyPanel(scenario)}
+          </div>
+        </div>
+      </section>
+    </div>
+  `;
+}
+
+function renderScenarioQuestionBox(selectedTeam: Team) {
+  return `
+    <form class="scenario-question-box" data-scenario-question-form>
+      <label for="scenario-question">Ask about ${escapeHtml(selectedTeam.name)}</label>
+      <div>
+        <input
+          id="scenario-question"
+          type="search"
+          data-scenario-question
+          value="${escapeAttribute(scenarioQuestion)}"
+          placeholder="How could ${escapeAttribute(selectedTeam.name)} miss out?"
+          autocomplete="off"
+        >
+        <button type="submit" ${scenarioQuestionLoading ? "disabled" : ""}>${scenarioQuestionLoading ? "Asking..." : "Ask"}</button>
+      </div>
+      ${scenarioAnswer ? `<p class="scenario-ai-answer" aria-live="polite">${escapeHtml(scenarioAnswer)}</p>` : ""}
+      ${scenarioQuestionError ? `<p class="scenario-ai-error" aria-live="polite">${escapeHtml(scenarioQuestionError)}</p>` : ""}
+    </form>
+  `;
+}
+
+function renderScenarioTeamSelector(selectedTeamId: string) {
+  const teams = scenarioTeams();
+  return `
+    <label class="scenario-team-selector">
+      <span>Team</span>
+      <select data-scenario-team aria-label="Select scenario team">
+        ${teams.map((team) => `<option value="${escapeAttribute(team.id)}" ${team.id === selectedTeamId ? "selected" : ""}>${escapeHtml(team.name)}</option>`).join("")}
+      </select>
+    </label>
+  `;
+}
+
+function scenarioTeams() {
+  return [...tournamentData.teams]
+    .filter((team) => team.group)
+    .sort((left, right) => left.name.localeCompare(right.name));
+}
+
+function renderScenarioCurrentPanel(scenario: TeamScenarioAnalysis) {
+  const team = teamById.get(scenario.teamId);
+  return `
+    <section class="scenario-panel scenario-current" aria-labelledby="scenario-current-heading">
+      <div class="scenario-current-heading">
+        <div class="scenario-current-title-row">
+          <h3 id="scenario-current-heading">Current Position</h3>
+          <span>${scenarioStatusLabel(scenario.current.status)}</span>
+        </div>
+        <p class="scenario-current-team-line">
+          ${renderTeamIdentity(team, scenario.teamId)}
+          <span>are ${ordinal(scenario.current.rank)} in Group ${scenario.group}.</span>
+        </p>
+      </div>
+      <div class="scenario-current-layout">
+        <div class="scenario-current-main">
+          <div class="scenario-current-grid">
+            <span><strong>${scenario.current.points}</strong> pts</span>
+            <span><strong>${formatSignedNumber(scenario.current.goalDifference)}</strong> GD</span>
+            <span><strong>${scenario.current.goalsFor}</strong> GF</span>
+            <span><strong>${scenario.current.played}</strong> played</span>
+          </div>
+          ${scenario.fixedResults.length > 0 ? `
+            <div class="scenario-fixed-results">
+              <h4>Fixed Results</h4>
+              ${scenario.fixedResults.map((result) => `<p>${escapeHtml(result)}</p>`).join("")}
+            </div>
+          ` : ""}
+        </div>
+        <div class="scenario-path-panel">
+          <h4>Round of 32</h4>
+          ${renderScenarioCurrentPath(scenario)}
+          ${renderScenarioInlineOpponents(scenario)}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderScenarioCurrentPath(scenario: TeamScenarioAnalysis) {
+  if (!scenario.currentPath) return `<p class="scenario-summary">No resolved assignment.</p>`;
+
+  return `
+    <div class="scenario-path-row current">
+      <span>${scenario.currentPath.fixtureId}</span>
+      <span>${scenario.currentPath.slot}</span>
+      <strong>${renderScenarioOpponent(scenario.currentPath.opponentTeamId, scenario.currentPath.opponentLabel)}</strong>
+    </div>
+  `;
+}
+
+function renderScenarioInlineOpponents(scenario: TeamScenarioAnalysis) {
+  const alternatives = scenario.possibleOpponents
+    .filter((possibility) => !sameScenarioOpponent(possibility, scenario.currentPath))
+    .sort((left, right) => left.fixtureId.localeCompare(right.fixtureId) || left.opponentLabel.localeCompare(right.opponentLabel));
+  if (alternatives.length === 0) return "";
+
+  return `
+    <div class="scenario-inline-opponents">
+      <h5>Alternative opponents</h5>
+      ${alternatives.slice(0, 5).map((possibility) => `
+        <div class="scenario-opponent-row">
+          <div>
+            <span>${possibility.fixtureId}</span>
+            <strong>${renderScenarioOpponent(possibility.opponentTeamId, possibility.opponentLabel)}</strong>
+          </div>
+          <em>${escapeHtml(possibility.condition)}</em>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function sameScenarioOpponent(possibility: TeamScenarioAnalysis["possibleOpponents"][number], currentPath: TeamScenarioAnalysis["currentPath"]) {
+  return Boolean(currentPath) &&
+    possibility.fixtureId === currentPath?.fixtureId &&
+    possibility.opponentLabel === currentPath.opponentLabel &&
+    possibility.opponentTeamId === currentPath.opponentTeamId;
+}
+
+function renderScenarioOutcomePanel(scenario: TeamScenarioAnalysis) {
+  return `
+    <section class="scenario-panel scenario-outcomes" aria-labelledby="scenario-outcomes-heading">
+      <div class="stats-panel-heading">
+        <div>
+          <h3 id="scenario-outcomes-heading">Qualification Paths</h3>
+          <p>Remaining group branches.</p>
+        </div>
+        <span>${scenario.outcomes.length} paths</span>
+      </div>
+      ${scenario.outcomes.length > 0 ? `
+        <div class="scenario-list">
+          ${scenario.outcomes.map(renderScenarioOutcome).join("")}
+        </div>
+      ` : `<p class="empty-state">No unresolved group fixtures remain for this team.</p>`}
+      ${scenario.marginNotes.length > 0 ? `
+        <div class="scenario-margin-notes">
+          <h4>Margin swings</h4>
+          <div class="scenario-list">
+            ${scenario.marginNotes.map(renderScenarioMarginNote).join("")}
+          </div>
+        </div>
+      ` : ""}
+      ${scenario.tieBreakerNote ? `<p class="scenario-note">${escapeHtml(scenario.tieBreakerNote)}</p>` : ""}
+    </section>
+  `;
+}
+
+function renderScenarioOutcome(outcome: ScenarioOutcome) {
+  return `
+    <article class="scenario-item ${outcome.status}">
+      <div>
+        <strong>${escapeHtml(outcome.condition)}</strong>
+        <p>${ordinal(outcome.groupFinish)} in group; ${outcome.points} pts${outcome.slot ? `; ${outcome.roundOf32FixtureId} as ${outcome.slot}${outcome.opponentLabel ? ` vs ${escapeHtml(outcome.opponentLabel)}` : ""}` : ""}.</p>
+      </div>
+      <span>${scenarioStatusLabel(outcome.status)}</span>
+    </article>
+  `;
+}
+
+function renderScenarioMarginNote(note: ScenarioMarginNote) {
+  return `
+    <article class="scenario-item ${note.status}">
+      <div>
+        <strong>${escapeHtml(note.condition)}</strong>
+        <p>${escapeHtml(note.effect)}</p>
+      </div>
+      <span>${note.fixtureIds.join(" + ")}</span>
+    </article>
+  `;
+}
+
+function renderScenarioDependencyPanel(scenario: TeamScenarioAnalysis) {
+  return `
+    <section class="scenario-panel scenario-dependencies" aria-labelledby="scenario-dependencies-heading">
+      <div class="stats-panel-heading">
+        <div>
+          <h3 id="scenario-dependencies-heading">Dependencies</h3>
+          <p>Other results that can move the path.</p>
+        </div>
+        <span>${scenario.dependencies.length}</span>
+      </div>
+      ${scenario.dependencies.length > 0 ? `
+        <div class="scenario-list">
+          ${scenario.dependencies.map(renderScenarioDependency).join("")}
+        </div>
+      ` : `<p class="empty-state">No outside dependency changes this team's current path.</p>`}
+    </section>
+  `;
+}
+
+function renderScenarioDependency(dependency: ScenarioDependency) {
+  return `
+    <article class="scenario-item ${dependency.kind}">
+      <div>
+        <strong>${escapeHtml(dependency.condition)}</strong>
+        <p>${escapeHtml(dependency.effect)}</p>
+      </div>
+      <span>${dependency.fixtureId ?? dependency.kind}</span>
+    </article>
+  `;
+}
+
+function renderScenarioOpponent(teamId: string | undefined, label: string) {
+  return renderTeamIdentity(teamId ? teamById.get(teamId) : undefined, label);
 }
 
 function renderMainView(projection: ProjectedMatch[]) {
@@ -1071,6 +1336,12 @@ function performanceStatusLabel(row: PerformanceRow) {
   return "Unknown";
 }
 
+function scenarioStatusLabel(status: TeamScenarioAnalysis["current"]["status"]) {
+  if (status === "direct") return "Direct";
+  if (status === "third-place") return "Third place";
+  return "Eliminated";
+}
+
 function fixtureResultLabel(row: FixturePerformanceEntry) {
   if (row.result === "win") return "W";
   if (row.result === "draw") return "D";
@@ -1194,6 +1465,57 @@ async function handleSharePredictions() {
   } catch {
     window.prompt("Copy prediction link", url);
     if (status) status.textContent = "Link ready";
+  }
+}
+
+async function handleScenarioQuestion(event: Event) {
+  event.preventDefault();
+
+  const question = scenarioQuestion.trim();
+  scenarioAnswer = "";
+  scenarioQuestionError = "";
+
+  if (!question) {
+    scenarioQuestionError = "Ask a scenario question first.";
+    render();
+    return;
+  }
+
+  scenarioQuestionLoading = true;
+  render();
+
+  try {
+    const selectedTeam = teamById.get(selectedScenarioTeamId);
+    const response = await fetch("/api/scenario-question", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        question,
+        team: selectedTeam?.name ?? selectedScenarioTeamId,
+        context: buildScenarioQuestionContext(tournamentData, predictions, selectedScenarioTeamId)
+      })
+    });
+    const payload = await parseScenarioQuestionResponse(response);
+
+    if (!response.ok) {
+      throw new Error(payload.error ?? "Scenario questions are unavailable right now.");
+    }
+
+    scenarioAnswer = payload.answer ?? "";
+    scenarioQuestionError = scenarioAnswer ? "" : "The model did not return an answer.";
+  } catch (error) {
+    scenarioQuestionError = error instanceof Error ? error.message : "Scenario questions are unavailable right now.";
+  } finally {
+    scenarioQuestionLoading = false;
+    render();
+  }
+}
+
+async function parseScenarioQuestionResponse(response: Response): Promise<{ answer?: string; error?: string }> {
+  try {
+    return await response.json() as { answer?: string; error?: string };
+  } catch {
+    return {};
   }
 }
 
