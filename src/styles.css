@@ -564,6 +564,71 @@ h2 {
   border-top: 1px solid #dce6df;
 }
 
+.scenario-current-status-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 10px;
+  align-items: center;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #d9e3dc;
+  border-left: 5px solid #8ba496;
+  border-radius: 6px;
+  background: #f8fbf8;
+}
+
+.scenario-current-status-card.qualifying {
+  border-left-color: #2f7d58;
+}
+
+.scenario-current-status-card.missing {
+  border-color: #e2b4b4;
+  border-left-color: #b43f3f;
+  background: #fff6f6;
+}
+
+.scenario-current-status-card > strong,
+.scenario-current-status-card > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.scenario-current-status-card > strong {
+  color: #17382a;
+}
+
+.scenario-current-status-card > span:last-child {
+  grid-column: 2;
+  color: #607268;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.scenario-state-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 24px;
+  padding: 0 9px;
+  border: 1px solid #b9d7c5;
+  border-radius: 999px;
+  background: #eef8f0;
+  color: #17382a;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.scenario-state-badge.missing {
+  border-color: #e2b4b4;
+  background: #fff2f2;
+  color: #8f2828;
+}
+
 .scenario-visual-block {
   display: grid;
   gap: 8px;
@@ -723,7 +788,7 @@ h2 {
   gap: 16px;
   min-width: 0;
   overflow-x: auto;
-  padding-bottom: 3px;
+  padding: 0 18px 4px 0;
 }
 
 .scenario-path-chip,
@@ -960,6 +1025,16 @@ h2 {
   color: #607268;
   font-size: 13px;
   font-weight: 800;
+}
+
+.scenario-current-title-row .scenario-state-badge {
+  color: #17382a;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.scenario-current-title-row .scenario-state-badge.missing {
+  color: #8f2828;
 }
 
 .scenario-current-team-line {
@@ -2307,6 +2382,14 @@ h2 {
 
   .scenario-visual-heading strong {
     text-align: left;
+  }
+
+  .scenario-current-status-card {
+    grid-template-columns: 1fr;
+  }
+
+  .scenario-current-status-card > span:last-child {
+    grid-column: auto;
   }
 
   .scenario-quick-paths,

@@ -171,6 +171,7 @@ function renderScenariosView() {
 
   selectedScenarioTeamId = selectedTeam.id;
   const scenario = analyzeTeamScenarios(tournamentData, predictions, selectedTeam.id);
+  const scenarioContext = buildScenarioQuestionContext(tournamentData, predictions, selectedTeam.id);
 
   return `
     <div class="scenarios-page">
@@ -182,7 +183,7 @@ function renderScenariosView() {
           </div>
           ${renderScenarioTeamSelector(selectedTeam.id)}
         </div>
-        ${renderScenarioQuestionBox(selectedTeam)}
+        ${renderScenarioQuestionBox(selectedTeam, scenarioContext)}
         <div class="scenarios-layout">
           <div class="scenario-left-column">
             ${renderScenarioCurrentPanel(scenario)}
@@ -197,7 +198,8 @@ function renderScenariosView() {
   `;
 }
 
-function renderScenarioQuestionBox(selectedTeam: Team) {
+function renderScenarioQuestionBox(selectedTeam: Team, currentContext: ScenarioQuestionContext) {
+  const visualContext = scenarioAnswerContext ?? currentContext;
   return `
     <form class="scenario-question-box" data-scenario-question-form>
       <label for="scenario-question">Ask about ${escapeHtml(selectedTeam.name)}</label>
@@ -212,7 +214,7 @@ function renderScenarioQuestionBox(selectedTeam: Team) {
         >
         <button type="submit" ${scenarioQuestionLoading ? "disabled" : ""}>${scenarioQuestionLoading ? "Asking..." : "Ask"}</button>
       </div>
-      ${scenarioAnswerContext ? renderScenarioVisualAnswer(scenarioAnswerContext) : ""}
+      ${renderScenarioVisualAnswer(visualContext)}
       ${scenarioAnswer ? `<div class="scenario-ai-answer" aria-live="polite">${escapeHtml(scenarioAnswer)}</div>` : ""}
       ${scenarioQuestionError ? `<p class="scenario-ai-error" aria-live="polite">${escapeHtml(scenarioQuestionError)}</p>` : ""}
     </form>
@@ -221,24 +223,51 @@ function renderScenarioQuestionBox(selectedTeam: Team) {
 
 function renderScenarioVisualAnswer(context: ScenarioQuestionContext) {
   const intent = scenarioVisualIntent();
+  const currentlyQualifying = scenarioCurrentlyQualifies(context.current.status);
   const route = context.jeopardyRoutes[0];
-  const qualificationMarkup = intent !== "miss-out" ? renderScenarioQualificationRoutes(context) : "";
-  const pathMarkup = intent === "qualify" && qualificationMarkup ? "" : renderScenarioQuickPaths(context);
-  const routeMarkup = intent !== "qualify" && route ? renderScenarioRouteMap(context, route) : "";
-  const chaserMarkup = intent !== "qualify" ? renderScenarioChaserMap(context, route) : "";
+  const statusMarkup = renderScenarioCurrentStatusSummary(context);
+  const qualificationMarkup = !currentlyQualifying || intent === "qualify" ? renderScenarioQualificationRoutes(context) : "";
+  const pathMarkup = currentlyQualifying && intent !== "qualify" ? renderScenarioQuickPaths(context) : "";
+  const routeMarkup = currentlyQualifying && route ? renderScenarioRouteMap(context, route) : "";
+  const chaserMarkup = currentlyQualifying ? renderScenarioChaserMap(context, route) : "";
   const finishMarkup = renderScenarioFinishMap(context);
 
-  if (!pathMarkup && !qualificationMarkup && !routeMarkup && !chaserMarkup && !finishMarkup) return "";
+  if (!statusMarkup && !pathMarkup && !qualificationMarkup && !routeMarkup && !chaserMarkup && !finishMarkup) return "";
 
   return `
     <div class="scenario-visual-answer" aria-label="Scenario implications">
-      ${pathMarkup}
+      ${statusMarkup}
       ${qualificationMarkup}
       ${routeMarkup}
       ${chaserMarkup}
+      ${pathMarkup}
       ${finishMarkup}
     </div>
   `;
+}
+
+function renderScenarioCurrentStatusSummary(context: ScenarioQuestionContext) {
+  const qualifies = scenarioCurrentlyQualifies(context.current.status);
+  const statusClass = qualifies ? "qualifying" : "missing";
+  const thirdPlaceRow = context.thirdPlaceTable.find((row) => row.teamId === context.team.id);
+  const path = context.currentPath
+    ? `${context.currentPath.fixtureId} ${context.currentPath.slot} vs ${context.currentPath.opponentLabel}`
+    : context.current.status === "third-place"
+      ? "Projected through the best third-place table"
+      : "No round-of-32 slot right now";
+  const thirdPlaceRank = thirdPlaceRow ? ` · ${ordinal(thirdPlaceRow.thirdPlaceRank)} in third-place table` : "";
+
+  return `
+    <div class="scenario-current-status-card ${statusClass}">
+      ${renderScenarioStateBadge(context.current.status)}
+      <strong>${escapeHtml(context.team.name)} are ${ordinal(context.current.rank)} in Group ${context.team.group}</strong>
+      <span>${context.current.points} pts · GD ${formatSignedNumber(context.current.goalDifference)} · GF ${context.current.goalsFor}${thirdPlaceRank} · ${escapeHtml(path)}</span>
+    </div>
+  `;
+}
+
+function scenarioCurrentlyQualifies(status: ScenarioQuestionContext["current"]["status"]) {
+  return status !== "eliminated";
 }
 
 function scenarioVisualIntent() {
@@ -507,7 +536,7 @@ function renderScenarioCurrentPanel(scenario: TeamScenarioAnalysis) {
       <div class="scenario-current-heading">
         <div class="scenario-current-title-row">
           <h3 id="scenario-current-heading">Current Position</h3>
-          <span>${scenarioStatusLabel(scenario.current.status)}</span>
+          ${renderScenarioStateBadge(scenario.current.status)}
         </div>
         <p class="scenario-current-team-line">
           ${renderTeamIdentity(team, scenario.teamId)}
@@ -1606,6 +1635,11 @@ function scenarioStatusLabel(status: TeamScenarioAnalysis["current"]["status"]) 
   if (status === "direct") return "Direct";
   if (status === "third-place") return "Third place";
   return "Eliminated";
+}
+
+function renderScenarioStateBadge(status: TeamScenarioAnalysis["current"]["status"]) {
+  const qualifies = status !== "eliminated";
+  return `<span class="scenario-state-badge ${qualifies ? "qualifying" : "missing"}">Currently: ${qualifies ? "qualifying" : "missing out"}</span>`;
 }
 
 function fixtureResultLabel(row: FixturePerformanceEntry) {

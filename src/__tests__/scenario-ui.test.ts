@@ -24,6 +24,11 @@ describe("scenario UI integration", () => {
     expect(mainSource).toContain("let scenarioAnswerContext");
     expect(mainSource).toContain("renderScenarioVisualAnswer");
     expect(mainSource).toContain("scenarioVisualIntent");
+    expect(mainSource).toContain("renderScenarioCurrentStatusSummary");
+    expect(mainSource).toContain("scenarioCurrentlyQualifies");
+    expect(mainSource).toContain("renderScenarioStateBadge");
+    expect(mainSource).toContain("Currently:");
+    expect(mainSource).toContain("missing out");
     expect(mainSource).toContain("renderScenarioQualificationRoutes");
     expect(mainSource).toContain("renderScenarioQualificationRoute");
     expect(mainSource).toContain("compareQualificationPaths");
@@ -52,6 +57,8 @@ describe("scenario UI integration", () => {
     expect(styles).toContain(".scenario-question-box");
     expect(styles).toContain(".scenario-question-row");
     expect(styles).toContain(".scenario-visual-answer");
+    expect(styles).toContain(".scenario-current-status-card");
+    expect(styles).toContain(".scenario-state-badge");
     expect(styles).toContain(".scenario-qualification-routes");
     expect(styles).toContain(".scenario-shortest-qualification");
     expect(styles).toContain(".scenario-qualification-route");
