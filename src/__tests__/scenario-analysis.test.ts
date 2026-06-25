@@ -1,31 +1,27 @@
 import { describe, expect, it } from "vitest";
-import { tournamentData } from "../data/tournament";
 import { generateScenarioDocuments, thirdPlaceJumpCandidates } from "../engine/scenario-documents";
 import { scenarioSnapshotId } from "../engine/scenario-snapshot";
 import { analyzeTeamScenarios, buildScenarioQuestionContext } from "../engine/scenarios";
 import { calculateGroupStandings, thirdPlaceRankings } from "../engine/standings";
 import type { TournamentData } from "../types";
+import { makeTournamentData, setFixtureResult, setFixtureScheduled } from "./fixtures/tournament";
 
 function cloneTournamentData() {
-  return structuredClone(tournamentData) as TournamentData;
+  return makeTournamentData();
 }
 
 function setResult(data: TournamentData, fixtureId: string, home: number, away: number) {
-  const fixture = data.fixtures.find((candidate) => candidate.id === fixtureId)!;
-  fixture.status = "completed";
-  fixture.result = { home, away };
-  delete fixture.sourceResult;
+  setFixtureResult(data, fixtureId, home, away);
 }
 
 function setScheduled(data: TournamentData, fixtureId: string) {
-  const fixture = data.fixtures.find((candidate) => candidate.id === fixtureId)!;
-  fixture.status = "scheduled";
-  delete fixture.result;
-  delete fixture.sourceResult;
+  setFixtureScheduled(data, fixtureId);
 }
 
 function stagedScotlandData() {
   const data = cloneTournamentData();
+  stageThirdPlaceChasers(data);
+  stageOpenChaserGroup(data);
   setResult(data, "m013", 1, 1);
   setResult(data, "m014", 0, 1);
   setResult(data, "m015", 3, 0);
@@ -37,6 +33,8 @@ function stagedScotlandData() {
 
 function stagedScotlandMarginData() {
   const data = cloneTournamentData();
+  stageThirdPlaceChasers(data);
+  stageOpenChaserGroup(data);
   setResult(data, "m013", 1, 0);
   setResult(data, "m014", 0, 1);
   setResult(data, "m015", 1, 0);
@@ -48,6 +46,8 @@ function stagedScotlandMarginData() {
 
 function stagedEnglandData() {
   const data = cloneTournamentData();
+  stageThirdPlaceChasers(data);
+  stageOpenChaserGroup(data);
   setResult(data, "m067", 4, 2);
   setResult(data, "m068", 1, 0);
   setResult(data, "m069", 0, 0);
@@ -59,6 +59,8 @@ function stagedEnglandData() {
 
 function stagedAlgeriaData() {
   const data = cloneTournamentData();
+  stageThirdPlaceChasers(data);
+  stageOpenChaserGroup(data);
   setResult(data, "m055", 3, 0);
   setResult(data, "m056", 3, 1);
   setResult(data, "m057", 2, 0);
@@ -66,6 +68,27 @@ function stagedAlgeriaData() {
   setScheduled(data, "m059");
   setScheduled(data, "m060");
   return data;
+}
+
+function stageThirdPlaceChasers(data: TournamentData) {
+  for (const group of ["A", "B", "D", "E", "F", "G", "I"] as const) {
+    const fixtures = data.fixtures.filter((fixture) => fixture.group === group);
+    setResult(data, fixtures[0].id, 1, 0);
+    setResult(data, fixtures[1].id, 1, 0);
+    setResult(data, fixtures[2].id, 1, 1);
+    setResult(data, fixtures[3].id, 0, 1);
+    setResult(data, fixtures[4].id, 0, 1);
+    setResult(data, fixtures[5].id, 1, 0);
+  }
+}
+
+function stageOpenChaserGroup(data: TournamentData) {
+  setResult(data, "m043", 1, 1);
+  setResult(data, "m044", 0, 1);
+  setResult(data, "m045", 1, 0);
+  setResult(data, "m046", 1, 1);
+  setScheduled(data, "m047");
+  setScheduled(data, "m048");
 }
 
 describe("scenario analysis", () => {

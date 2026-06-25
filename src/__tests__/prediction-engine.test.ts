@@ -1,21 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { tournamentData } from "../data/tournament";
 import { projectTournament } from "../engine/knockout";
 import { interpretPredictionInput, isEditableFixture, sanitizePredictions, setPrediction } from "../engine/predictions";
 import { bestThirdPlacedGroups, calculateGroupStandings, thirdPlaceRankings } from "../engine/standings";
 import type { PredictionMap, TournamentData } from "../types";
+import { completeGroupPredictions, fixtureById, makeTournamentData, setFixtureResult } from "./fixtures/tournament";
 
 function editableGroupTournamentData(): TournamentData {
-  const data = structuredClone(tournamentData) as TournamentData;
-
-  for (const fixture of data.fixtures) {
-    if (fixture.stage !== "group") continue;
-    fixture.status = "scheduled";
-    delete fixture.result;
-    delete fixture.sourceResult;
-  }
-
-  return data;
+  return makeTournamentData();
 }
 
 function editableGroupFixtureCount(data: TournamentData) {
@@ -23,20 +14,17 @@ function editableGroupFixtureCount(data: TournamentData) {
 }
 
 function groupPredictionSet(data: TournamentData): PredictionMap {
-  return Object.fromEntries(
-    data.fixtures
-      .filter((fixture) => fixture.stage === "group")
-      .map((fixture) => [fixture.id, { home: 1, away: 0 }])
-  );
+  return completeGroupPredictions(data);
 }
 
 describe("prediction engine", () => {
   it("prevents predictions from overriding completed fixtures", () => {
-    const completed = tournamentData.fixtures.find((fixture) => fixture.status === "completed");
-    expect(completed).toBeDefined();
-    expect(isEditableFixture(completed!)).toBe(false);
+    const data = makeTournamentData();
+    setFixtureResult(data, "m001", 2, 0);
+    const completed = fixtureById(data, "m001");
+    expect(isEditableFixture(completed)).toBe(false);
 
-    const predictions = setPrediction(tournamentData, {}, completed!.id, { home: 0, away: 99 });
+    const predictions = setPrediction(data, {}, completed.id, { home: 0, away: 99 });
     expect(predictions).toEqual({});
   });
 
@@ -74,7 +62,7 @@ describe("prediction engine", () => {
     const data = editableGroupTournamentData();
     const groupH = calculateGroupStandings(data, {}).H;
 
-    expect(editableGroupFixtureCount(data)).toBe(tournamentData.fixtures.filter((fixture) => fixture.stage === "group").length);
+    expect(editableGroupFixtureCount(data)).toBe(data.fixtures.filter((fixture) => fixture.stage === "group").length);
     expect(groupH.map((row) => row.teamId)).toEqual(["spain", "uruguay", "saudi-arabia", "cape-verde"]);
   });
 
@@ -110,11 +98,12 @@ describe("prediction engine", () => {
   });
 
   it("projects knockout slots deterministically", () => {
-    const scheduledGroupFixtures = tournamentData.fixtures.filter((fixture) => fixture.stage === "group" && fixture.status === "scheduled");
+    const data = makeTournamentData();
+    const scheduledGroupFixtures = data.fixtures.filter((fixture) => fixture.stage === "group" && fixture.status === "scheduled");
     const predictions = Object.fromEntries(scheduledGroupFixtures.map((fixture, index) => [fixture.id, { home: index % 3, away: (index + 1) % 3 }]));
 
-    expect(projectTournament(tournamentData, predictions)).toEqual(projectTournament(tournamentData, predictions));
-    expect(projectTournament(tournamentData, predictions).some((match) => match.stage === "round-of-32" && match.home.teamId)).toBe(true);
+    expect(projectTournament(data, predictions)).toEqual(projectTournament(data, predictions));
+    expect(projectTournament(data, predictions).some((match) => match.stage === "round-of-32" && match.home.teamId)).toBe(true);
   });
 
   it("ranks third-place teams from projected standings", () => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { mergeResultFeed } from "../../scripts/update-results";
-import { tournamentData } from "../data/tournament";
 import type { SourceMetadata, TournamentData } from "../types";
+import { fixtureById, makeTournamentData, setFixtureResult } from "./fixtures/tournament";
 
 const source: SourceMetadata = {
   name: "Test result feed",
@@ -12,8 +12,9 @@ const source: SourceMetadata = {
 
 describe("result refresh", () => {
   it("merges a new completed result into generated data", () => {
-    const openFixture = tournamentData.fixtures.find((fixture) => fixture.status === "scheduled")!;
-    const result = mergeResultFeed(tournamentData, {
+    const data = makeTournamentData();
+    const openFixture = fixtureById(data, "m001");
+    const result = mergeResultFeed(data, {
       source,
       results: [{ fixtureId: openFixture.id, home: 2, away: 1 }]
     }, source);
@@ -28,8 +29,9 @@ describe("result refresh", () => {
   });
 
   it("merges a tied knockout result with penalties and winner", () => {
-    const openFixture = tournamentData.fixtures.find((fixture) => fixture.stage === "round-of-32" && fixture.status === "scheduled")!;
-    const result = mergeResultFeed(tournamentData, {
+    const data = makeTournamentData();
+    const openFixture = fixtureById(data, "m073");
+    const result = mergeResultFeed(data, {
       results: [{ fixtureId: openFixture.id, home: 1, away: 1, decision: "penalties", winner: "home" }]
     }, source);
 
@@ -43,16 +45,19 @@ describe("result refresh", () => {
   });
 
   it("rejects a tied knockout result without a penalty winner", () => {
-    const openFixture = tournamentData.fixtures.find((fixture) => fixture.stage === "round-of-32" && fixture.status === "scheduled")!;
+    const data = makeTournamentData();
+    const openFixture = fixtureById(data, "m073");
 
-    expect(() => mergeResultFeed(tournamentData, {
+    expect(() => mergeResultFeed(data, {
       results: [{ fixtureId: openFixture.id, home: 1, away: 1, decision: "aet" }]
     }, source)).toThrow(`Tied knockout result ${openFixture.id} must include penalties and a winner`);
   });
 
   it("does not change data when a feed repeats an existing completed result", () => {
-    const completedFixture = tournamentData.fixtures.find((fixture) => fixture.status === "completed" && fixture.result)!;
-    const result = mergeResultFeed(tournamentData, {
+    const data = makeTournamentData();
+    setFixtureResult(data, "m001", 2, 0);
+    const completedFixture = fixtureById(data, "m001");
+    const result = mergeResultFeed(data, {
       source,
       results: [{
         fixtureId: completedFixture.id,
@@ -63,28 +68,31 @@ describe("result refresh", () => {
 
     expect(result.changed).toBe(false);
     expect(result.imported).toBe(0);
-    expect(result.data).toEqual(tournamentData);
+    expect(result.data).toEqual(data);
   });
 
   it("rejects conflicting updates for completed fixtures", () => {
-    const completedFixture = tournamentData.fixtures.find((fixture) => fixture.status === "completed" && fixture.result)!;
+    const data = makeTournamentData();
+    setFixtureResult(data, "m001", 2, 0);
+    const completedFixture = fixtureById(data, "m001");
     const conflictingHome = completedFixture.result!.home + 1;
 
-    expect(() => mergeResultFeed(tournamentData, {
+    expect(() => mergeResultFeed(data, {
       source,
       results: [{ fixtureId: completedFixture.id, home: conflictingHome, away: completedFixture.result!.away }]
     }, source)).toThrow(`Incoming result conflicts with completed fixture ${completedFixture.id}`);
   });
 
   it("can merge from a normalized tournament dataset", () => {
-    const openFixture = tournamentData.fixtures.find((fixture) => fixture.status === "scheduled")!;
-    const sourceData = structuredClone(tournamentData) as TournamentData;
+    const data = makeTournamentData();
+    const openFixture = fixtureById(data, "m001");
+    const sourceData = structuredClone(data) as TournamentData;
     const sourceFixture = sourceData.fixtures.find((fixture) => fixture.id === openFixture.id)!;
     sourceFixture.status = "completed";
     sourceFixture.result = { home: 3, away: 0 };
     sourceFixture.sourceResult = source;
 
-    const result = mergeResultFeed(tournamentData, sourceData, source);
+    const result = mergeResultFeed(data, sourceData, source);
 
     expect(result.changed).toBe(true);
     expect(result.imported).toBe(1);
@@ -92,11 +100,12 @@ describe("result refresh", () => {
   });
 
   it("can merge completed football-data.org matches by team and fixture date", () => {
-    const openFixture = tournamentData.fixtures.find((fixture) => fixture.status === "scheduled" && typeof fixture.home === "string" && typeof fixture.away === "string")!;
-    const homeTeam = tournamentData.teams.find((team) => team.id === openFixture.home)!;
-    const awayTeam = tournamentData.teams.find((team) => team.id === openFixture.away)!;
+    const data = makeTournamentData();
+    const openFixture = fixtureById(data, "m001");
+    const homeTeam = data.teams.find((team) => team.id === openFixture.home)!;
+    const awayTeam = data.teams.find((team) => team.id === openFixture.away)!;
 
-    const result = mergeResultFeed(tournamentData, {
+    const result = mergeResultFeed(data, {
       matches: [{
         utcDate: openFixture.date,
         status: "FINISHED",
@@ -112,15 +121,16 @@ describe("result refresh", () => {
   });
 
   it("can merge completed FIFA calendar matches by team pairing", () => {
-    const openFixture = tournamentData.fixtures.find((fixture) => fixture.status === "scheduled" && typeof fixture.home === "string" && typeof fixture.away === "string")!;
+    const data = makeTournamentData();
+    const openFixture = fixtureById(data, "m001");
 
-    const result = mergeResultFeed(tournamentData, {
+    const result = mergeResultFeed(data, {
       Results: [{
         MatchNumber: openFixture.matchNumber,
         MatchStatus: 0,
         ResultType: 1,
-        Home: { ShortClubName: tournamentData.teams.find((team) => team.id === openFixture.home)!.name },
-        Away: { ShortClubName: tournamentData.teams.find((team) => team.id === openFixture.away)!.name },
+        Home: { ShortClubName: data.teams.find((team) => team.id === openFixture.home)!.name },
+        Away: { ShortClubName: data.teams.find((team) => team.id === openFixture.away)!.name },
         HomeTeamScore: 2,
         AwayTeamScore: 0
       }]
@@ -132,9 +142,10 @@ describe("result refresh", () => {
   });
 
   it("ignores FIFA calendar matches that do not have a final result", () => {
-    const openFixture = tournamentData.fixtures.find((fixture) => fixture.status === "scheduled")!;
+    const data = makeTournamentData();
+    const openFixture = fixtureById(data, "m001");
 
-    const result = mergeResultFeed(tournamentData, {
+    const result = mergeResultFeed(data, {
       Results: [{
         MatchNumber: openFixture.matchNumber,
         MatchStatus: 1,
@@ -146,6 +157,6 @@ describe("result refresh", () => {
 
     expect(result.changed).toBe(false);
     expect(result.imported).toBe(0);
-    expect(result.data).toEqual(tournamentData);
+    expect(result.data).toEqual(data);
   });
 });

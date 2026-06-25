@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { tournamentData } from "../data/tournament";
 import { loadPredictions, predictionStorageKey, savePredictions, type PredictionStore } from "../storage/session";
+import { fixtureById, makeTournamentData, setFixtureResult } from "./fixtures/tournament";
 
 class MemoryStorage implements PredictionStore {
   private values = new Map<string, string>();
@@ -20,29 +20,33 @@ class MemoryStorage implements PredictionStore {
 
 describe("session storage", () => {
   it("saves and restores valid predictions", () => {
+    const data = makeTournamentData();
     const storage = new MemoryStorage();
-    const openFixture = tournamentData.fixtures.find((fixture) => fixture.status === "scheduled")!;
+    const openFixture = fixtureById(data, "m001");
 
     savePredictions({ [openFixture.id]: { home: 2, away: 1 } }, storage);
 
-    expect(loadPredictions(tournamentData, storage)).toEqual({
+    expect(loadPredictions(data, storage)).toEqual({
       [openFixture.id]: { home: 2, away: 1 }
     });
   });
 
   it("discards invalid JSON", () => {
+    const data = makeTournamentData();
     const storage = new MemoryStorage();
     storage.setItem(predictionStorageKey, "{not-json");
 
-    expect(loadPredictions(tournamentData, storage)).toEqual({});
+    expect(loadPredictions(data, storage)).toEqual({});
     expect(storage.getItem(predictionStorageKey)).toBeNull();
   });
 
   it("discards predictions for completed fixtures", () => {
+    const data = makeTournamentData();
+    setFixtureResult(data, "m001", 1, 0);
     const storage = new MemoryStorage();
-    const completed = tournamentData.fixtures.find((fixture) => fixture.status === "completed")!;
+    const completed = fixtureById(data, "m001");
     storage.setItem(predictionStorageKey, JSON.stringify({ [completed.id]: { home: 1, away: 1 } }));
 
-    expect(loadPredictions(tournamentData, storage)).toEqual({});
+    expect(loadPredictions(data, storage)).toEqual({});
   });
 });

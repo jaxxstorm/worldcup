@@ -1,35 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { tournamentData } from "../data/tournament";
 import { projectTournament } from "../engine/knockout";
 import { calculateGroupStandings, thirdPlaceRankings } from "../engine/standings";
 import type { PredictionMap, TournamentData } from "../types";
 import { capturePredictionChangeSnapshot, changeLabel, matchChange, participantChange, standingRowChange, standingValueChange, thirdPlaceRowChange } from "../ui/change-highlights";
+import { completeGroupPredictions, makeTournamentData } from "./fixtures/tournament";
 
 function editableGroupTournamentData(): TournamentData {
-  const data = structuredClone(tournamentData) as TournamentData;
-
-  for (const fixture of data.fixtures) {
-    if (fixture.stage !== "group") continue;
-    fixture.status = "scheduled";
-    delete fixture.result;
-    delete fixture.sourceResult;
-  }
-
-  return data;
+  return makeTournamentData();
 }
 
-function groupPredictionSet(data = tournamentData): PredictionMap {
-  return Object.fromEntries(
-    data.fixtures
-      .filter((fixture) => fixture.stage === "group" && fixture.status === "scheduled")
-      .map((fixture) => [fixture.id, { home: 1, away: 0 }])
-  );
+function groupPredictionSet(data: TournamentData): PredictionMap {
+  return completeGroupPredictions(data);
 }
 
 describe("prediction change highlights", () => {
   it("does not report changes without a previous prediction snapshot", () => {
-    const row = calculateGroupStandings(tournamentData, {}).A[0];
-    const match = projectTournament(tournamentData, {})[0];
+    const data = makeTournamentData();
+    const row = calculateGroupStandings(data, {}).A[0];
+    const match = projectTournament(data, {})[0];
 
     expect(standingRowChange(undefined, row)).toBeUndefined();
     expect(matchChange(undefined, match)).toBeUndefined();
@@ -96,9 +84,10 @@ describe("prediction change highlights", () => {
   });
 
   it("reports changed bracket matches and participants after a knockout prediction", () => {
-    const basePredictions = groupPredictionSet();
-    const before = capturePredictionChangeSnapshot(tournamentData, basePredictions);
-    const nextProjection = projectTournament(tournamentData, {
+    const data = makeTournamentData();
+    const basePredictions = groupPredictionSet(data);
+    const before = capturePredictionChangeSnapshot(data, basePredictions);
+    const nextProjection = projectTournament(data, {
       ...basePredictions,
       m073: { home: 2, away: 0 }
     });

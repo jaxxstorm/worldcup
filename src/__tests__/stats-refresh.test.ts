@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadStatsSource, mergeStatsFeed } from "../../scripts/update-stats";
-import { tournamentData } from "../data/tournament";
 import type { SourceMetadata } from "../types";
+import { makeTournamentData } from "./fixtures/tournament";
 
 const source: SourceMetadata = {
   name: "football-data.org World Cup scorers API",
@@ -31,7 +31,8 @@ describe("stats refresh", () => {
   });
 
   it("normalizes football-data.org scorers into tournament leaderboards", () => {
-    const result = mergeStatsFeed(tournamentData, {
+    const data = makeTournamentData();
+    const result = mergeStatsFeed(data, {
       scorers: [
         {
           player: { name: "Example Striker" },
@@ -73,6 +74,7 @@ describe("stats refresh", () => {
   });
 
   it("does not change data when scorer leaderboards only have a new access time", () => {
+    const data = makeTournamentData();
     const feed = {
       scorers: [
         {
@@ -84,7 +86,7 @@ describe("stats refresh", () => {
         }
       ]
     };
-    const initial = mergeStatsFeed(tournamentData, feed, source);
+    const initial = mergeStatsFeed(data, feed, source);
     const laterSource = {
       ...source,
       accessedAt: "2026-06-20T16:00:00.000Z"
@@ -99,6 +101,7 @@ describe("stats refresh", () => {
   });
 
   it("limits the goal scorer leaderboard to the top 10", () => {
+    const data = makeTournamentData();
     const scorers = Array.from({ length: 12 }, (_, index) => ({
       player: { name: `Player ${String(index + 1).padStart(2, "0")}` },
       team: { name: "Canada", tla: "CAN" },
@@ -106,7 +109,7 @@ describe("stats refresh", () => {
       assists: 0,
       penalties: 0
     }));
-    const result = mergeStatsFeed(tournamentData, { scorers }, source);
+    const result = mergeStatsFeed(data, { scorers }, source);
     const goals = result.data.statLeaderboards?.find((leaderboard) => leaderboard.id === "goals");
 
     expect(goals?.entries).toHaveLength(10);
@@ -115,7 +118,8 @@ describe("stats refresh", () => {
   });
 
   it("keeps unmatched scorer teams displayable without a team id", () => {
-    const result = mergeStatsFeed(tournamentData, {
+    const data = makeTournamentData();
+    const result = mergeStatsFeed(data, {
       scorers: [{
         player: { name: "Mystery Player" },
         team: { name: "Unmatched Team" },
@@ -134,7 +138,8 @@ describe("stats refresh", () => {
   });
 
   it("normalizes fair-play penalty points from discipline data", () => {
-    const result = mergeStatsFeed(tournamentData, {
+    const data = makeTournamentData();
+    const result = mergeStatsFeed(data, {
       fairPlay: [
         {
           team: { name: "Spain", tla: "ESP" },

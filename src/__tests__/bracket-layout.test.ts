@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { buildBracketLayout } from "../engine/bracket-layout";
 import { projectTournament } from "../engine/knockout";
-import { tournamentData } from "../data/tournament";
+import { makeTournamentData } from "./fixtures/tournament";
 
 describe("bracket layout", () => {
   it("positions projected matches into left, right, and center bracket regions", () => {
-    const layout = buildBracketLayout(projectTournament(tournamentData, {}));
+    const layout = buildBracketLayout(projectTournament(makeTournamentData(), {}));
 
     expect(layout.nodes.some((node) => node.side === "left" && node.match.fixtureId === "m073")).toBe(true);
     expect(layout.nodes.some((node) => node.side === "right" && node.match.fixtureId === "m088")).toBe(true);
@@ -13,7 +13,7 @@ describe("bracket layout", () => {
   });
 
   it("builds connector paths from source fixtures to downstream matches", () => {
-    const layout = buildBracketLayout(projectTournament(tournamentData, {}));
+    const layout = buildBracketLayout(projectTournament(makeTournamentData(), {}));
 
     expect(layout.connectors).toContainEqual(expect.objectContaining({
       fromFixtureId: "m073",
@@ -27,7 +27,7 @@ describe("bracket layout", () => {
   });
 
   it("keeps semifinal, final, and third-place nodes from overlapping", () => {
-    const layout = buildBracketLayout(projectTournament(tournamentData, {}));
+    const layout = buildBracketLayout(projectTournament(makeTournamentData(), {}));
     const centerStageNodes = layout.nodes.filter((node) => [101, 102, 103, 104].includes(node.match.matchNumber));
 
     for (let leftIndex = 0; leftIndex < centerStageNodes.length; leftIndex += 1) {
