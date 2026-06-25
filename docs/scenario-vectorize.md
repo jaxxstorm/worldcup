@@ -24,6 +24,8 @@ Required bindings and secrets:
 - `SCENARIO_INDEX_TOKEN`: secret checked by `/api/scenario-index`.
 - `SCENARIO_INDEX_URL` or `SCENARIO_SITE_URL`: used by `npm run index-scenarios`.
 
+Local Pages/Workers development uses remote Cloudflare resources for Workers AI and Vectorize because neither binding has a local simulation. `wrangler.toml` sets `remote = true` on both bindings so `npx wrangler pages dev dist --ai=AI` can query the real `worldcup-scenarios` index.
+
 Optional overrides:
 
 - `SCENARIO_EMBEDDING_MODEL`: defaults to `@cf/baai/bge-base-en-v1.5`.
