@@ -41,11 +41,14 @@ describe("prediction engine", () => {
   });
 
   it("sanitizes unknown fixtures and completed fixture predictions", () => {
-    const completed = tournamentData.fixtures.find((fixture) => fixture.status === "completed")!;
-    const open = tournamentData.fixtures.find((fixture) => fixture.stage === "group" && fixture.status === "scheduled")!;
+    const data = editableGroupTournamentData();
+    const completed = data.fixtures.find((fixture) => fixture.stage === "group")!;
+    completed.status = "completed";
+    completed.result = { home: 1, away: 0 };
+    const open = data.fixtures.find((fixture) => fixture.stage === "group" && fixture.id !== completed.id)!;
 
     expect(
-      sanitizePredictions(tournamentData, {
+      sanitizePredictions(data, {
         [completed.id]: { home: 9, away: 9 },
         [open.id]: { home: 2, away: 1 },
         missing: { home: 1, away: 1 }
@@ -54,9 +57,14 @@ describe("prediction engine", () => {
   });
 
   it("recalculates standings from real results and predictions", () => {
-    const groupAOpen = tournamentData.fixtures.find((fixture) => fixture.group === "A" && fixture.status === "scheduled")!;
+    const data = editableGroupTournamentData();
+    const groupAFixtures = data.fixtures.filter((fixture) => fixture.group === "A");
+    const completed = groupAFixtures[0];
+    completed.status = "completed";
+    completed.result = { home: 1, away: 0 };
+    const groupAOpen = groupAFixtures[1];
     const predictions: PredictionMap = { [groupAOpen.id]: { home: 3, away: 0 } };
-    const groupA = calculateGroupStandings(tournamentData, predictions).A;
+    const groupA = calculateGroupStandings(data, predictions).A;
 
     expect(groupA[0].points).toBeGreaterThanOrEqual(groupA[1].points);
     expect(groupA.some((row) => row.played > 0)).toBe(true);

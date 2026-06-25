@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { tournamentData } from "../data/tournament";
+import { generateScenarioDocuments, thirdPlaceJumpCandidates } from "../engine/scenario-documents";
+import { scenarioSnapshotId } from "../engine/scenario-snapshot";
 import { analyzeTeamScenarios, buildScenarioQuestionContext } from "../engine/scenarios";
+import { calculateGroupStandings, thirdPlaceRankings } from "../engine/standings";
 import type { TournamentData } from "../types";
 
 function cloneTournamentData() {
@@ -198,7 +201,7 @@ describe("scenario analysis", () => {
     ]));
     expect(currentContext.pressureSummary).toEqual(expect.arrayContaining([
       expect.stringContaining("Lose by 1"),
-      expect.stringContaining("Lose by 2+"),
+      expect.stringMatching(/^Lose by \d\+/),
       expect.any(String)
     ]));
     expect(currentContext.pressureNotes[0]).toEqual(expect.objectContaining({
@@ -277,5 +280,64 @@ describe("scenario analysis", () => {
   it("returns deterministic scenario output for the same inputs", () => {
     const data = stagedScotlandData();
     expect(analyzeTeamScenarios(data, {}, "scotland")).toEqual(analyzeTeamScenarios(data, {}, "scotland"));
+  });
+
+  it("generates deterministic scenario documents for vector retrieval", () => {
+    const data = stagedScotlandData();
+    const documents = generateScenarioDocuments(data);
+    const snapshotId = scenarioSnapshotId(data);
+
+    expect(documents.length).toBeGreaterThan(data.teams.length);
+    expect(documents.every((document) => document.metadata.snapshotId === snapshotId)).toBe(true);
+    expect(documents).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        metadata: expect.objectContaining({ kind: "team-summary", teamId: "scotland" }),
+        text: expect.stringContaining("Scotland")
+      }),
+      expect.objectContaining({
+        metadata: expect.objectContaining({ kind: "qualification-route", teamId: "scotland" })
+      }),
+      expect.objectContaining({
+        metadata: expect.objectContaining({ kind: "miss-out-route" }),
+        text: expect.stringContaining("miss out")
+      }),
+      expect.objectContaining({
+        metadata: expect.objectContaining({ kind: "rule-note" })
+      })
+    ]));
+  });
+
+  it("includes third-place jump candidates for teams outside the current third-place table", () => {
+    const data = stagedScotlandData();
+    const currentThirdTeamIds = new Set(thirdPlaceRankings(calculateGroupStandings(data, {}), data).map((row) => row.teamId));
+    const jumpCandidates = thirdPlaceJumpCandidates(data);
+    const outsideCurrentTable = jumpCandidates.find((candidate) => !currentThirdTeamIds.has(candidate.thirdPlaceTeamId));
+
+    expect(outsideCurrentTable).toEqual(expect.objectContaining({
+      fixtureId: expect.any(String),
+      condition: expect.any(String),
+      thirdPlaceTeamId: expect.any(String),
+      thirdPlaceTeamName: expect.any(String),
+      points: expect.any(Number),
+      goalDifference: expect.any(Number),
+      goalsFor: expect.any(Number)
+    }));
+    expect(generateScenarioDocuments(data)).toContainEqual(expect.objectContaining({
+      metadata: expect.objectContaining({
+        kind: "third-place-jump",
+        teamId: outsideCurrentTable?.thirdPlaceTeamId
+      }),
+      text: expect.stringContaining("can jump into third place")
+    }));
+  });
+
+  it("keeps snapshot ids stable for identical data and changes them for real result changes", () => {
+    const data = stagedScotlandData();
+    const sameData = structuredClone(data) as TournamentData;
+    const changedData = structuredClone(data) as TournamentData;
+    setResult(changedData, "m017", 1, 0);
+
+    expect(scenarioSnapshotId(data)).toBe(scenarioSnapshotId(sameData));
+    expect(scenarioSnapshotId(data)).not.toBe(scenarioSnapshotId(changedData));
   });
 });

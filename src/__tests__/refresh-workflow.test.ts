@@ -21,4 +21,20 @@ describe("refresh workflow", () => {
     expect(workflow).toContain("git add src/data/tournament.generated.json");
     expect(workflow).toContain("npx wrangler pages deploy dist --project-name worldcup2026 --branch main");
   });
+
+  it("indexes scenario vectors only after changed data passes verification", () => {
+    const changeCheck = workflow.indexOf("git diff --quiet -- src/data/tournament.generated.json");
+    const tests = workflow.indexOf("npm test");
+    const build = workflow.indexOf("npm run build");
+    const artifactVerify = workflow.indexOf("Verify Cloudflare Pages artifact");
+    const scenarioIndex = workflow.indexOf("npm run index-scenarios");
+    const commit = workflow.indexOf("git commit -m \"chore(data): update tournament results\"");
+
+    expect(scenarioIndex).toBeGreaterThan(artifactVerify);
+    expect(scenarioIndex).toBeGreaterThan(build);
+    expect(scenarioIndex).toBeGreaterThan(tests);
+    expect(scenarioIndex).toBeGreaterThan(changeCheck);
+    expect(scenarioIndex).toBeLessThan(commit);
+    expect(workflow).toContain("if: steps.changes.outputs.changed == 'true'\n        run: npm run index-scenarios");
+  });
 });

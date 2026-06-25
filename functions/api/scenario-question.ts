@@ -1,9 +1,13 @@
+import { defaultEmbeddingModel, retrieveScenarioDocuments, type VectorizeBinding } from "../lib/scenario-vectorize";
+
 interface Env {
   AI?: {
     run(model: string, input: unknown, options?: unknown): Promise<unknown>;
   };
+  SCENARIO_VECTORIZE?: VectorizeBinding;
   SCENARIO_AI_MODEL?: string;
   SCENARIO_AI_GATEWAY_ID?: string;
+  SCENARIO_EMBEDDING_MODEL?: string;
 }
 
 const defaultModel = "@cf/openai/gpt-oss-120b";
@@ -25,10 +29,20 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!context) return json({ error: "Scenario context is missing." }, 400);
   if (!env.AI) return json({ error: "Scenario questions are unavailable in this environment." }, 503);
 
-  const messages = buildMessages(question, team, context);
+  const retrievedDocuments = await retrieveScenarioDocuments({
+    ai: env.AI,
+    vectorize: env.SCENARIO_VECTORIZE,
+    embeddingModel: env.SCENARIO_EMBEDDING_MODEL ?? defaultEmbeddingModel,
+    question: `${team} ${question}`,
+    teamId: contextTeamId(context),
+    snapshotId: contextSnapshotId(context)
+  });
+  const retrievedContext = normalizeRetrievedDocuments(retrievedDocuments);
+  const contextForAnswer = augmentContext(context, retrievedContext);
+  const messages = buildMessages(question, team, contextForAnswer);
   const result = await runAi(env, messages);
   if (result instanceof Response) return result;
-  const answer = extractAnswer(result) || fallbackAnswer(question, context);
+  const answer = extractAnswer(result) || fallbackAnswer(question, contextForAnswer);
 
   if (!answer) return json({ error: "The model did not return an answer." }, 502);
   return json({ answer });
@@ -67,6 +81,8 @@ function buildMessages(question: string, team: string, context: unknown) {
     "You are not chatting, brainstorming, or showing your work. Return only the final fan-facing answer.",
     "Use only the supplied JSON context. Do not invent teams, fixtures, scores, or probabilities. Do not browse.",
     "The context includes answerSeed, qualificationPaths, finishPaths, jeopardyBaselines, jeopardyChasers, jeopardyRoutes, missOutSummary, userFacingSummary, answerBrief, pressureSummary, chasingTeams, qualificationRules, selectedGroupStandings, thirdPlaceTable, remainingGroupFixtures, groupOutcomeCombinations, outcomes, dependencies, marginNotes, and possibleOpponents.",
+    "The context may also include retrievedScenarioDocuments from the refresh-time Vectorize index. These are deterministic generated scenario facts, but the exact request context still wins if there is any conflict.",
+    "Use retrievedScenarioDocuments to answer broad questions about teams and fixtures outside the selected compact context, especially third-place jump candidates and cross-group chasers.",
     "Treat answerSeed, jeopardyRoutes, jeopardyChasers, qualificationPaths, and finishPaths as the source-of-truth explanation material. Preserve their concrete facts and lightly rewrite them for readability.",
     "For miss-out, not-qualify, pass, overtake, or danger questions, use jeopardyRoutes and jeopardyChasers before missOutSummary, and use missOutSummary before userFacingSummary.",
     "Use userFacingSummary only when it directly answers the question without generic dependency language.",
@@ -170,6 +186,9 @@ function fallbackAnswer(question: string, context: unknown) {
   const answerBrief = Array.isArray(record.answerBrief) ? record.answerBrief.filter((value): value is string => typeof value === "string") : [];
   const pressureSummary = Array.isArray(record.pressureSummary) ? record.pressureSummary.filter((value): value is string => typeof value === "string") : [];
   const chasingTeams = Array.isArray(record.chasingTeams) ? record.chasingTeams.filter((value): value is string => typeof value === "string") : [];
+  const retrievedScenarioDocuments = Array.isArray(record.retrievedScenarioDocuments)
+    ? record.retrievedScenarioDocuments.filter((value): value is Record<string, unknown> => Boolean(value) && typeof value === "object")
+    : [];
   if (/\b(chance|percent|percentage|likelihood|likely)\b/i.test(question)) {
     const shareLines = scenarioShareFallback(jeopardyBaselines);
     if (shareLines.length > 0) return shareLines.join("\n");
@@ -186,11 +205,47 @@ function fallbackAnswer(question: string, context: unknown) {
     return (structuredChasers.length > 0 ? structuredChasers : chasingTeams.slice(0, 6).map((line) => `- ${line}`)).join("\n");
   }
   if (answerSeed.length > 0) return answerSeed.slice(0, 10).join("\n");
+  if (retrievedScenarioDocuments.length > 0) {
+    return retrievedScenarioDocuments.slice(0, 5).map((document) => {
+      const title = typeof document.title === "string" ? document.title : "Retrieved scenario";
+      const text = typeof document.text === "string" ? document.text : "";
+      return `- ${title}: ${text}`;
+    }).filter((line) => line.trim() !== "- Retrieved scenario:").join("\n");
+  }
   if (/\b(miss out|not qualify|eliminat|danger)\b/i.test(question) && missOutSummary.length > 0) {
     return missOutSummary.slice(0, 6).map((line) => `- ${line}`).join("\n");
   }
   const source = [...missOutSummary, ...userFacingSummary, ...pressureSummary, ...chasingTeams, ...answerBrief.filter((line) => /miss out|eliminat|lose|pressure|fall out|top 8/i.test(line))].slice(0, 4);
   return source.length > 0 ? source.map((line) => `- ${line}`).join("\n") : "";
+}
+
+function augmentContext(context: unknown, retrievedScenarioDocuments: ReturnType<typeof normalizeRetrievedDocuments>) {
+  if (retrievedScenarioDocuments.length === 0) return context;
+  if (!context || typeof context !== "object") return { retrievedScenarioDocuments };
+  return { ...(context as Record<string, unknown>), retrievedScenarioDocuments };
+}
+
+function normalizeRetrievedDocuments(documents: Awaited<ReturnType<typeof retrieveScenarioDocuments>>) {
+  return documents.map((document) => ({
+    title: document.title,
+    text: document.text,
+    score: document.score,
+    metadata: document.metadata
+  }));
+}
+
+function contextSnapshotId(context: unknown) {
+  return context && typeof context === "object" && typeof (context as Record<string, unknown>).snapshotId === "string"
+    ? (context as Record<string, string>).snapshotId
+    : undefined;
+}
+
+function contextTeamId(context: unknown) {
+  if (!context || typeof context !== "object") return undefined;
+  const team = (context as Record<string, unknown>).team;
+  return team && typeof team === "object" && typeof (team as Record<string, unknown>).id === "string"
+    ? (team as Record<string, string>).id
+    : undefined;
 }
 
 function scenarioShareFallback(jeopardyBaselines: Array<Record<string, unknown>>) {

@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "normalize-data": "tsx scripts/normalize-tournament-data.ts",
     "update-results": "tsx scripts/update-results.ts",
-    "update-stats": "tsx scripts/update-stats.ts"
+    "update-stats": "tsx scripts/update-stats.ts",
+    "index-scenarios": "tsx scripts/index-scenarios.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.3",

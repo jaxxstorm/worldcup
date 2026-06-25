@@ -68,6 +68,13 @@ jobs:
           test -f dist/index.html
           ! grep -q "src/main.ts" dist/index.html
           grep -q "assets/index-" dist/index.html
+      - name: Index scenario vectors
+        if: steps.changes.outputs.changed == 'true'
+        run: npm run index-scenarios
+        env:
+          SCENARIO_INDEX_URL: ${{ secrets.SCENARIO_INDEX_URL || vars.SCENARIO_INDEX_URL }}
+          SCENARIO_SITE_URL: ${{ vars.SCENARIO_SITE_URL || 'https://worldcup2026.pages.dev' }}
+          SCENARIO_INDEX_TOKEN: ${{ secrets.SCENARIO_INDEX_TOKEN }}
       - name: Commit generated data
         if: steps.changes.outputs.changed == 'true'
         run: |

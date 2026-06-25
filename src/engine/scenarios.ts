@@ -1,6 +1,7 @@
 import type { Fixture, FixtureId, GroupId, PredictionMap, ProjectedMatch, Score, StandingRow, TeamId, TournamentData } from "../types";
 import { projectTournament } from "./knockout";
 import { getAppliedScore } from "./predictions";
+import { scenarioSnapshotId } from "./scenario-snapshot";
 import { calculateGroupStandings, thirdPlaceRankings } from "./standings";
 
 export type ScenarioQualificationStatus = "direct" | "third-place" | "eliminated";
@@ -79,6 +80,7 @@ export interface TeamScenarioAnalysis {
 }
 
 export interface ScenarioQuestionContext {
+  snapshotId: string;
   team: {
     id: TeamId;
     name: string;
@@ -335,6 +337,7 @@ export function buildScenarioQuestionContext(data: TournamentData, predictions: 
   const jeopardy = scenarioJeopardyAnalysis(data, predictions, teamId);
 
   return {
+    snapshotId: scenarioSnapshotId(data),
     team: {
       id: teamId,
       name: teamNameValue,

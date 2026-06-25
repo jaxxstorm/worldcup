@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { onRequestPost } from "../../functions/api/scenario-question";
+import { onRequestPost as onScenarioIndexPost } from "../../functions/api/scenario-index";
 
 describe("scenario question function", () => {
   it("asks Workers AI with the supplied compact context", async () => {
@@ -62,6 +63,103 @@ describe("scenario question function", () => {
     });
 
     expect(run).toHaveBeenCalledWith("@cf/test/model", expect.any(Object), { gateway: { id: "test-gateway" } });
+  });
+
+  it("adds retrieved Vectorize scenario documents to the AI prompt", async () => {
+    const run = vi.fn(async (model: string, _input?: unknown) => {
+      if (model === "@cf/baai/bge-base-en-v1.5") return { data: [[0.1, 0.2, 0.3]] };
+      return { response: "- Scotland should watch the retrieved chasers." };
+    });
+    const query = vi.fn(async () => ({
+      matches: [
+        {
+          id: "fresh",
+          score: 0.91,
+          metadata: {
+            snapshotId: "snap-a",
+            teamId: "scotland",
+            kind: "third-place-jump",
+            title: "Czechia can change the table",
+            text: "Czechia beat Mexico by 1+ and South Korea become a third-place chaser."
+          }
+        },
+        {
+          id: "stale",
+          score: 0.88,
+          metadata: {
+            snapshotId: "old-snap",
+            teamId: "scotland",
+            title: "Stale route",
+            text: "This should not be sent."
+          }
+        }
+      ]
+    }));
+
+    const response = await onRequestPost({
+      request: jsonRequest({
+        question: "Which other teams can hurt Scotland?",
+        team: "Scotland",
+        context: {
+          snapshotId: "snap-a",
+          team: { id: "scotland", name: "Scotland" },
+          answerSeed: ["Exact request context."]
+        }
+      }),
+      env: {
+        AI: { run },
+        SCENARIO_VECTORIZE: { query, upsert: vi.fn() }
+      }
+    });
+
+    expect(response.status).toBe(200);
+    expect(query).toHaveBeenCalledWith([0.1, 0.2, 0.3], expect.objectContaining({
+      filter: { snapshotId: "snap-a", teamId: "scotland" },
+      returnMetadata: "all"
+    }));
+    const chatCall = run.mock.calls.find((call) => call[0] === "@cf/openai/gpt-oss-120b");
+    const userMessage = (chatCall?.[1] as { messages?: Array<{ role: string; content: string }> } | undefined)?.messages?.find((message) => message.role === "user")?.content ?? "";
+    expect(userMessage).toContain("retrievedScenarioDocuments");
+    expect(userMessage).toContain("Czechia beat Mexico by 1+");
+    expect(userMessage).not.toContain("This should not be sent.");
+  });
+
+  it("can fall back to retrieved Vectorize documents when the model has no answer", async () => {
+    const run = vi.fn(async (model: string) => {
+      if (model === "@cf/baai/bge-base-en-v1.5") return { data: [[0.1, 0.2, 0.3]] };
+      return { reasoning: "hidden" };
+    });
+    const response = await onRequestPost({
+      request: jsonRequest({
+        question: "Who can jump into third?",
+        team: "Scotland",
+        context: {
+          snapshotId: "snap-a",
+          team: { id: "scotland", name: "Scotland" }
+        }
+      }),
+      env: {
+        AI: { run },
+        SCENARIO_VECTORIZE: {
+          upsert: vi.fn(),
+          query: vi.fn(async () => ({
+            matches: [{
+              id: "fresh",
+              metadata: {
+                snapshotId: "snap-a",
+                title: "South Korea can become third",
+                text: "Czechia beat Mexico by 1+ and South Korea become third in Group A."
+              }
+            }]
+          }))
+        }
+      }
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      answer: "- South Korea can become third: Czechia beat Mexico by 1+ and South Korea become third in Group A."
+    });
   });
 
   it("strips leaked analysis and role markers from model output", async () => {
@@ -229,6 +327,79 @@ describe("scenario question function", () => {
 
     expect(response.status).toBe(400);
     expect(await response.json()).toEqual({ error: "Ask a scenario question first." });
+  });
+
+  it("indexes scenario documents through the protected Vectorize endpoint", async () => {
+    const run = vi.fn(async () => ({ data: [[0.1, 0.2], [0.3, 0.4]] }));
+    const upsert = vi.fn(async () => ({ count: 2 }));
+    const response = await onScenarioIndexPost({
+      request: jsonRequest({
+        documents: [
+          {
+            id: "snap:team-summary:scotland",
+            title: "Scotland summary",
+            text: "Scotland can qualify directly with a win.",
+            metadata: { snapshotId: "snap", kind: "team-summary", teamId: "scotland" }
+          },
+          {
+            id: "snap:third-place-jump:czechia",
+            title: "Czechia jump",
+            text: "Czechia can move South Korea into third.",
+            metadata: { snapshotId: "snap", kind: "third-place-jump", teamId: "south-korea" }
+          }
+        ]
+      }),
+      env: {
+        AI: { run },
+        SCENARIO_VECTORIZE: { query: vi.fn(), upsert },
+        SCENARIO_INDEX_TOKEN: "secret"
+      }
+    });
+
+    expect(response.status).toBe(401);
+
+    const authorizedResponse = await onScenarioIndexPost({
+      request: new Request("https://worldcup.test/api/scenario-index", {
+        method: "POST",
+        headers: { "content-type": "application/json", "authorization": "Bearer secret" },
+        body: JSON.stringify({
+          documents: [
+            {
+              id: "snap:team-summary:scotland",
+              title: "Scotland summary",
+              text: "Scotland can qualify directly with a win.",
+              metadata: { snapshotId: "snap", kind: "team-summary", teamId: "scotland" }
+            },
+            {
+              id: "snap:third-place-jump:czechia",
+              title: "Czechia jump",
+              text: "Czechia can move South Korea into third.",
+              metadata: { snapshotId: "snap", kind: "third-place-jump", teamId: "south-korea" }
+            }
+          ]
+        })
+      }),
+      env: {
+        AI: { run },
+        SCENARIO_VECTORIZE: { query: vi.fn(), upsert },
+        SCENARIO_INDEX_TOKEN: "secret"
+      }
+    });
+
+    expect(authorizedResponse.status).toBe(200);
+    expect(await authorizedResponse.json()).toEqual({ indexed: 2, skipped: 0 });
+    expect(upsert).toHaveBeenCalledWith([
+      expect.objectContaining({
+        id: "snap:team-summary:scotland",
+        values: [0.1, 0.2],
+        metadata: expect.objectContaining({ snapshotId: "snap", kind: "team-summary", text: "Scotland can qualify directly with a win." })
+      }),
+      expect.objectContaining({
+        id: "snap:third-place-jump:czechia",
+        values: [0.3, 0.4],
+        metadata: expect.objectContaining({ snapshotId: "snap", kind: "third-place-jump", text: "Czechia can move South Korea into third." })
+      })
+    ]);
   });
 });
 
