@@ -14,8 +14,14 @@ export interface ScenarioIndexResult {
   skippedReason?: string;
 }
 
-export async function generateAndMaybeIndexScenarios(data: TournamentData, env = process.env): Promise<ScenarioIndexResult> {
-  const documents = generateScenarioDocuments(data);
+type ScenarioDocumentGenerator = typeof generateScenarioDocuments;
+
+export async function generateAndMaybeIndexScenarios(
+  data: TournamentData,
+  env = process.env,
+  generateDocuments: ScenarioDocumentGenerator = generateScenarioDocuments
+): Promise<ScenarioIndexResult> {
+  const documents = generateDocuments(data);
   const snapshotId = documents[0]?.metadata.snapshotId ?? "unknown";
   const endpoint = endpointUrl(env.SCENARIO_INDEX_URL, env.SCENARIO_SITE_URL);
   const token = env.SCENARIO_INDEX_TOKEN?.trim();
