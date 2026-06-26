@@ -56,4 +56,16 @@ describe("scenario indexing script", () => {
       headers: expect.objectContaining({ authorization: "Bearer secret" })
     }));
   });
+
+  it("treats a root scenario index URL as the site URL", async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ indexed: 1, skipped: 0 }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await generateAndMaybeIndexScenarios(makeTournamentData(), {
+      SCENARIO_INDEX_URL: "https://worldcup.test",
+      SCENARIO_INDEX_TOKEN: "secret"
+    }, testDocuments);
+
+    expect(fetchMock).toHaveBeenCalledWith("https://worldcup.test/api/scenario-index", expect.any(Object));
+  });
 });

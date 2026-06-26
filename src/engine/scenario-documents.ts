@@ -335,8 +335,9 @@ function documentFromParts(input: {
 }
 
 function scenarioDocumentId(snapshotId: string, kind: ScenarioDocumentKind, parts: string[]) {
-  const readable = parts.map(slug).filter(Boolean).join("-").slice(0, 80);
-  return `${snapshotId}:${kind}:${readable || hashString(parts.join(":"))}`;
+  const kindPrefix = kind.split("-").map((part) => part[0]).join("");
+  const stableHash = hashString(`${kind}:${parts.join(":")}`);
+  return `${snapshotId}:${kindPrefix}:${stableHash}`;
 }
 
 function dedupeDocuments(documents: ScenarioDocument[]) {

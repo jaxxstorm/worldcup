@@ -401,6 +401,39 @@ describe("scenario question function", () => {
       })
     ]);
   });
+
+  it("returns indexing errors as JSON", async () => {
+    const response = await onScenarioIndexPost({
+      request: new Request("https://worldcup.test/api/scenario-index", {
+        method: "POST",
+        headers: { "content-type": "application/json", "authorization": "Bearer secret" },
+        body: JSON.stringify({
+          documents: [{
+            id: "snap:team-summary:scotland",
+            title: "Scotland summary",
+            text: "Scotland can qualify directly with a win.",
+            metadata: { snapshotId: "snap", kind: "team-summary", teamId: "scotland" }
+          }]
+        })
+      }),
+      env: {
+        AI: { run: vi.fn(async () => ({ data: [[0.1, 0.2]] })) },
+        SCENARIO_VECTORIZE: {
+          query: vi.fn(),
+          upsert: vi.fn(async () => {
+            throw new Error("Vectorize index dimension mismatch");
+          })
+        },
+        SCENARIO_INDEX_TOKEN: "secret"
+      }
+    });
+
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({
+      error: "Scenario indexing failed.",
+      detail: "Vectorize index dimension mismatch"
+    });
+  });
 });
 
 function jsonRequest(body: unknown) {

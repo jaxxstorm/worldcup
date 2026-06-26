@@ -31,14 +31,21 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (documents.length === 0) return json({ error: "No valid scenario documents supplied." }, 400);
   if (documents.length > maxDocumentsPerRequest) return json({ error: `Send at most ${maxDocumentsPerRequest} scenario documents per request.` }, 400);
 
-  const result = await indexScenarioDocuments({
-    ai: env.AI,
-    vectorize: env.SCENARIO_VECTORIZE,
-    embeddingModel: env.SCENARIO_EMBEDDING_MODEL ?? defaultEmbeddingModel,
-    documents
-  });
+  try {
+    const result = await indexScenarioDocuments({
+      ai: env.AI,
+      vectorize: env.SCENARIO_VECTORIZE,
+      embeddingModel: env.SCENARIO_EMBEDDING_MODEL ?? defaultEmbeddingModel,
+      documents
+    });
 
-  return json(result);
+    return json(result);
+  } catch (error) {
+    return json({
+      error: "Scenario indexing failed.",
+      detail: error instanceof Error ? error.message : String(error)
+    }, 500);
+  }
 };
 
 function authorized(request: Request, token: string) {

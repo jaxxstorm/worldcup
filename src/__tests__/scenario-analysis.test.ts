@@ -312,6 +312,7 @@ describe("scenario analysis", () => {
 
     expect(documents.length).toBeGreaterThan(data.teams.length);
     expect(documents.every((document) => document.metadata.snapshotId === snapshotId)).toBe(true);
+    expect(documents.every((document) => new TextEncoder().encode(document.id).length <= 64)).toBe(true);
     expect(documents).toEqual(expect.arrayContaining([
       expect.objectContaining({
         metadata: expect.objectContaining({ kind: "team-summary", teamId: "scotland" }),
