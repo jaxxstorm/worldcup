@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-26T20:30:24.909Z",
+  "generatedAt": "2026-06-26T22:23:03.607Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -1649,7 +1649,17 @@
       "venueId": "gillette-stadium",
       "home": "norway",
       "away": "france",
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 1,
+        "away": 4
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-26T22:23:02.650Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m054",
@@ -1660,7 +1670,17 @@
       "venueId": "bmo-field",
       "home": "senegal",
       "away": "iraq",
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 5,
+        "away": 0
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-26T22:23:02.650Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m055",
@@ -2727,7 +2747,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-26T20:30:24.909Z",
+        "accessedAt": "2026-06-26T22:23:03.607Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2810,7 +2830,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-26T20:30:24.909Z",
+        "accessedAt": "2026-06-26T22:23:03.607Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2865,24 +2885,24 @@
         },
         {
           "rank": 8,
+          "player": "Bradley Barcola",
+          "teamId": "france",
+          "value": 1,
+          "detail": "France"
+        },
+        {
+          "rank": 9,
           "player": "Cody Gakpo",
           "teamId": "netherlands",
           "value": 1,
           "detail": "Netherlands"
         },
         {
-          "rank": 9,
+          "rank": 10,
           "player": "Crysencio Summerville",
           "teamId": "netherlands",
           "value": 1,
           "detail": "Netherlands"
-        },
-        {
-          "rank": 10,
-          "player": "Felix Kalu Nmecha",
-          "teamId": "germany",
-          "value": 1,
-          "detail": "Germany"
         }
       ]
     },
@@ -2893,7 +2913,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-26T20:30:24.909Z",
+        "accessedAt": "2026-06-26T22:23:03.607Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
