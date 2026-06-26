@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-26T01:58:54.552Z",
+  "generatedAt": "2026-06-26T04:24:28.351Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -1059,7 +1059,17 @@
       "venueId": "sofi-stadium",
       "home": "turkiye",
       "away": "united-states",
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 3,
+        "away": 2
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-26T04:24:28.351Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m024",
@@ -1070,7 +1080,17 @@
       "venueId": "levi-stadium",
       "home": "paraguay",
       "away": "australia",
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 0,
+        "away": 0
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-26T04:24:28.351Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m025",
