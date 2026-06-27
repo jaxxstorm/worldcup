@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-27T05:10:27.172Z",
+  "generatedAt": "2026-06-27T23:47:03.649Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -2027,7 +2027,17 @@
       "venueId": "metlife-stadium",
       "home": "panama",
       "away": "england",
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 0,
+        "away": 2
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-27T23:47:02.953Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m072",
@@ -2038,7 +2048,17 @@
       "venueId": "lincoln-financial-field",
       "home": "croatia",
       "away": "ghana",
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 2,
+        "away": 1
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-27T23:47:02.953Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m073",
@@ -2787,7 +2807,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-27T05:10:23.128Z",
+        "accessedAt": "2026-06-27T23:47:03.649Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2849,17 +2869,17 @@
         },
         {
           "rank": 9,
+          "player": "Harry Kane",
+          "teamId": "england",
+          "value": 3,
+          "detail": "England"
+        },
+        {
+          "rank": 10,
           "player": "Ismael Saibari",
           "teamId": "morocco",
           "value": 3,
           "detail": "Morocco"
-        },
-        {
-          "rank": 10,
-          "player": "Ismaïla Sarr",
-          "teamId": "senegal",
-          "value": 3,
-          "detail": "Senegal"
         }
       ]
     },
@@ -2870,7 +2890,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-27T05:10:23.128Z",
+        "accessedAt": "2026-06-27T23:47:03.649Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2953,7 +2973,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-27T05:10:23.128Z",
+        "accessedAt": "2026-06-27T23:47:03.649Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
