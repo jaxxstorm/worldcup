@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-27T02:16:58.783Z",
+  "generatedAt": "2026-06-26T01:58:54.552Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -1059,6 +1059,7 @@
       "venueId": "sofi-stadium",
       "home": "turkiye",
       "away": "united-states",
+<<<<<<< HEAD
       "status": "completed",
       "result": {
         "home": 3,
@@ -1070,6 +1071,21 @@
         "accessedAt": "2026-06-26T04:24:28.351Z",
         "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
       }
+||||||| parent of 1414d29 (Revert "results!")
+      "status": "completed",
+      "result": {
+        "home": 3,
+        "away": 2
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-27T05:06:00.105Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
+=======
+      "status": "scheduled"
+>>>>>>> 1414d29 (Revert "results!")
     },
     {
       "id": "m024",
@@ -1080,6 +1096,7 @@
       "venueId": "levi-stadium",
       "home": "paraguay",
       "away": "australia",
+<<<<<<< HEAD
       "status": "completed",
       "result": {
         "home": 0,
@@ -1091,6 +1108,21 @@
         "accessedAt": "2026-06-26T04:24:28.351Z",
         "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
       }
+||||||| parent of 1414d29 (Revert "results!")
+      "status": "completed",
+      "result": {
+        "home": 0,
+        "away": 0
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-27T05:06:00.105Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
+=======
+      "status": "scheduled"
+>>>>>>> 1414d29 (Revert "results!")
     },
     {
       "id": "m025",
@@ -1437,17 +1469,7 @@
       "venueId": "bc-place",
       "home": "new-zealand",
       "away": "belgium",
-      "status": "completed",
-      "result": {
-        "home": 1,
-        "away": 5
-      },
-      "sourceResult": {
-        "name": "FIFA World Cup 2026 match calendar API",
-        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
-        "accessedAt": "2026-06-27T05:06:00.105Z",
-        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
-      }
+      "status": "scheduled"
     },
     {
       "id": "m042",
@@ -1458,17 +1480,7 @@
       "venueId": "lumen-field",
       "home": "egypt",
       "away": "iran",
-      "status": "completed",
-      "result": {
-        "home": 1,
-        "away": 1
-      },
-      "sourceResult": {
-        "name": "FIFA World Cup 2026 match calendar API",
-        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
-        "accessedAt": "2026-06-27T05:06:00.105Z",
-        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
-      }
+      "status": "scheduled"
     },
     {
       "id": "m043",
@@ -1563,6 +1575,7 @@
       "venueId": "estadio-akron",
       "home": "uruguay",
       "away": "spain",
+<<<<<<< HEAD
       "status": "completed",
       "result": {
         "home": 0,
@@ -1574,6 +1587,21 @@
         "accessedAt": "2026-06-27T02:16:58.783Z",
         "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
       }
+||||||| parent of 1414d29 (Revert "results!")
+      "status": "completed",
+      "result": {
+        "home": 0,
+        "away": 1
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-27T05:06:00.105Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
+=======
+      "status": "scheduled"
+>>>>>>> 1414d29 (Revert "results!")
     },
     {
       "id": "m048",
@@ -1584,6 +1612,7 @@
       "venueId": "nrg-stadium",
       "home": "cape-verde",
       "away": "saudi-arabia",
+<<<<<<< HEAD
       "status": "completed",
       "result": {
         "home": 0,
@@ -1595,6 +1624,21 @@
         "accessedAt": "2026-06-27T02:16:58.783Z",
         "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
       }
+||||||| parent of 1414d29 (Revert "results!")
+      "status": "completed",
+      "result": {
+        "home": 0,
+        "away": 0
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-27T05:06:00.105Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
+=======
+      "status": "scheduled"
+>>>>>>> 1414d29 (Revert "results!")
     },
     {
       "id": "m049",
@@ -1689,6 +1733,7 @@
       "venueId": "gillette-stadium",
       "home": "norway",
       "away": "france",
+<<<<<<< HEAD
       "status": "completed",
       "result": {
         "home": 1,
@@ -1700,6 +1745,21 @@
         "accessedAt": "2026-06-26T22:23:02.650Z",
         "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
       }
+||||||| parent of 1414d29 (Revert "results!")
+      "status": "completed",
+      "result": {
+        "home": 1,
+        "away": 4
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-27T05:06:00.105Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
+=======
+      "status": "scheduled"
+>>>>>>> 1414d29 (Revert "results!")
     },
     {
       "id": "m054",
@@ -1710,6 +1770,7 @@
       "venueId": "bmo-field",
       "home": "senegal",
       "away": "iraq",
+<<<<<<< HEAD
       "status": "completed",
       "result": {
         "home": 5,
@@ -1721,6 +1782,21 @@
         "accessedAt": "2026-06-26T22:23:02.650Z",
         "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
       }
+||||||| parent of 1414d29 (Revert "results!")
+      "status": "completed",
+      "result": {
+        "home": 5,
+        "away": 0
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-27T05:06:00.105Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
+=======
+      "status": "scheduled"
+>>>>>>> 1414d29 (Revert "results!")
     },
     {
       "id": "m055",
@@ -2787,7 +2863,13 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
+<<<<<<< HEAD
         "accessedAt": "2026-06-26T22:23:03.607Z",
+||||||| parent of 1414d29 (Revert "results!")
+        "accessedAt": "2026-06-27T05:05:50.459Z",
+=======
+        "accessedAt": "2026-06-26T01:58:54.552Z",
+>>>>>>> 1414d29 (Revert "results!")
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2814,44 +2896,61 @@
         },
         {
           "rank": 4,
-          "player": "Ousmane Dembélé",
-          "teamId": "france",
-          "value": 4,
-          "detail": "France"
-        },
-        {
-          "rank": 5,
           "player": "Vinicius Junior",
           "teamId": "brazil",
           "value": 4,
           "detail": "Brazil"
         },
         {
-          "rank": 6,
+          "rank": 5,
           "player": "Brian Brobbey",
           "teamId": "netherlands",
           "value": 3,
           "detail": "Netherlands"
         },
         {
-          "rank": 7,
+          "rank": 6,
           "player": "Deniz Undav",
           "teamId": "germany",
           "value": 3,
           "detail": "Germany"
         },
         {
+<<<<<<< HEAD
           "rank": 8,
+||||||| parent of 1414d29 (Revert "results!")
+          "rank": 8,
+          "player": "Elijah Just",
+          "teamId": "new-zealand",
+          "value": 3,
+          "detail": "New Zealand"
+        },
+        {
+          "rank": 9,
+=======
+          "rank": 7,
+>>>>>>> 1414d29 (Revert "results!")
           "player": "Ismael Saibari",
           "teamId": "morocco",
           "value": 3,
           "detail": "Morocco"
         },
         {
+<<<<<<< HEAD
           "rank": 9,
           "player": "Ismaïla Sarr",
           "teamId": "senegal",
+||||||| parent of 1414d29 (Revert "results!")
+          "rank": 10,
+          "player": "Ismaïla Sarr",
+          "teamId": "senegal",
+=======
+          "rank": 8,
+          "player": "Johan Manzambi",
+          "teamId": "switzerland",
+>>>>>>> 1414d29 (Revert "results!")
           "value": 3,
+<<<<<<< HEAD
           "detail": "Senegal"
         },
         {
@@ -2860,6 +2959,25 @@
           "teamId": "switzerland",
           "value": 3,
           "detail": "Switzerland"
+||||||| parent of 1414d29 (Revert "results!")
+          "detail": "Senegal"
+=======
+          "detail": "Switzerland"
+        },
+        {
+          "rank": 9,
+          "player": "Jonathan David",
+          "teamId": "canada",
+          "value": 3,
+          "detail": "Canada"
+        },
+        {
+          "rank": 10,
+          "player": "Matheus Cunha",
+          "teamId": "brazil",
+          "value": 3,
+          "detail": "Brazil"
+>>>>>>> 1414d29 (Revert "results!")
         }
       ]
     },
@@ -2870,7 +2988,13 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
+<<<<<<< HEAD
         "accessedAt": "2026-06-26T22:23:03.607Z",
+||||||| parent of 1414d29 (Revert "results!")
+        "accessedAt": "2026-06-27T05:05:50.459Z",
+=======
+        "accessedAt": "2026-06-26T01:58:54.552Z",
+>>>>>>> 1414d29 (Revert "results!")
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2897,52 +3021,52 @@
         },
         {
           "rank": 4,
-          "player": "Kylian Mbappé",
-          "teamId": "france",
-          "value": 2,
-          "detail": "France"
-        },
-        {
-          "rank": 5,
           "player": "Mohamed Salah",
           "teamId": "egypt",
           "value": 2,
           "detail": "Egypt"
         },
         {
-          "rank": 6,
+          "rank": 5,
           "player": "Viktor Gyökeres",
           "teamId": "sweden",
           "value": 2,
           "detail": "Sweden"
         },
         {
-          "rank": 7,
+          "rank": 6,
           "player": "Ayase Ueda",
           "teamId": "japan",
           "value": 1,
           "detail": "Japan"
         },
         {
-          "rank": 8,
-          "player": "Bradley Barcola",
-          "teamId": "france",
-          "value": 1,
-          "detail": "France"
-        },
-        {
-          "rank": 9,
+          "rank": 7,
           "player": "Cody Gakpo",
           "teamId": "netherlands",
           "value": 1,
           "detail": "Netherlands"
         },
         {
-          "rank": 10,
+          "rank": 8,
           "player": "Crysencio Summerville",
           "teamId": "netherlands",
           "value": 1,
           "detail": "Netherlands"
+        },
+        {
+          "rank": 9,
+          "player": "Felix Kalu Nmecha",
+          "teamId": "germany",
+          "value": 1,
+          "detail": "Germany"
+        },
+        {
+          "rank": 10,
+          "player": "In-beom Hwang",
+          "teamId": "south-korea",
+          "value": 1,
+          "detail": "South Korea"
         }
       ]
     },
@@ -2953,7 +3077,13 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
+<<<<<<< HEAD
         "accessedAt": "2026-06-26T22:23:03.607Z",
+||||||| parent of 1414d29 (Revert "results!")
+        "accessedAt": "2026-06-27T05:05:50.459Z",
+=======
+        "accessedAt": "2026-06-26T01:58:54.552Z",
+>>>>>>> 1414d29 (Revert "results!")
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
