@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-28T01:59:55.645Z",
+  "generatedAt": "2026-06-28T05:26:27.296Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -1815,7 +1815,17 @@
       "venueId": "at-and-t-stadium",
       "home": "jordan",
       "away": "argentina",
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 1,
+        "away": 3
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-28T05:26:26.443Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m060",
@@ -1826,7 +1836,17 @@
       "venueId": "arrowhead-stadium",
       "home": "algeria",
       "away": "austria",
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 3,
+        "away": 3
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-28T05:26:26.443Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m061",
@@ -2827,7 +2847,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-28T01:59:51.418Z",
+        "accessedAt": "2026-06-28T05:26:27.296Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2835,7 +2855,7 @@
           "rank": 1,
           "player": "Lionel Messi",
           "teamId": "argentina",
-          "value": 5,
+          "value": 6,
           "detail": "Argentina"
         },
         {
@@ -2910,7 +2930,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-28T01:59:51.418Z",
+        "accessedAt": "2026-06-28T05:26:27.296Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2951,35 +2971,35 @@
         },
         {
           "rank": 6,
+          "player": "Riyad Mahrez",
+          "teamId": "algeria",
+          "value": 2,
+          "detail": "Algeria"
+        },
+        {
+          "rank": 7,
           "player": "Viktor Gyökeres",
           "teamId": "sweden",
           "value": 2,
           "detail": "Sweden"
         },
         {
-          "rank": 7,
+          "rank": 8,
           "player": "Ayase Ueda",
           "teamId": "japan",
           "value": 1,
           "detail": "Japan"
         },
         {
-          "rank": 8,
+          "rank": 9,
           "player": "Bradley Barcola",
           "teamId": "france",
           "value": 1,
           "detail": "France"
         },
         {
-          "rank": 9,
-          "player": "Cody Gakpo",
-          "teamId": "netherlands",
-          "value": 1,
-          "detail": "Netherlands"
-        },
-        {
           "rank": 10,
-          "player": "Crysencio Summerville",
+          "player": "Cody Gakpo",
           "teamId": "netherlands",
           "value": 1,
           "detail": "Netherlands"
@@ -2993,7 +3013,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-28T01:59:51.418Z",
+        "accessedAt": "2026-06-28T05:26:27.296Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
