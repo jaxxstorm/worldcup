@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-27T23:47:03.649Z",
+  "generatedAt": "2026-06-28T01:59:55.645Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -1921,7 +1921,17 @@
       "venueId": "hard-rock-stadium",
       "home": "colombia",
       "away": "portugal",
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 0,
+        "away": 0
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-28T01:59:55.645Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m066",
@@ -1932,7 +1942,17 @@
       "venueId": "mercedes-benz-stadium",
       "home": "dr-congo",
       "away": "uzbekistan",
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 3,
+        "away": 1
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-28T01:59:55.645Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m067",
@@ -2807,7 +2827,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-27T23:47:03.649Z",
+        "accessedAt": "2026-06-28T01:59:51.418Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2890,7 +2910,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-27T23:47:03.649Z",
+        "accessedAt": "2026-06-28T01:59:51.418Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2973,7 +2993,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-27T23:47:03.649Z",
+        "accessedAt": "2026-06-28T01:59:51.418Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3018,6 +3038,13 @@
           "teamId": "south-africa",
           "value": 1,
           "detail": "South Africa"
+        },
+        {
+          "rank": 7,
+          "player": "Yoane Wissa",
+          "teamId": "dr-congo",
+          "value": 1,
+          "detail": "Congo DR"
         }
       ]
     }
