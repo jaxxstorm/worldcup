@@ -227,9 +227,32 @@ h2 {
 
 .fixture {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
   padding: 14px;
+  align-items: center;
+}
+
+.fixture-body {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.fixture-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: #607268;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.fixture-kicker span:not(:last-child)::after {
+  content: "·";
+  padding-left: 6px;
+  color: #95a79b;
 }
 
 .fixture-meta,
@@ -242,21 +265,21 @@ h2 {
 
 .team-line {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 8px;
+  min-height: 32px;
 }
 
 .fixture-meta {
   flex-wrap: wrap;
-  margin-top: 10px;
   color: #607268;
   font-size: 13px;
 }
 
 .team-stack {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .flag {
@@ -279,6 +302,31 @@ h2 {
   min-width: 32px;
   text-align: right;
   font-weight: 700;
+}
+
+.fixture-slot-label,
+.fixture-source-slot {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 26px;
+  border-radius: 6px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.fixture-slot-label {
+  padding: 0 9px;
+  border: 1px solid #c8d6cc;
+  color: #17382a;
+  background: #f7faf7;
+}
+
+.fixture-source-slot {
+  padding: 0 8px;
+  color: #607268;
+  background: #eef4ef;
+  font-size: 12px;
 }
 
 .prediction-controls {

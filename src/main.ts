@@ -142,7 +142,7 @@ function renderMainView(projection: ProjectedMatch[]) {
       <div class="column">
         <section>
           <h2>Fixtures</h2>
-          <div class="fixture-list">${renderFixtures()}</div>
+          <div class="fixture-list">${renderFixtures(projection)}</div>
         </section>
       </div>
       <div class="column">
@@ -597,17 +597,18 @@ function renderThirdPlaceRow(row: ThirdPlaceStandingRow) {
   `;
 }
 
-function renderFixtures() {
+function renderFixtures(projection: ProjectedMatch[]) {
   const visibleFixtures = tournamentData.fixtures.filter((fixture) => fixture.stage === "group" || fixture.stage === "round-of-32");
   const { actionable, completed } = sectionFixturesForDisplay(visibleFixtures);
+  const projectionByFixtureId = new Map(projection.map((match) => [match.fixtureId, match]));
 
   return `
-    ${renderCompletedFixtureSection(completed)}
-    ${renderFixtureDateGroups(actionable)}
+    ${renderCompletedFixtureSection(completed, projectionByFixtureId)}
+    ${renderFixtureDateGroups(actionable, projectionByFixtureId)}
   `;
 }
 
-function renderCompletedFixtureSection(fixtureGroups: ReturnType<typeof sectionFixturesForDisplay>["completed"]) {
+function renderCompletedFixtureSection(fixtureGroups: ReturnType<typeof sectionFixturesForDisplay>["completed"], projectionByFixtureId: Map<string, ProjectedMatch>) {
   const completedCount = fixtureGroups.reduce((total, group) => total + group.fixtures.length, 0);
   if (completedCount === 0) return "";
 
@@ -618,13 +619,13 @@ function renderCompletedFixtureSection(fixtureGroups: ReturnType<typeof sectionF
         <span>${completedCount} ${completedCount === 1 ? "match" : "matches"}</span>
       </summary>
       <div class="completed-fixture-list">
-        ${renderFixtureDateGroups(fixtureGroups)}
+        ${renderFixtureDateGroups(fixtureGroups, projectionByFixtureId)}
       </div>
     </details>
   `;
 }
 
-function renderFixtureDateGroups(fixtureGroups: ReturnType<typeof sectionFixturesForDisplay>["actionable"]) {
+function renderFixtureDateGroups(fixtureGroups: ReturnType<typeof sectionFixturesForDisplay>["actionable"], projectionByFixtureId: Map<string, ProjectedMatch>) {
   return fixtureGroups
     .map((group) => `
       <section class="fixture-date-group" aria-labelledby="fixture-date-${group.key}">
@@ -633,27 +634,32 @@ function renderFixtureDateGroups(fixtureGroups: ReturnType<typeof sectionFixture
           <span>${group.fixtures.length} ${group.fixtures.length === 1 ? "match" : "matches"}</span>
         </div>
         <div class="fixture-date-list">
-          ${group.fixtures.map(renderFixture).join("")}
+          ${group.fixtures.map((fixture) => renderFixture(fixture, projectionByFixtureId.get(fixture.id))).join("")}
         </div>
       </section>
     `)
     .join("");
 }
 
-function renderFixture(fixture: Fixture) {
+function renderFixture(fixture: Fixture, projectedMatch?: ProjectedMatch) {
   const venue = venueById.get(fixture.venueId);
   const score = fixture.result ?? predictions[fixture.id];
+  const stageLabel = fixtureStageLabel(fixture);
+  const kickoff = formatFixtureKickoff(fixture);
 
   return `
     <article class="fixture">
-      <div>
+      <div class="fixture-body">
+        <div class="fixture-kicker">
+          <span>${fixture.id}</span>
+          <span>${stageLabel}</span>
+          <span>${kickoff}</span>
+        </div>
         <div class="team-stack">
-          ${renderFixtureTeam(fixture.home, score?.home)}
-          ${renderFixtureTeam(fixture.away, score?.away)}
+          ${renderFixtureTeam(fixture.home, score?.home, projectedMatch?.home, projectedMatch?.homeSource)}
+          ${renderFixtureTeam(fixture.away, score?.away, projectedMatch?.away, projectedMatch?.awaySource)}
         </div>
         <div class="fixture-meta">
-          <span>${fixtureStageLabel(fixture)}</span>
-          <span>${formatFixtureKickoff(fixture)}</span>
           <span>${venue ? `${venue.name}, ${venue.city}, ${venue.country}` : "Venue TBD"}</span>
           ${score ? renderScoreDecision(score) : ""}
         </div>
@@ -667,15 +673,22 @@ function fixtureStageLabel(fixture: Fixture) {
   return fixture.stage === "group" && fixture.group ? `Group ${fixture.group}` : fixture.stage.replaceAll("-", " ");
 }
 
-function renderFixtureTeam(teamRef: TeamRef, score?: number) {
-  const team = typeof teamRef === "string" ? teamById.get(teamRef) : undefined;
-  const label = team ? team.name : typeof teamRef === "string" ? teamRef : teamRef.label;
+function renderFixtureTeam(teamRef: TeamRef, score?: number, projected?: QualifiedTeam, sourceLabel?: string) {
+  const team = projected?.teamId ? teamById.get(projected.teamId) : typeof teamRef === "string" ? teamById.get(teamRef) : undefined;
+  const fallbackLabel = projected?.label ?? (typeof teamRef === "string" ? teamRef : teamRef.label);
+  const isProjectedPlaceholder = Boolean(projected && typeof teamRef !== "string");
+
   return `
     <div class="team-line">
-      ${renderTeamIdentity(team, label)}
+      ${team ? renderTeamIdentity(team, fallbackLabel) : renderFixtureSlotLabel(fallbackLabel)}
+      ${sourceLabel && (isProjectedPlaceholder || sourceLabel !== fallbackLabel) ? `<span class="fixture-source-slot">${escapeHtml(sourceLabel)}</span>` : ""}
       <span class="score">${score ?? "-"}</span>
     </div>
   `;
+}
+
+function renderFixtureSlotLabel(label: string) {
+  return `<span class="fixture-slot-label">${escapeHtml(label)}</span>`;
 }
 
 function renderFixtureControls(fixture: Fixture) {
