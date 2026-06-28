@@ -22,21 +22,9 @@ describe("refresh workflow", () => {
     expect(workflow).toContain("npx wrangler pages deploy dist --project-name worldcup2026 --branch main");
   });
 
-  it("indexes scenario vectors only after changed data is deployed", () => {
-    const changeCheck = workflow.indexOf("git diff --quiet -- src/data/tournament.generated.json");
-    const tests = workflow.indexOf("npm test");
-    const build = workflow.indexOf("npm run build");
-    const artifactVerify = workflow.indexOf("Verify Cloudflare Pages artifact");
-    const scenarioIndex = workflow.indexOf("npm run index-scenarios");
-    const commit = workflow.indexOf("git commit -m \"chore(data): update tournament results\"");
-    const deploy = workflow.indexOf("npx wrangler pages deploy dist --project-name worldcup2026 --branch main");
-
-    expect(scenarioIndex).toBeGreaterThan(artifactVerify);
-    expect(scenarioIndex).toBeGreaterThan(build);
-    expect(scenarioIndex).toBeGreaterThan(tests);
-    expect(scenarioIndex).toBeGreaterThan(changeCheck);
-    expect(scenarioIndex).toBeGreaterThan(commit);
-    expect(scenarioIndex).toBeGreaterThan(deploy);
-    expect(workflow).toContain("if: steps.changes.outputs.changed == 'true'\n        run: npm run index-scenarios");
+  it("does not index retired scenario vectors after changed data is deployed", () => {
+    expect(workflow).not.toContain("npm run index-scenarios");
+    expect(workflow).not.toContain("SCENARIO_INDEX_URL");
+    expect(workflow).not.toContain("SCENARIO_INDEX_TOKEN");
   });
 });

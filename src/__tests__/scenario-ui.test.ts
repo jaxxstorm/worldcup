@@ -4,69 +4,30 @@ import { describe, expect, it } from "vitest";
 const mainSource = readFileSync("src/main.ts", "utf8");
 const styles = readFileSync("src/styles.css", "utf8");
 
-describe("scenario UI integration", () => {
-  it("wires the Scenarios tab, team selector, and active prediction analysis into the main view", () => {
-    expect(mainSource).toContain('data-view="scenarios"');
-    expect(mainSource).toContain('data-scenario-team');
-    expect(mainSource).not.toContain("${team.flag} ${escapeHtml(team.name)}");
-    expect(mainSource).toContain("analyzeTeamScenarios(tournamentData, predictions");
-    expect(mainSource).toContain("let selectedScenarioTeamId = scenarioTeams()[0]?.id ?? \"\"");
-    expect(mainSource).toContain(".sort((left, right) => left.name.localeCompare(right.name))");
-    expect(mainSource).toContain("renderScenarioOutcomePanel");
-    expect(mainSource).toContain("renderScenarioDependencyPanel");
-    expect(mainSource).toContain("scenario-right-column");
-    expect(mainSource).toContain("renderScenarioInlineOpponents");
-    expect(mainSource).toContain("scenario-opponent-row");
-    expect(mainSource).toContain("Alternative opponents");
-    expect(mainSource).toContain("sameScenarioOpponent");
-    expect(mainSource).toContain("data-scenario-question");
-    expect(mainSource).toContain("<div class=\"scenario-ai-answer\"");
-    expect(mainSource).toContain("let scenarioAnswerContext");
-    expect(mainSource).toContain("renderScenarioVisualAnswer");
-    expect(mainSource).toContain("scenarioVisualIntent");
-    expect(mainSource).toContain("renderScenarioCurrentStatusSummary");
-    expect(mainSource).toContain("scenarioCurrentlyQualifies");
-    expect(mainSource).toContain("renderScenarioStateBadge");
-    expect(mainSource).toContain("Currently:");
-    expect(mainSource).toContain("missing out");
-    expect(mainSource).toContain("renderScenarioQualificationRoutes");
-    expect(mainSource).toContain("renderScenarioQualificationRoute");
-    expect(mainSource).toContain("compareQualificationPaths");
-    expect(mainSource).toContain("qualificationPathEffort");
-    expect(mainSource).toContain("Shortest qualification path");
-    expect(mainSource).toContain("renderScenarioRouteMap");
-    expect(mainSource).toContain("renderScenarioChaserMap");
-    expect(mainSource).toContain("renderScenarioFinishMap");
-    expect(mainSource).toContain("scenario-qualification-route");
-    expect(mainSource).toContain("scenario-route-event");
-    expect(mainSource).toContain("scenario-chaser-chip");
-    expect(mainSource).toContain("scenario-finish-chip");
-    expect(mainSource).toContain("buildScenarioQuestionContext(tournamentData, predictions");
-    expect(mainSource).toContain("\"/api/scenario-question\"");
+describe("retired scenario UI", () => {
+  it("does not expose the Scenarios view in browser navigation or rendering", () => {
+    expect(mainSource).not.toContain('data-view="scenarios"');
+    expect(mainSource).not.toContain(">Scenarios<");
+    expect(mainSource).not.toContain("renderScenariosView");
+    expect(mainSource).not.toContain("data-scenario-team");
+    expect(mainSource).not.toContain("data-scenario-question");
+    expect(mainSource).not.toContain("/api/scenario-question");
+
+    expect(mainSource).toContain('data-view="main"');
+    expect(mainSource).toContain('data-view="bracket"');
+    expect(mainSource).toContain('data-view="stats"');
+    expect(mainSource).toContain('data-view="performance"');
   });
 
-  it("renders fixed-result copy and responsive scenario styles", () => {
-    expect(mainSource).toContain("Fixed Results");
-    expect(mainSource).toContain("scenario.fixedResults");
-    expect(styles).toContain(".scenarios-layout");
-    expect(styles).toContain(".scenario-left-column");
-    expect(styles).toContain(".scenario-right-column");
-    expect(styles).toContain(".scenario-current-layout");
-    expect(styles).toContain(".scenario-path-panel");
-    expect(styles).toContain(".scenario-opponent-row");
-    expect(styles).toContain(".scenario-question-box");
-    expect(styles).toContain(".scenario-question-row");
-    expect(styles).toContain(".scenario-visual-answer");
-    expect(styles).toContain(".scenario-current-status-card");
-    expect(styles).toContain(".scenario-state-badge");
-    expect(styles).toContain(".scenario-qualification-routes");
-    expect(styles).toContain(".scenario-shortest-qualification");
-    expect(styles).toContain(".scenario-qualification-route");
-    expect(styles).toContain(".scenario-route-flow");
-    expect(styles).toContain(".scenario-chaser-grid");
-    expect(styles).toContain(".scenario-finish-strip");
-    expect(styles).toContain("white-space: pre-wrap");
-    expect(styles).toContain(".scenario-team-selector");
-    expect(styles).toContain("@media (max-width: 900px)");
+  it("does not keep scenario-specific styles in the browser stylesheet", () => {
+    expect(styles).not.toContain(".scenarios-page");
+    expect(styles).not.toContain(".scenarios-layout");
+    expect(styles).not.toContain(".scenario-question-box");
+    expect(styles).not.toContain(".scenario-visual-answer");
+    expect(styles).not.toContain(".scenario-state-badge");
+
+    expect(styles).toContain(".bracket-page");
+    expect(styles).toContain(".stats-page");
+    expect(styles).toContain(".performance-page");
   });
 });

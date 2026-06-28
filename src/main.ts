@@ -6,7 +6,6 @@ import { formatFixtureKickoff, sectionFixturesForDisplay } from "./engine/fixtur
 import { drawSidesForProjection, projectTournament } from "./engine/knockout";
 import { calculateFixturePerformanceEntries, calculateFixturePerformanceSummaries, calculatePerformanceRows, type FixturePerformanceEntry, type FixturePerformanceSummary, type PerformanceMode, type PerformanceRow } from "./engine/performance";
 import { interpretPredictionInput, isEditableFixture, setPrediction } from "./engine/predictions";
-import { analyzeTeamScenarios, buildScenarioQuestionContext, type ScenarioDependency, type ScenarioMarginNote, type ScenarioOutcome, type ScenarioQuestionContext, type TeamScenarioAnalysis } from "./engine/scenarios";
 import { calculateGroupStandings, thirdPlaceRankings } from "./engine/standings";
 import { recentResultsForTeam, type TeamRecentResult } from "./engine/team-details";
 import { buildPredictionShareUrl, sharedPredictionsFromUrl } from "./storage/share";
@@ -26,15 +25,9 @@ if (!app) throw new Error("App root missing");
 const appRoot = app;
 const sharedPredictions = sharedPredictionsFromUrl(tournamentData, window.location.href);
 let predictions: PredictionMap = sharedPredictions ?? loadPredictions(tournamentData);
-let activeView: "main" | "bracket" | "stats" | "performance" | "scenarios" = "main";
+let activeView: "main" | "bracket" | "stats" | "performance" = "main";
 let activePerformanceTab: "teams" | "fixtures" = "teams";
 let activePerformanceMode: PerformanceMode = "raw";
-let selectedScenarioTeamId = scenarioTeams()[0]?.id ?? "";
-let scenarioQuestion = "";
-let scenarioAnswer = "";
-let scenarioAnswerContext: ScenarioQuestionContext | undefined;
-let scenarioQuestionError = "";
-let scenarioQuestionLoading = false;
 let activeTooltip: HTMLDivElement | undefined;
 let recentPredictionChange: PredictionChangeSnapshot | undefined = sharedPredictions && Object.keys(sharedPredictions).length > 0
   ? capturePredictionChangeSnapshot(tournamentData, {})
@@ -66,7 +59,6 @@ function render() {
       <nav class="view-tabs" aria-label="Views">
         <button class="${activeView === "main" ? "active" : ""}" type="button" data-view="main">Fixtures</button>
         <button class="${activeView === "bracket" ? "active" : ""}" type="button" data-view="bracket">Knockout Stages</button>
-        <button class="${activeView === "scenarios" ? "active" : ""}" type="button" data-view="scenarios">Scenarios</button>
         <button class="${activeView === "stats" ? "active" : ""}" type="button" data-view="stats">Stats</button>
         <button class="${activeView === "performance" ? "active" : ""}" type="button" data-view="performance">Performance</button>
       </nav>
@@ -93,26 +85,6 @@ function render() {
       activePerformanceTab = parsePerformanceTab(button.dataset.performanceTab);
       render();
     });
-  });
-
-  appRoot.querySelectorAll<HTMLSelectElement>("[data-scenario-team]").forEach((select) => {
-    select.addEventListener("change", () => {
-      selectedScenarioTeamId = select.value;
-      scenarioAnswer = "";
-      scenarioAnswerContext = undefined;
-      scenarioQuestionError = "";
-      render();
-    });
-  });
-
-  appRoot.querySelectorAll<HTMLInputElement>("[data-scenario-question]").forEach((input) => {
-    input.addEventListener("input", () => {
-      scenarioQuestion = input.value;
-    });
-  });
-
-  appRoot.querySelectorAll<HTMLFormElement>("[data-scenario-question-form]").forEach((form) => {
-    form.addEventListener("submit", handleScenarioQuestion);
   });
 
   appRoot.querySelectorAll<HTMLElement>("[data-tooltip]").forEach((element) => {
@@ -143,7 +115,7 @@ function render() {
 }
 
 function parseActiveView(view: string | undefined): typeof activeView {
-  if (view === "bracket" || view === "stats" || view === "performance" || view === "scenarios") return view;
+  if (view === "bracket" || view === "stats" || view === "performance") return view;
   return "main";
 }
 
@@ -159,541 +131,9 @@ function parsePerformanceTab(tab: string | undefined): typeof activePerformanceT
 
 function renderActiveView(view: typeof activeView, projection: ProjectedMatch[]) {
   if (view === "bracket") return renderBracketView(projection);
-  if (view === "scenarios") return renderScenariosView();
   if (view === "stats") return renderStatsView();
   if (view === "performance") return renderPerformanceView();
   return renderMainView(projection);
-}
-
-function renderScenariosView() {
-  const selectedTeam = teamById.get(selectedScenarioTeamId) ?? tournamentData.teams.find((team) => team.group);
-  if (!selectedTeam) return `<p class="empty-state">No group-stage teams are available.</p>`;
-
-  selectedScenarioTeamId = selectedTeam.id;
-  const scenario = analyzeTeamScenarios(tournamentData, predictions, selectedTeam.id);
-  const scenarioContext = buildScenarioQuestionContext(tournamentData, predictions, selectedTeam.id);
-
-  return `
-    <div class="scenarios-page">
-      <section>
-        <div class="scenarios-heading">
-          <div>
-            <h2>Scenarios</h2>
-            <p class="section-note">Pick a team or ask a scenario question.</p>
-          </div>
-          ${renderScenarioTeamSelector(selectedTeam.id)}
-        </div>
-        ${renderScenarioQuestionBox(selectedTeam, scenarioContext)}
-        <div class="scenarios-layout">
-          <div class="scenario-left-column">
-            ${renderScenarioCurrentPanel(scenario)}
-          </div>
-          <div class="scenario-right-column">
-            ${renderScenarioOutcomePanel(scenario)}
-            ${renderScenarioDependencyPanel(scenario)}
-          </div>
-        </div>
-      </section>
-    </div>
-  `;
-}
-
-function renderScenarioQuestionBox(selectedTeam: Team, currentContext: ScenarioQuestionContext) {
-  const visualContext = scenarioAnswerContext ?? currentContext;
-  return `
-    <form class="scenario-question-box" data-scenario-question-form>
-      <label for="scenario-question">Ask about ${escapeHtml(selectedTeam.name)}</label>
-      <div class="scenario-question-row">
-        <input
-          id="scenario-question"
-          type="search"
-          data-scenario-question
-          value="${escapeAttribute(scenarioQuestion)}"
-          placeholder="How could ${escapeAttribute(selectedTeam.name)} miss out?"
-          autocomplete="off"
-        >
-        <button type="submit" ${scenarioQuestionLoading ? "disabled" : ""}>${scenarioQuestionLoading ? "Asking..." : "Ask"}</button>
-      </div>
-      ${renderScenarioVisualAnswer(visualContext)}
-      ${scenarioAnswer ? `<div class="scenario-ai-answer" aria-live="polite">${escapeHtml(scenarioAnswer)}</div>` : ""}
-      ${scenarioQuestionError ? `<p class="scenario-ai-error" aria-live="polite">${escapeHtml(scenarioQuestionError)}</p>` : ""}
-    </form>
-  `;
-}
-
-function renderScenarioVisualAnswer(context: ScenarioQuestionContext) {
-  const intent = scenarioVisualIntent();
-  const currentlyQualifying = scenarioCurrentlyQualifies(context.current.status);
-  const route = context.jeopardyRoutes[0];
-  const statusMarkup = renderScenarioCurrentStatusSummary(context);
-  const qualificationMarkup = !currentlyQualifying || intent === "qualify" ? renderScenarioQualificationRoutes(context) : "";
-  const pathMarkup = currentlyQualifying && intent !== "qualify" ? renderScenarioQuickPaths(context) : "";
-  const routeMarkup = currentlyQualifying && route ? renderScenarioRouteMap(context, route) : "";
-  const chaserMarkup = currentlyQualifying ? renderScenarioChaserMap(context, route) : "";
-  const finishMarkup = renderScenarioFinishMap(context);
-
-  if (!statusMarkup && !pathMarkup && !qualificationMarkup && !routeMarkup && !chaserMarkup && !finishMarkup) return "";
-
-  return `
-    <div class="scenario-visual-answer" aria-label="Scenario implications">
-      ${statusMarkup}
-      ${qualificationMarkup}
-      ${routeMarkup}
-      ${chaserMarkup}
-      ${pathMarkup}
-      ${finishMarkup}
-    </div>
-  `;
-}
-
-function renderScenarioCurrentStatusSummary(context: ScenarioQuestionContext) {
-  const qualifies = scenarioCurrentlyQualifies(context.current.status);
-  const statusClass = qualifies ? "qualifying" : "missing";
-  const thirdPlaceRow = context.thirdPlaceTable.find((row) => row.teamId === context.team.id);
-  const path = context.currentPath
-    ? `${context.currentPath.fixtureId} ${context.currentPath.slot} vs ${context.currentPath.opponentLabel}`
-    : context.current.status === "third-place"
-      ? "Projected through the best third-place table"
-      : "No round-of-32 slot right now";
-  const thirdPlaceRank = thirdPlaceRow ? ` · ${ordinal(thirdPlaceRow.thirdPlaceRank)} in third-place table` : "";
-
-  return `
-    <div class="scenario-current-status-card ${statusClass}">
-      ${renderScenarioStateBadge(context.current.status)}
-      <strong>${escapeHtml(context.team.name)} are ${ordinal(context.current.rank)} in Group ${context.team.group}</strong>
-      <span>${context.current.points} pts · GD ${formatSignedNumber(context.current.goalDifference)} · GF ${context.current.goalsFor}${thirdPlaceRank} · ${escapeHtml(path)}</span>
-    </div>
-  `;
-}
-
-function scenarioCurrentlyQualifies(status: ScenarioQuestionContext["current"]["status"]) {
-  return status !== "eliminated";
-}
-
-function scenarioVisualIntent() {
-  const asksQualification = /\b(qualif|advance|through|go through|make it|round of 32|path|route)\b/i.test(scenarioQuestion);
-  const asksMissOut = /\b(miss|fail|eliminat|knock(?:ed)? out|out|danger|panic|jeopardy)\b/i.test(scenarioQuestion);
-  if (asksQualification && !asksMissOut) return "qualify";
-  if (asksMissOut && !asksQualification) return "miss-out";
-  return "balanced";
-}
-
-function renderScenarioQualificationRoutes(context: ScenarioQuestionContext) {
-  const qualifyingPaths = context.qualificationPaths
-    .filter((path) => path.status !== "eliminated")
-    .sort(compareQualificationPaths)
-    .slice(0, 5);
-  if (qualifyingPaths.length === 0) return "";
-
-  const shortestPath = qualifyingPaths[0];
-  const shortestDirectPath = qualifyingPaths.find((path) => path.status === "direct");
-  const featuredPaths = [shortestPath, shortestDirectPath]
-    .filter((path): path is ScenarioQuestionContext["qualificationPaths"][number] => Boolean(path))
-    .filter((path, index, paths) => paths.findIndex((candidate) => candidate.condition === path.condition && candidate.status === path.status) === index);
-  const remainingPaths = qualifyingPaths.filter((path) => !featuredPaths.some((featured) => featured.condition === path.condition && featured.status === path.status));
-
-  return `
-    <div class="scenario-visual-block">
-      <div class="scenario-visual-heading">
-        <span>Shortest qualification path</span>
-        <strong>${scenarioStatusLabel(shortestPath.status)}</strong>
-      </div>
-      <div class="scenario-shortest-qualification">
-        ${featuredPaths.map((path) => renderScenarioQualificationRoute(path, path === shortestPath ? "shortest" : "direct")).join("")}
-      </div>
-      ${remainingPaths.length > 0 ? `
-        <div class="scenario-visual-heading scenario-qualification-subheading">
-          <span>Other qualification routes</span>
-          <strong>${remainingPaths.length}</strong>
-        </div>
-        <div class="scenario-qualification-routes">
-          ${remainingPaths.map((path) => renderScenarioQualificationRoute(path)).join("")}
-        </div>
-      ` : ""}
-    </div>
-  `;
-}
-
-function renderScenarioQualificationRoute(path: ScenarioQuestionContext["qualificationPaths"][number], emphasis = "") {
-  const landing = path.roundOf32FixtureId
-    ? `${path.roundOf32FixtureId}${path.opponentLabel ? ` vs ${path.opponentLabel}` : ""}`
-    : path.status === "third-place" ? "Best third-place table" : "Round of 32 unresolved";
-  const routeLabel = emphasis === "shortest"
-    ? "Shortest"
-    : emphasis === "direct"
-      ? "Direct route"
-      : "Route";
-
-  return `
-    <article class="scenario-qualification-route ${path.status} ${emphasis}">
-      <span class="scenario-qualification-step">
-        <em>${routeLabel}</em>
-        <strong>${escapeHtml(path.condition)}</strong>
-      </span>
-      <span class="scenario-qualification-step">
-        <em>Group table</em>
-        <strong>${ordinal(path.groupFinish)} in group</strong>
-        <span>${path.points} pts · GD ${formatSignedNumber(path.goalDifference)} · GF ${path.goalsFor}</span>
-      </span>
-      <span class="scenario-qualification-step">
-        <em>Outcome</em>
-        <strong>${scenarioStatusLabel(path.status)}</strong>
-        <span>${escapeHtml(landing)}</span>
-      </span>
-    </article>
-  `;
-}
-
-function compareQualificationPaths(left: ScenarioQuestionContext["qualificationPaths"][number], right: ScenarioQuestionContext["qualificationPaths"][number]) {
-  return qualificationPathEffort(left) - qualificationPathEffort(right) ||
-    qualificationStatusEffort(left.status) - qualificationStatusEffort(right.status) ||
-    right.points - left.points ||
-    right.goalDifference - left.goalDifference ||
-    left.condition.localeCompare(right.condition);
-}
-
-function qualificationPathEffort(path: ScenarioQuestionContext["qualificationPaths"][number]) {
-  const condition = path.condition.toLowerCase();
-  const score = condition.match(/(\d+)-(\d+)/);
-  const homeGoals = score ? Number(score[1]) : 0;
-  const awayGoals = score ? Number(score[2]) : 0;
-  const margin = Math.abs(homeGoals - awayGoals);
-
-  if (condition.includes("lose")) return -margin;
-  if (condition.includes("draw")) return 100;
-  if (condition.includes("beat")) return 200 + margin;
-  return 300;
-}
-
-function qualificationStatusEffort(status: ScenarioQuestionContext["qualificationPaths"][number]["status"]) {
-  if (status === "direct") return 0;
-  if (status === "third-place") return 1;
-  return 2;
-}
-
-function renderScenarioQuickPaths(context: ScenarioQuestionContext) {
-  const paths = context.qualificationPaths.slice(0, 5);
-  if (paths.length === 0) return "";
-
-  return `
-    <div class="scenario-visual-block">
-      <div class="scenario-visual-heading">
-        <span>Paths</span>
-        <strong>${escapeHtml(context.team.name)}</strong>
-      </div>
-      <div class="scenario-quick-paths">
-        ${paths.map((path) => `
-          <span class="scenario-path-chip ${path.status}">
-            <strong>${escapeHtml(path.condition)}</strong>
-            <em>${scenarioStatusLabel(path.status)} · ${ordinal(path.groupFinish)} · ${path.points} pts</em>
-          </span>
-        `).join("")}
-      </div>
-    </div>
-  `;
-}
-
-function renderScenarioRouteMap(context: ScenarioQuestionContext, route: ScenarioQuestionContext["jeopardyRoutes"][number]) {
-  const routeCount = context.jeopardyRoutes.length;
-  const routeRank = route.resultingThirdPlaceRank ? `${ordinal(route.resultingThirdPlaceRank)} in third-place` : scenarioStatusLabel(route.status);
-  const routeShare = renderScenarioRouteShare(route.scenarioShare);
-
-  return `
-    <div class="scenario-visual-block">
-      <div class="scenario-visual-heading">
-        <span>Shortest miss-out route</span>
-        <strong>${route.events.length} ${route.events.length === 1 ? "result" : "results"} needed${routeCount > 1 ? ` · ${routeCount} routes found` : ""}</strong>
-      </div>
-      <div class="scenario-route-flow">
-        <span class="scenario-route-baseline">${escapeHtml(route.baselineCondition)}</span>
-        ${route.events.map((event) => `
-          <span class="scenario-route-event">
-            <span>${escapeHtml(event.fixtureId)}</span>
-            <strong>${escapeHtml(event.resultCondition)}</strong>
-            <em>${escapeHtml(event.passingTeams.join(", "))} pass</em>
-          </span>
-        `).join("")}
-        <span class="scenario-route-outcome ${route.status}">
-          <strong>${escapeHtml(routeRank)}</strong>
-          <em>${scenarioStatusLabel(route.status)}</em>
-        </span>
-      </div>
-      ${routeShare ? `<p class="scenario-visual-note">${routeShare}</p>` : ""}
-    </div>
-  `;
-}
-
-function renderScenarioRouteShare(share: ScenarioQuestionContext["jeopardyRoutes"][number]["scenarioShare"]) {
-  if (!questionAsksForShare() || share.tested === 0) return "";
-
-  const percent = Number.isInteger(share.percent) ? `${share.percent}%` : `${share.percent.toFixed(1)}%`;
-  return `${share.eliminating} of ${share.tested} tested compatible combinations (${percent} bounded scenario share, not a prediction probability).`;
-}
-
-function questionAsksForShare() {
-  return /\b(chance|percent|percentage|probability|probable|likely|likelihood)\b/i.test(scenarioQuestion);
-}
-
-function renderScenarioChaserMap(context: ScenarioQuestionContext, route: ScenarioQuestionContext["jeopardyRoutes"][number] | undefined) {
-  const routePassingTeams = new Set(route?.events.flatMap((event) => event.passingTeams) ?? []);
-  const chasers = scenarioVisualChasers(context, routePassingTeams);
-  if (chasers.length === 0) return "";
-
-  const visibleChasers = chasers.slice(0, 8);
-  const hiddenCount = chasers.length - visibleChasers.length;
-
-  return `
-    <div class="scenario-visual-block">
-      <div class="scenario-visual-heading">
-        <span>Chasing pack</span>
-        <strong>${chasers.length} ${chasers.length === 1 ? "team" : "teams"} can pass</strong>
-      </div>
-      <div class="scenario-chaser-grid">
-        ${visibleChasers.map((chaser) => `
-          <span class="scenario-chaser-chip ${routePassingTeams.has(chaser.passingTeamName) ? "route" : ""}">
-            <strong>${escapeHtml(chaser.passingTeamName)}</strong>
-            <span>${escapeHtml(chaser.resultCondition)}</span>
-            <em>${ordinal(chaser.thirdPlaceRank)} · ${chaser.points} pts · GD ${formatSignedNumber(chaser.goalDifference)}</em>
-          </span>
-        `).join("")}
-        ${hiddenCount > 0 ? `<span class="scenario-chaser-chip more">+${hiddenCount} more</span>` : ""}
-      </div>
-    </div>
-  `;
-}
-
-function scenarioVisualChasers(context: ScenarioQuestionContext, routePassingTeams: Set<string>) {
-  const byTeam = new Map<string, ScenarioQuestionContext["jeopardyChasers"][number]>();
-
-  for (const chaser of context.jeopardyChasers) {
-    const current = byTeam.get(chaser.passingTeamId);
-    if (!current || scenarioChaserSortValue(chaser, routePassingTeams) < scenarioChaserSortValue(current, routePassingTeams)) {
-      byTeam.set(chaser.passingTeamId, chaser);
-    }
-  }
-
-  return Array.from(byTeam.values()).sort((left, right) => {
-    const leftRoute = routePassingTeams.has(left.passingTeamName) ? 0 : 1;
-    const rightRoute = routePassingTeams.has(right.passingTeamName) ? 0 : 1;
-    return leftRoute - rightRoute ||
-      left.thirdPlaceRank - right.thirdPlaceRank ||
-      (left.margin ?? 99) - (right.margin ?? 99) ||
-      left.passingTeamName.localeCompare(right.passingTeamName);
-  });
-}
-
-function scenarioChaserSortValue(chaser: ScenarioQuestionContext["jeopardyChasers"][number], routePassingTeams: Set<string>) {
-  return (routePassingTeams.has(chaser.passingTeamName) ? 0 : 100000) +
-    chaser.thirdPlaceRank * 1000 +
-    (chaser.margin ?? 99);
-}
-
-function renderScenarioFinishMap(context: ScenarioQuestionContext) {
-  const paths = [...context.finishPaths].sort((left, right) => left.groupFinish - right.groupFinish);
-  if (paths.length === 0) return "";
-
-  return `
-    <div class="scenario-visual-block">
-      <div class="scenario-visual-heading">
-        <span>Round of 32</span>
-        <strong>By finish</strong>
-      </div>
-      <div class="scenario-finish-strip">
-        ${paths.map((path) => `
-          <span class="scenario-finish-chip ${path.status}">
-            <strong>${ordinal(path.groupFinish)}</strong>
-            <span>${escapeHtml(path.roundOf32FixtureId ?? "TBD")} ${path.opponentLabel ? `vs ${renderScenarioOpponent(path.opponentTeamId, path.opponentLabel)}` : "opponent unresolved"}</span>
-            <em>${escapeHtml(path.condition)}</em>
-          </span>
-        `).join("")}
-      </div>
-    </div>
-  `;
-}
-
-function renderScenarioTeamSelector(selectedTeamId: string) {
-  const teams = scenarioTeams();
-  return `
-    <label class="scenario-team-selector">
-      <span>Team</span>
-      <select data-scenario-team aria-label="Select scenario team">
-        ${teams.map((team) => `<option value="${escapeAttribute(team.id)}" ${team.id === selectedTeamId ? "selected" : ""}>${escapeHtml(team.name)}</option>`).join("")}
-      </select>
-    </label>
-  `;
-}
-
-function scenarioTeams() {
-  return [...tournamentData.teams]
-    .filter((team) => team.group)
-    .sort((left, right) => left.name.localeCompare(right.name));
-}
-
-function renderScenarioCurrentPanel(scenario: TeamScenarioAnalysis) {
-  const team = teamById.get(scenario.teamId);
-  return `
-    <section class="scenario-panel scenario-current" aria-labelledby="scenario-current-heading">
-      <div class="scenario-current-heading">
-        <div class="scenario-current-title-row">
-          <h3 id="scenario-current-heading">Current Position</h3>
-          ${renderScenarioStateBadge(scenario.current.status)}
-        </div>
-        <p class="scenario-current-team-line">
-          ${renderTeamIdentity(team, scenario.teamId)}
-          <span>are ${ordinal(scenario.current.rank)} in Group ${scenario.group}.</span>
-        </p>
-      </div>
-      <div class="scenario-current-layout">
-        <div class="scenario-current-main">
-          <div class="scenario-current-grid">
-            <span><strong>${scenario.current.points}</strong> pts</span>
-            <span><strong>${formatSignedNumber(scenario.current.goalDifference)}</strong> GD</span>
-            <span><strong>${scenario.current.goalsFor}</strong> GF</span>
-            <span><strong>${scenario.current.played}</strong> played</span>
-          </div>
-          ${scenario.fixedResults.length > 0 ? `
-            <div class="scenario-fixed-results">
-              <h4>Fixed Results</h4>
-              ${scenario.fixedResults.map((result) => `<p>${escapeHtml(result)}</p>`).join("")}
-            </div>
-          ` : ""}
-        </div>
-        <div class="scenario-path-panel">
-          <h4>Round of 32</h4>
-          ${renderScenarioCurrentPath(scenario)}
-          ${renderScenarioInlineOpponents(scenario)}
-        </div>
-      </div>
-    </section>
-  `;
-}
-
-function renderScenarioCurrentPath(scenario: TeamScenarioAnalysis) {
-  if (!scenario.currentPath) return `<p class="scenario-summary">No resolved assignment.</p>`;
-
-  return `
-    <div class="scenario-path-row current">
-      <span>${scenario.currentPath.fixtureId}</span>
-      <span>${scenario.currentPath.slot}</span>
-      <strong>${renderScenarioOpponent(scenario.currentPath.opponentTeamId, scenario.currentPath.opponentLabel)}</strong>
-    </div>
-  `;
-}
-
-function renderScenarioInlineOpponents(scenario: TeamScenarioAnalysis) {
-  const alternatives = scenario.possibleOpponents
-    .filter((possibility) => !sameScenarioOpponent(possibility, scenario.currentPath))
-    .sort((left, right) => left.fixtureId.localeCompare(right.fixtureId) || left.opponentLabel.localeCompare(right.opponentLabel));
-  if (alternatives.length === 0) return "";
-
-  return `
-    <div class="scenario-inline-opponents">
-      <h5>Alternative opponents</h5>
-      ${alternatives.slice(0, 5).map((possibility) => `
-        <div class="scenario-opponent-row">
-          <div>
-            <span>${possibility.fixtureId}</span>
-            <strong>${renderScenarioOpponent(possibility.opponentTeamId, possibility.opponentLabel)}</strong>
-          </div>
-          <em>${escapeHtml(possibility.condition)}</em>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
-
-function sameScenarioOpponent(possibility: TeamScenarioAnalysis["possibleOpponents"][number], currentPath: TeamScenarioAnalysis["currentPath"]) {
-  return Boolean(currentPath) &&
-    possibility.fixtureId === currentPath?.fixtureId &&
-    possibility.opponentLabel === currentPath.opponentLabel &&
-    possibility.opponentTeamId === currentPath.opponentTeamId;
-}
-
-function renderScenarioOutcomePanel(scenario: TeamScenarioAnalysis) {
-  return `
-    <section class="scenario-panel scenario-outcomes" aria-labelledby="scenario-outcomes-heading">
-      <div class="stats-panel-heading">
-        <div>
-          <h3 id="scenario-outcomes-heading">Qualification Paths</h3>
-          <p>Remaining group branches.</p>
-        </div>
-        <span>${scenario.outcomes.length} paths</span>
-      </div>
-      ${scenario.outcomes.length > 0 ? `
-        <div class="scenario-list">
-          ${scenario.outcomes.map(renderScenarioOutcome).join("")}
-        </div>
-      ` : `<p class="empty-state">No unresolved group fixtures remain for this team.</p>`}
-      ${scenario.marginNotes.length > 0 ? `
-        <div class="scenario-margin-notes">
-          <h4>Margin swings</h4>
-          <div class="scenario-list">
-            ${scenario.marginNotes.map(renderScenarioMarginNote).join("")}
-          </div>
-        </div>
-      ` : ""}
-      ${scenario.tieBreakerNote ? `<p class="scenario-note">${escapeHtml(scenario.tieBreakerNote)}</p>` : ""}
-    </section>
-  `;
-}
-
-function renderScenarioOutcome(outcome: ScenarioOutcome) {
-  return `
-    <article class="scenario-item ${outcome.status}">
-      <div>
-        <strong>${escapeHtml(outcome.condition)}</strong>
-        <p>${ordinal(outcome.groupFinish)} in group; ${outcome.points} pts${outcome.slot ? `; ${outcome.roundOf32FixtureId} as ${outcome.slot}${outcome.opponentLabel ? ` vs ${escapeHtml(outcome.opponentLabel)}` : ""}` : ""}.</p>
-      </div>
-      <span>${scenarioStatusLabel(outcome.status)}</span>
-    </article>
-  `;
-}
-
-function renderScenarioMarginNote(note: ScenarioMarginNote) {
-  return `
-    <article class="scenario-item ${note.status}">
-      <div>
-        <strong>${escapeHtml(note.condition)}</strong>
-        <p>${escapeHtml(note.effect)}</p>
-      </div>
-      <span>${note.fixtureIds.join(" + ")}</span>
-    </article>
-  `;
-}
-
-function renderScenarioDependencyPanel(scenario: TeamScenarioAnalysis) {
-  return `
-    <section class="scenario-panel scenario-dependencies" aria-labelledby="scenario-dependencies-heading">
-      <div class="stats-panel-heading">
-        <div>
-          <h3 id="scenario-dependencies-heading">Dependencies</h3>
-          <p>Other results that can move the path.</p>
-        </div>
-        <span>${scenario.dependencies.length}</span>
-      </div>
-      ${scenario.dependencies.length > 0 ? `
-        <div class="scenario-list">
-          ${scenario.dependencies.map(renderScenarioDependency).join("")}
-        </div>
-      ` : `<p class="empty-state">No outside dependency changes this team's current path.</p>`}
-    </section>
-  `;
-}
-
-function renderScenarioDependency(dependency: ScenarioDependency) {
-  return `
-    <article class="scenario-item ${dependency.kind}">
-      <div>
-        <strong>${escapeHtml(dependency.condition)}</strong>
-        <p>${escapeHtml(dependency.effect)}</p>
-      </div>
-      <span>${dependency.fixtureId ?? dependency.kind}</span>
-    </article>
-  `;
-}
-
-function renderScenarioOpponent(teamId: string | undefined, label: string) {
-  return renderTeamIdentity(teamId ? teamById.get(teamId) : undefined, label);
 }
 
 function renderMainView(projection: ProjectedMatch[]) {
@@ -1631,17 +1071,6 @@ function performanceStatusLabel(row: PerformanceRow) {
   return "Unknown";
 }
 
-function scenarioStatusLabel(status: TeamScenarioAnalysis["current"]["status"]) {
-  if (status === "direct") return "Direct";
-  if (status === "third-place") return "Third place";
-  return "Eliminated";
-}
-
-function renderScenarioStateBadge(status: TeamScenarioAnalysis["current"]["status"]) {
-  const qualifies = status !== "eliminated";
-  return `<span class="scenario-state-badge ${qualifies ? "qualifying" : "missing"}">Currently: ${qualifies ? "qualifying" : "missing out"}</span>`;
-}
-
 function fixtureResultLabel(row: FixturePerformanceEntry) {
   if (row.result === "win") return "W";
   if (row.result === "draw") return "D";
@@ -1750,10 +1179,6 @@ function handlePredictionInput(event: Event) {
     recentPredictionChange ??= capturePredictionChangeSnapshot(tournamentData, predictions);
     predictions = setPrediction(tournamentData, predictions, fixtureId, decision.score);
   }
-
-  scenarioAnswer = "";
-  scenarioAnswerContext = undefined;
-  scenarioQuestionError = "";
   savePredictions(predictions);
   renderPreservingPredictionInput(input);
 }
@@ -1771,68 +1196,11 @@ async function handleSharePredictions() {
   }
 }
 
-async function handleScenarioQuestion(event: Event) {
-  event.preventDefault();
-
-  const question = scenarioQuestion.trim();
-  scenarioAnswer = "";
-  scenarioAnswerContext = undefined;
-  scenarioQuestionError = "";
-
-  if (!question) {
-    scenarioQuestionError = "Ask a scenario question first.";
-    render();
-    return;
-  }
-
-  try {
-    const selectedTeam = teamById.get(selectedScenarioTeamId);
-    const context = buildScenarioQuestionContext(tournamentData, predictions, selectedScenarioTeamId);
-    scenarioAnswerContext = context;
-    scenarioQuestionLoading = true;
-    render();
-
-    const response = await fetch("/api/scenario-question", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        question,
-        team: selectedTeam?.name ?? selectedScenarioTeamId,
-        context
-      })
-    });
-    const payload = await parseScenarioQuestionResponse(response);
-
-    if (!response.ok) {
-      throw new Error(payload.error ?? "Scenario questions are unavailable right now.");
-    }
-
-    scenarioAnswer = payload.answer ?? "";
-    scenarioQuestionError = scenarioAnswer ? "" : "The model did not return an answer.";
-  } catch (error) {
-    scenarioQuestionError = error instanceof Error ? error.message : "Scenario questions are unavailable right now.";
-  } finally {
-    scenarioQuestionLoading = false;
-    render();
-  }
-}
-
-async function parseScenarioQuestionResponse(response: Response): Promise<{ answer?: string; error?: string }> {
-  try {
-    return await response.json() as { answer?: string; error?: string };
-  } catch {
-    return {};
-  }
-}
-
 function handleClearPredictions() {
   if (Object.keys(predictions).length === 0) return;
 
   predictions = {};
   recentPredictionChange = undefined;
-  scenarioAnswer = "";
-  scenarioAnswerContext = undefined;
-  scenarioQuestionError = "";
   hideTooltip();
   savePredictions(predictions);
   render();
