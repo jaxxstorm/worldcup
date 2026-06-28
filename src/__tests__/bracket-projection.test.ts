@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { teamById, tournamentData } from "../data/tournament";
 import { projectTournament } from "../engine/knockout";
 import { bestThirdPlacedGroups, calculateGroupStandings, thirdPlaceRankings, thirdPlaceSourceAssignments } from "../engine/standings";
 import type { Fixture, GroupId, PredictionMap, TeamRef, TournamentData } from "../types";
@@ -26,6 +27,20 @@ function expectedThirdPlaceSlots(data: TournamentData, predictions: PredictionMa
     const group = slot?.slice(1) as GroupId | undefined;
     return [fixture.id, slot, group ? standings[group][2]?.teamId : undefined];
   };
+}
+
+function projectedFixtureNames() {
+  return Object.fromEntries(
+    projectTournament(tournamentData, {})
+      .filter((match) => match.stage === "round-of-32")
+      .map((match) => [
+        match.fixtureId,
+        [
+          match.home.teamId ? teamById.get(match.home.teamId)?.name : match.home.label,
+          match.away.teamId ? teamById.get(match.away.teamId)?.name : match.away.label
+        ]
+      ])
+  );
 }
 
 describe("bracket projection", () => {
@@ -130,6 +145,19 @@ describe("bracket projection", () => {
     expect(thirdPlaceMatches.map((match) => [match.fixtureId, match.away.slot, match.away.teamId])).toEqual(
       thirdPlaceFixtures.map(expectedThirdPlaceSlots(data, {}))
     );
+  });
+
+  it("matches the confirmed current round-of-32 bracket for BBC-listed ties", () => {
+    const fixtures = projectedFixtureNames();
+
+    expect(fixtures.m074).toEqual(["Germany", "Paraguay"]);
+    expect(fixtures.m078).toEqual(["Cote d'Ivoire", "Norway"]);
+    expect(fixtures.m080).toEqual(["England", "DR Congo"]);
+    expect(fixtures.m081).toEqual(["United States", "Bosnia and Herzegovina"]);
+    expect(fixtures.m083).toEqual(["Portugal", "Croatia"]);
+    expect(fixtures.m084).toEqual(["Spain", "Austria"]);
+    expect(fixtures.m085).toEqual(["Switzerland", "Algeria"]);
+    expect(fixtures.m088).toEqual(["Australia", "Egypt"]);
   });
 
   it("uses the official third-place combination table for qualifying group sets", () => {

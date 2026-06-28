@@ -100,6 +100,16 @@ const OFFICIAL_THIRD_PLACE_SOURCE_ASSIGNMENTS: Record<string, Record<string, str
     "3A/E/H/I/J": "3A",
     "3E/F/G/I/J": "3G",
     "3D/E/I/J/L": "3D"
+  },
+  BDEFIJKL: {
+    "3A/B/C/D/F": "3D",
+    "3C/D/F/G/H": "3F",
+    "3C/E/F/H/I": "3E",
+    "3E/H/I/J/K": "3K",
+    "3B/E/F/I/J": "3B",
+    "3A/E/H/I/J": "3I",
+    "3E/F/G/I/J": "3J",
+    "3D/E/I/J/L": "3L"
   }
 };
 

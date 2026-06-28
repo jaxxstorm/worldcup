@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-28T05:26:27.296Z",
+  "generatedAt": "2026-06-28T11:54:19.869Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -1823,7 +1823,7 @@
       "sourceResult": {
         "name": "FIFA World Cup 2026 match calendar API",
         "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
-        "accessedAt": "2026-06-28T05:26:26.443Z",
+        "accessedAt": "2026-06-28T11:54:19.869Z",
         "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
       }
     },
@@ -1844,7 +1844,7 @@
       "sourceResult": {
         "name": "FIFA World Cup 2026 match calendar API",
         "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
-        "accessedAt": "2026-06-28T05:26:26.443Z",
+        "accessedAt": "2026-06-28T11:54:19.869Z",
         "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
       }
     },
