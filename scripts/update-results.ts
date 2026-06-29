@@ -37,6 +37,7 @@ interface FifaLocalizedDescription {
 
 interface FifaTeam {
   Score?: number | null;
+  IdTeam?: string;
   IdCountry?: string;
   TeamName?: FifaLocalizedDescription[];
   Abbreviation?: string;
@@ -52,6 +53,9 @@ interface FifaMatch {
   Away?: FifaTeam | null;
   HomeTeamScore?: number | null;
   AwayTeamScore?: number | null;
+  HomeTeamPenaltyScore?: number | null;
+  AwayTeamPenaltyScore?: number | null;
+  Winner?: string | null;
 }
 
 interface FifaCalendarFeed {
@@ -180,10 +184,15 @@ function fifaMatchToResult(match: FifaMatch, data: TournamentData): ResultEntry[
     throw new Error(`No fixture found for FIFA match ${describeFifaTeam(match.Home)} vs ${describeFifaTeam(match.Away)}`);
   }
 
-  return [{ fixtureId: fixture.id, home: home!, away: away! }];
+  return [fifaMatchToResultEntry(fixture, match, home!, away!)];
 }
 
 function findFixtureByFifaTeams(data: TournamentData, match: FifaMatch): Fixture | undefined {
+  if (match.MatchNumber) {
+    const fixture = data.fixtures.find((candidate) => candidate.matchNumber === match.MatchNumber);
+    if (fixture && fixture.stage !== "group") return fixture;
+  }
+
   const homeNames = fifaTeamKeys(match.Home);
   const awayNames = fifaTeamKeys(match.Away);
   if (homeNames.size === 0 || awayNames.size === 0) return undefined;
@@ -195,6 +204,36 @@ function findFixtureByFifaTeams(data: TournamentData, match: FifaMatch): Fixture
     const awayTeam = data.teams.find((team) => team.id === fixture.away);
     return Boolean(homeTeam && awayTeam && homeNames.has(teamKey(homeTeam.name)) && awayNames.has(teamKey(awayTeam.name)));
   });
+}
+
+function fifaMatchToResultEntry(fixture: Fixture, match: FifaMatch, home: number, away: number): ResultEntry {
+  const result: ResultEntry = { fixtureId: fixture.id, matchNumber: fixture.matchNumber, home, away };
+  if (fixture.stage === "group") return result;
+
+  const penaltyHome = match.HomeTeamPenaltyScore;
+  const penaltyAway = match.AwayTeamPenaltyScore;
+  if (Number.isInteger(penaltyHome) && Number.isInteger(penaltyAway)) {
+    result.decision = "penalties";
+    result.winner = penaltyHome! > penaltyAway! ? "home" : "away";
+    return result;
+  }
+
+  if (home === away) {
+    const winner = fifaWinnerSide(match);
+    if (winner) {
+      result.decision = "penalties";
+      result.winner = winner;
+    }
+  }
+
+  return result;
+}
+
+function fifaWinnerSide(match: FifaMatch): Score["winner"] | undefined {
+  if (!match.Winner) return undefined;
+  if (match.Winner === match.Home?.IdTeam) return "home";
+  if (match.Winner === match.Away?.IdTeam) return "away";
+  return undefined;
 }
 
 function fifaTeamKeys(team: FifaTeam | null | undefined): Set<string> {

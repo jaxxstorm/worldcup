@@ -141,6 +141,57 @@ describe("result refresh", () => {
     expect(result.data.fixtures.find((fixture) => fixture.id === openFixture.id)!.result).toEqual({ home: 2, away: 0 });
   });
 
+  it("can merge completed FIFA calendar knockout matches by match number", () => {
+    const data = makeTournamentData();
+    const openFixture = fixtureById(data, "m073");
+
+    const result = mergeResultFeed(data, {
+      Results: [{
+        MatchNumber: openFixture.matchNumber,
+        MatchStatus: 0,
+        ResultType: 1,
+        Home: { IdTeam: "43883", ShortClubName: "South Africa" },
+        Away: { IdTeam: "43899", ShortClubName: "Canada" },
+        HomeTeamScore: 0,
+        AwayTeamScore: 1,
+        Winner: "43899"
+      }]
+    }, source);
+
+    expect(result.changed).toBe(true);
+    expect(result.imported).toBe(1);
+    expect(result.data.fixtures.find((fixture) => fixture.id === openFixture.id)!.result).toEqual({ home: 0, away: 1 });
+  });
+
+  it("can merge completed FIFA calendar penalty shootout winners", () => {
+    const data = makeTournamentData();
+    const openFixture = fixtureById(data, "m073");
+
+    const result = mergeResultFeed(data, {
+      Results: [{
+        MatchNumber: openFixture.matchNumber,
+        MatchStatus: 0,
+        ResultType: 1,
+        Home: { IdTeam: "43883", ShortClubName: "South Africa" },
+        Away: { IdTeam: "43899", ShortClubName: "Canada" },
+        HomeTeamScore: 1,
+        AwayTeamScore: 1,
+        HomeTeamPenaltyScore: 4,
+        AwayTeamPenaltyScore: 5,
+        Winner: "43899"
+      }]
+    }, source);
+
+    expect(result.changed).toBe(true);
+    expect(result.imported).toBe(1);
+    expect(result.data.fixtures.find((fixture) => fixture.id === openFixture.id)!.result).toEqual({
+      home: 1,
+      away: 1,
+      decision: "penalties",
+      winner: "away"
+    });
+  });
+
   it("ignores FIFA calendar matches that do not have a final result", () => {
     const data = makeTournamentData();
     const openFixture = fixtureById(data, "m001");
