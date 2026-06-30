@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-30T20:34:19.766Z",
+  "generatedAt": "2026-06-30T22:24:39.823Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -2901,7 +2901,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-30T20:34:19.766Z",
+        "accessedAt": "2026-06-30T22:24:39.823Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2923,7 +2923,7 @@
           "rank": 3,
           "player": "Kylian Mbappé",
           "teamId": "france",
-          "value": 4,
+          "value": 5,
           "detail": "France"
         },
         {
@@ -2984,7 +2984,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-30T20:34:19.766Z",
+        "accessedAt": "2026-06-30T22:24:39.823Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3032,31 +3032,31 @@
         },
         {
           "rank": 7,
+          "player": "Ousmane Dembélé",
+          "teamId": "france",
+          "value": 2,
+          "detail": "France"
+        },
+        {
+          "rank": 8,
           "player": "Riyad Mahrez",
           "teamId": "algeria",
           "value": 2,
           "detail": "Algeria"
         },
         {
-          "rank": 8,
+          "rank": 9,
           "player": "Viktor Gyökeres",
           "teamId": "sweden",
           "value": 2,
           "detail": "Sweden"
         },
         {
-          "rank": 9,
+          "rank": 10,
           "player": "Ayase Ueda",
           "teamId": "japan",
           "value": 1,
           "detail": "Japan"
-        },
-        {
-          "rank": 10,
-          "player": "Bradley Barcola",
-          "teamId": "france",
-          "value": 1,
-          "detail": "France"
         }
       ]
     },
@@ -3067,7 +3067,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-30T20:34:19.766Z",
+        "accessedAt": "2026-06-30T22:24:39.823Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
