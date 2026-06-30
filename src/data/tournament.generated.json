@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-30T04:16:11.529Z",
+  "generatedAt": "2026-06-30T20:34:19.766Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -2238,7 +2238,17 @@
         "kind": "placeholder",
         "label": "2I"
       },
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 1,
+        "away": 2
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-06-30T20:34:19.000Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m079",
@@ -2891,7 +2901,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-30T03:00:27.423Z",
+        "accessedAt": "2026-06-30T20:34:19.766Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2906,7 +2916,7 @@
           "rank": 2,
           "player": "Erling Haaland",
           "teamId": "norway",
-          "value": 4,
+          "value": 5,
           "detail": "Norway"
         },
         {
@@ -2974,7 +2984,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-30T03:00:27.423Z",
+        "accessedAt": "2026-06-30T20:34:19.766Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3057,7 +3067,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-30T03:00:27.423Z",
+        "accessedAt": "2026-06-30T20:34:19.766Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
