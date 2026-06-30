@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-06-29T23:53:54.193Z",
+  "generatedAt": "2026-06-30T03:00:27.423Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -2879,7 +2879,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-28T05:26:27.296Z",
+        "accessedAt": "2026-06-30T03:00:27.423Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2927,31 +2927,31 @@
         },
         {
           "rank": 7,
+          "player": "Cody Gakpo",
+          "teamId": "netherlands",
+          "value": 3,
+          "detail": "Netherlands"
+        },
+        {
+          "rank": 8,
           "player": "Deniz Undav",
           "teamId": "germany",
           "value": 3,
           "detail": "Germany"
         },
         {
-          "rank": 8,
+          "rank": 9,
           "player": "Elijah Just",
           "teamId": "new-zealand",
           "value": 3,
           "detail": "New Zealand"
         },
         {
-          "rank": 9,
+          "rank": 10,
           "player": "Harry Kane",
           "teamId": "england",
           "value": 3,
           "detail": "England"
-        },
-        {
-          "rank": 10,
-          "player": "Ismael Saibari",
-          "teamId": "morocco",
-          "value": 3,
-          "detail": "Morocco"
         }
       ]
     },
@@ -2962,7 +2962,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-28T05:26:27.296Z",
+        "accessedAt": "2026-06-30T03:00:27.423Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2982,59 +2982,59 @@
         },
         {
           "rank": 3,
+          "player": "Crysencio Summerville",
+          "teamId": "netherlands",
+          "value": 2,
+          "detail": "Netherlands"
+        },
+        {
+          "rank": 4,
           "player": "Deniz Undav",
           "teamId": "germany",
           "value": 2,
           "detail": "Germany"
         },
         {
-          "rank": 4,
+          "rank": 5,
           "player": "Kylian Mbappé",
           "teamId": "france",
           "value": 2,
           "detail": "France"
         },
         {
-          "rank": 5,
+          "rank": 6,
           "player": "Mohamed Salah",
           "teamId": "egypt",
           "value": 2,
           "detail": "Egypt"
         },
         {
-          "rank": 6,
+          "rank": 7,
           "player": "Riyad Mahrez",
           "teamId": "algeria",
           "value": 2,
           "detail": "Algeria"
         },
         {
-          "rank": 7,
+          "rank": 8,
           "player": "Viktor Gyökeres",
           "teamId": "sweden",
           "value": 2,
           "detail": "Sweden"
         },
         {
-          "rank": 8,
+          "rank": 9,
           "player": "Ayase Ueda",
           "teamId": "japan",
           "value": 1,
           "detail": "Japan"
         },
         {
-          "rank": 9,
+          "rank": 10,
           "player": "Bradley Barcola",
           "teamId": "france",
           "value": 1,
           "detail": "France"
-        },
-        {
-          "rank": 10,
-          "player": "Cody Gakpo",
-          "teamId": "netherlands",
-          "value": 1,
-          "detail": "Netherlands"
         }
       ]
     },
@@ -3045,7 +3045,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-06-28T05:26:27.296Z",
+        "accessedAt": "2026-06-30T03:00:27.423Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
