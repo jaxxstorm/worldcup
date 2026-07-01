@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-07-01T05:28:24.928Z",
+  "generatedAt": "2026-07-01T18:34:03.354Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -2300,7 +2300,17 @@
         "kind": "placeholder",
         "label": "3E/H/I/J/K"
       },
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 2,
+        "away": 1
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-07-01T18:34:02.693Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m081",
@@ -2921,7 +2931,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-01T00:24:49.243Z",
+        "accessedAt": "2026-07-01T18:34:03.354Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2948,52 +2958,52 @@
         },
         {
           "rank": 4,
+          "player": "Harry Kane",
+          "teamId": "england",
+          "value": 5,
+          "detail": "England"
+        },
+        {
+          "rank": 5,
           "player": "Ousmane Dembélé",
           "teamId": "france",
           "value": 4,
           "detail": "France"
         },
         {
-          "rank": 5,
+          "rank": 6,
           "player": "Vinicius Junior",
           "teamId": "brazil",
           "value": 4,
           "detail": "Brazil"
         },
         {
-          "rank": 6,
+          "rank": 7,
           "player": "Brian Brobbey",
           "teamId": "netherlands",
           "value": 3,
           "detail": "Netherlands"
         },
         {
-          "rank": 7,
+          "rank": 8,
           "player": "Cody Gakpo",
           "teamId": "netherlands",
           "value": 3,
           "detail": "Netherlands"
         },
         {
-          "rank": 8,
+          "rank": 9,
           "player": "Deniz Undav",
           "teamId": "germany",
           "value": 3,
           "detail": "Germany"
         },
         {
-          "rank": 9,
+          "rank": 10,
           "player": "Elijah Just",
           "teamId": "new-zealand",
           "value": 3,
           "detail": "New Zealand"
-        },
-        {
-          "rank": 10,
-          "player": "Harry Kane",
-          "teamId": "england",
-          "value": 3,
-          "detail": "England"
         }
       ]
     },
@@ -3004,7 +3014,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-01T00:24:49.243Z",
+        "accessedAt": "2026-07-01T18:34:03.354Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3087,7 +3097,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-01T00:24:49.243Z",
+        "accessedAt": "2026-07-01T18:34:03.354Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
