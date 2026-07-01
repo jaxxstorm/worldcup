@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-07-01T18:34:03.354Z",
+  "generatedAt": "2026-07-01T22:25:40.750Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -2931,7 +2931,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-01T18:34:03.354Z",
+        "accessedAt": "2026-07-01T22:25:40.750Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -2965,45 +2965,45 @@
         },
         {
           "rank": 5,
+          "player": "Ismaïla Sarr",
+          "teamId": "senegal",
+          "value": 4,
+          "detail": "Senegal"
+        },
+        {
+          "rank": 6,
           "player": "Ousmane Dembélé",
           "teamId": "france",
           "value": 4,
           "detail": "France"
         },
         {
-          "rank": 6,
+          "rank": 7,
           "player": "Vinicius Junior",
           "teamId": "brazil",
           "value": 4,
           "detail": "Brazil"
         },
         {
-          "rank": 7,
+          "rank": 8,
           "player": "Brian Brobbey",
           "teamId": "netherlands",
           "value": 3,
           "detail": "Netherlands"
         },
         {
-          "rank": 8,
+          "rank": 9,
           "player": "Cody Gakpo",
           "teamId": "netherlands",
           "value": 3,
           "detail": "Netherlands"
         },
         {
-          "rank": 9,
+          "rank": 10,
           "player": "Deniz Undav",
           "teamId": "germany",
           "value": 3,
           "detail": "Germany"
-        },
-        {
-          "rank": 10,
-          "player": "Elijah Just",
-          "teamId": "new-zealand",
-          "value": 3,
-          "detail": "New Zealand"
         }
       ]
     },
@@ -3014,7 +3014,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-01T18:34:03.354Z",
+        "accessedAt": "2026-07-01T22:25:40.750Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3097,7 +3097,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-01T18:34:03.354Z",
+        "accessedAt": "2026-07-01T22:25:40.750Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
