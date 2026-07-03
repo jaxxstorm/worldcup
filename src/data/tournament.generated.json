@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-07-02T22:20:22.338Z",
+  "generatedAt": "2026-07-03T01:49:52.656Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -2378,7 +2378,17 @@
         "kind": "placeholder",
         "label": "2L"
       },
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 2,
+        "away": 1
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-07-03T01:49:45.959Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m084",
@@ -2961,7 +2971,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-02T22:20:22.338Z",
+        "accessedAt": "2026-07-03T01:49:52.656Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3044,7 +3054,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-02T22:20:22.338Z",
+        "accessedAt": "2026-07-03T01:49:52.656Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3127,7 +3137,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-02T22:20:22.338Z",
+        "accessedAt": "2026-07-03T01:49:52.656Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3140,48 +3150,55 @@
         },
         {
           "rank": 2,
+          "player": "Cristiano Ronaldo",
+          "teamId": "portugal",
+          "value": 1,
+          "detail": "Portugal"
+        },
+        {
+          "rank": 3,
           "player": "Granit Xhaka",
           "teamId": "switzerland",
           "value": 1,
           "detail": "Switzerland"
         },
         {
-          "rank": 3,
+          "rank": 4,
           "player": "Harry Kane",
           "teamId": "england",
           "value": 1,
           "detail": "England"
         },
         {
-          "rank": 4,
+          "rank": 5,
           "player": "Kai Havertz",
           "teamId": "germany",
           "value": 1,
           "detail": "Germany"
         },
         {
-          "rank": 5,
+          "rank": 6,
           "player": "Marko Arnautovic",
           "teamId": "austria",
           "value": 1,
           "detail": "Austria"
         },
         {
-          "rank": 6,
+          "rank": 7,
           "player": "Teboho Mokoena",
           "teamId": "south-africa",
           "value": 1,
           "detail": "South Africa"
         },
         {
-          "rank": 7,
+          "rank": 8,
           "player": "Yoane Wissa",
           "teamId": "dr-congo",
           "value": 1,
           "detail": "Congo DR"
         },
         {
-          "rank": 8,
+          "rank": 9,
           "player": "Youri Tielemans",
           "teamId": "belgium",
           "value": 1,
