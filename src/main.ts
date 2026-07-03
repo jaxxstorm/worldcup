@@ -598,8 +598,7 @@ function renderThirdPlaceRow(row: ThirdPlaceStandingRow) {
 }
 
 function renderFixtures(projection: ProjectedMatch[]) {
-  const visibleFixtures = tournamentData.fixtures.filter((fixture) => fixture.stage === "group" || fixture.stage === "round-of-32");
-  const { actionable, completed } = sectionFixturesForDisplay(visibleFixtures);
+  const { actionable, completed } = sectionFixturesForDisplay(tournamentData.fixtures);
   const projectionByFixtureId = new Map(projection.map((match) => [match.fixtureId, match]));
 
   return `
