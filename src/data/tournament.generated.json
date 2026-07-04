@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-07-03T22:18:58.972Z",
+  "generatedAt": "2026-07-04T00:21:03.214Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -2993,23 +2993,23 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-03T05:14:36.830Z",
+        "accessedAt": "2026-07-04T00:21:03.214Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
         {
           "rank": 1,
+          "player": "Lionel Messi",
+          "teamId": "argentina",
+          "value": 7,
+          "detail": "Argentina"
+        },
+        {
+          "rank": 2,
           "player": "Kylian Mbappé",
           "teamId": "france",
           "value": 6,
           "detail": "France"
-        },
-        {
-          "rank": 2,
-          "player": "Lionel Messi",
-          "teamId": "argentina",
-          "value": 6,
-          "detail": "Argentina"
         },
         {
           "rank": 3,
@@ -3076,7 +3076,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-03T05:14:36.830Z",
+        "accessedAt": "2026-07-04T00:21:03.214Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3159,7 +3159,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-03T05:14:36.830Z",
+        "accessedAt": "2026-07-04T00:21:03.214Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
