@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-07-05T00:20:08.591Z",
+  "generatedAt": "2026-07-05T22:18:14.483Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -2588,7 +2588,17 @@
         "kind": "placeholder",
         "label": "Winner m078"
       },
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 1,
+        "away": 2
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-07-05T22:18:13.549Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m092",
@@ -3033,30 +3043,30 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-05T00:20:08.591Z",
+        "accessedAt": "2026-07-05T22:18:14.483Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
         {
           "rank": 1,
+          "player": "Erling Haaland",
+          "teamId": "norway",
+          "value": 7,
+          "detail": "Norway"
+        },
+        {
+          "rank": 2,
           "player": "Kylian Mbappé",
           "teamId": "france",
           "value": 7,
           "detail": "France"
         },
         {
-          "rank": 2,
+          "rank": 3,
           "player": "Lionel Messi",
           "teamId": "argentina",
           "value": 7,
           "detail": "Argentina"
-        },
-        {
-          "rank": 3,
-          "player": "Erling Haaland",
-          "teamId": "norway",
-          "value": 5,
-          "detail": "Norway"
         },
         {
           "rank": 4,
@@ -3116,7 +3126,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-05T00:20:08.591Z",
+        "accessedAt": "2026-07-05T22:18:14.483Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3199,7 +3209,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-05T00:20:08.591Z",
+        "accessedAt": "2026-07-05T22:18:14.483Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
