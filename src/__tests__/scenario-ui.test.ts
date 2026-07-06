@@ -30,4 +30,12 @@ describe("retired scenario UI", () => {
     expect(styles).toContain(".stats-page");
     expect(styles).toContain(".performance-page");
   });
+
+  it("exposes all-team performance alongside group fixture performance", () => {
+    expect(mainSource).toContain('data-performance-tab="${tab.id}"');
+    expect(mainSource).toContain('label: "Group fixtures"');
+    expect(mainSource).toContain('label: "All teams"');
+    expect(mainSource).toContain('calculateFixturePerformanceEntries(tournamentData, predictions, "all")');
+    expect(mainSource).toContain('fixturePerformanceScopeLabel');
+  });
 });

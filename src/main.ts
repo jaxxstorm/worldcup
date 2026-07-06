@@ -26,7 +26,7 @@ const appRoot = app;
 const sharedPredictions = sharedPredictionsFromUrl(tournamentData, window.location.href);
 let predictions: PredictionMap = sharedPredictions ?? loadPredictions(tournamentData);
 let activeView: "main" | "bracket" | "stats" | "performance" = "main";
-let activePerformanceTab: "teams" | "fixtures" = "teams";
+let activePerformanceTab: "teams" | "fixtures" | "all" = "teams";
 let activePerformanceMode: PerformanceMode = "raw";
 let activeTooltip: HTMLDivElement | undefined;
 let recentPredictionChange: PredictionChangeSnapshot | undefined = sharedPredictions && Object.keys(sharedPredictions).length > 0
@@ -126,6 +126,7 @@ function parsePerformanceMode(mode: string | undefined): PerformanceMode {
 
 function parsePerformanceTab(tab: string | undefined): typeof activePerformanceTab {
   if (tab === "fixtures") return "fixtures";
+  if (tab === "all") return "all";
   return "teams";
 }
 
@@ -183,13 +184,15 @@ function renderPerformanceView() {
   const rows = calculatePerformanceRows(tournamentData, predictions, activePerformanceMode);
   const fixtureRows = calculateFixturePerformanceEntries(tournamentData, predictions);
   const fixtureSummaries = calculateFixturePerformanceSummaries(tournamentData, predictions);
+  const allFixtureRows = calculateFixturePerformanceEntries(tournamentData, predictions, "all");
+  const allFixtureSummaries = calculateFixturePerformanceSummaries(tournamentData, predictions, "all");
 
   return `
     <div class="performance-page">
       <section>
         <h2>Performance</h2>
         ${renderPerformanceSubTabs()}
-        ${activePerformanceTab === "teams" ? renderTeamPerformancePanel(rows) : renderFixturePerformancePanel(fixtureSummaries, fixtureRows)}
+        ${activePerformanceTab === "teams" ? renderTeamPerformancePanel(rows) : activePerformanceTab === "fixtures" ? renderFixturePerformancePanel(fixtureSummaries, fixtureRows, "Group Fixture Performances", "Group-stage results and complete group-stage predictions only.", "No completed or predicted ranked group fixtures are available yet.") : renderFixturePerformancePanel(allFixtureSummaries, allFixtureRows, "All-Team Performance", "All resolved ranked fixtures, including knockout results and complete predictions.", "No completed or predicted ranked fixtures are available yet.")}
       </section>
     </div>
   `;
@@ -198,7 +201,8 @@ function renderPerformanceView() {
 function renderPerformanceSubTabs() {
   const tabs: Array<{ id: typeof activePerformanceTab; label: string }> = [
     { id: "teams", label: "Teams" },
-    { id: "fixtures", label: "Fixtures" }
+    { id: "fixtures", label: "Group fixtures" },
+    { id: "all", label: "All teams" }
   ];
 
   return `
@@ -226,13 +230,13 @@ function renderTeamPerformancePanel(rows: PerformanceRow[]) {
   `;
 }
 
-function renderFixturePerformancePanel(summaryRows: FixturePerformanceSummary[], fixtureRows: FixturePerformanceEntry[]) {
+function renderFixturePerformancePanel(summaryRows: FixturePerformanceSummary[], fixtureRows: FixturePerformanceEntry[], heading: string, note: string, emptyMessage: string) {
   return `
     <section class="stats-panel fixture-performance-panel" aria-labelledby="fixture-performance-heading">
       <div class="stats-panel-heading">
         <div>
-          <h3 id="fixture-performance-heading">Fixture Performances</h3>
-        <p>Success compares each result with an Elo-style expectation derived from FIFA ranking.</p>
+          <h3 id="fixture-performance-heading">${heading}</h3>
+          <p>Success compares each result with an Elo-style expectation derived from FIFA ranking. ${note}</p>
         </div>
         <span>${fixtureRows.length} entries</span>
       </div>
@@ -242,7 +246,7 @@ function renderFixturePerformancePanel(summaryRows: FixturePerformanceSummary[],
         <h4>Results & Credit</h4>
         <span>${fixtureRows.length} rows</span>
       </div>
-      ${renderFixturePerformanceTable(fixtureRows)}
+      ${renderFixturePerformanceTable(fixtureRows, emptyMessage)}
     </section>
   `;
 }
@@ -335,7 +339,7 @@ function renderFixturePerformanceSummaryTable(rows: FixturePerformanceSummary[])
       <div class="fixture-summary-row header">
         ${renderHeaderTooltip("#", "Position in this fixture-credit table.")}
         ${renderHeaderTooltip("Team", "Team being summarized.")}
-        ${renderHeaderTooltip("Group", "World Cup group.")}
+        ${renderHeaderTooltip("Scope", "World Cup group for group entries, or Mixed when knockout entries are included.")}
         ${renderHeaderTooltip("Rank", "Team FIFA ranking. Lower numbers are stronger.")}
         ${renderHeaderTooltip("Played", "Final results and complete predictions included in this summary.")}
         ${renderHeaderTooltip("Record", "Wins-draws-losses across included fixture rows.")}
@@ -359,7 +363,7 @@ function renderFixturePerformanceSummaryRow(row: FixturePerformanceSummary, inde
     <div class="fixture-summary-row">
       <span>${index + 1}</span>
       <span class="team-cell">${renderTeamIdentity(team, row.teamId)}</span>
-      <span>${row.group}</span>
+      <span>${fixturePerformanceSummaryScopeLabel(row)}</span>
       <span>${row.fifaRanking}</span>
       <span>${row.fixtures}</span>
       <span>${row.won}-${row.drawn}-${row.lost}</span>
@@ -374,8 +378,12 @@ function renderFixturePerformanceSummaryRow(row: FixturePerformanceSummary, inde
   `;
 }
 
-function renderFixturePerformanceTable(rows: FixturePerformanceEntry[]) {
-  if (rows.length === 0) return `<p class="empty-state">No completed or predicted ranked group fixtures are available yet.</p>`;
+function fixturePerformanceSummaryScopeLabel(row: FixturePerformanceSummary) {
+  return row.hasKnockoutFixtures ? "Mixed" : row.group ?? "Mixed";
+}
+
+function renderFixturePerformanceTable(rows: FixturePerformanceEntry[], emptyMessage: string) {
+  if (rows.length === 0) return `<p class="empty-state">${emptyMessage}</p>`;
 
   return `
     <div class="fixture-performance-table">
@@ -383,6 +391,7 @@ function renderFixturePerformanceTable(rows: FixturePerformanceEntry[]) {
         ${renderHeaderTooltip("#", "Position in the fixture-result credit list.")}
         ${renderHeaderTooltip("Team", "Team whose side of the fixture is being scored.")}
         ${renderHeaderTooltip("Opponent", "The team faced in this fixture.")}
+        ${renderHeaderTooltip("Scope", "Group or knockout stage for this fixture.")}
         ${renderHeaderTooltip("Fixture", "Fixture identifier from the tournament data.")}
         ${renderHeaderTooltip("Score", "Score from this team's perspective, plus W/D/L result.")}
         ${renderHeaderTooltip("Rank", "Team FIFA ranking. Lower numbers are stronger.")}
@@ -487,6 +496,7 @@ function renderFixturePerformanceRow(row: FixturePerformanceEntry, index: number
       <span>${index + 1}</span>
       <span class="team-cell">${renderTeamIdentity(team, row.teamId)}</span>
       <span class="team-cell">${renderTeamIdentity(opponent, row.opponentId)}</span>
+      <span>${fixturePerformanceScopeLabel(row)}</span>
       <span>${row.fixtureId}</span>
       <span>${row.goalsFor}-${row.goalsAgainst} ${fixtureResultLabel(row)}</span>
       <span>${row.fifaRanking}</span>
@@ -499,6 +509,10 @@ function renderFixturePerformanceRow(row: FixturePerformanceEntry, index: number
       <span><span class="fixture-performance-source">${row.source === "final" ? "Final" : "Predicted"}</span></span>
     </div>
   `;
+}
+
+function fixturePerformanceScopeLabel(row: FixturePerformanceEntry) {
+  return row.stage === "group" ? `Group ${row.group ?? "-"}` : formatStage(row.stage);
 }
 
 function renderFixturePerformanceFormula() {

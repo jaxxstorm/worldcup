@@ -349,6 +349,136 @@ describe("performance analysis", () => {
     expect(rows.some((row) => row.fixtureId === "gamma-delta")).toBe(false);
   });
 
+  it("keeps group fixture performance scoped to group fixtures by default", () => {
+    const data = performanceTournament();
+    data.fixtures.push({
+      id: "beta-hotel-ko",
+      matchNumber: 50,
+      stage: "round-of-32",
+      date: "2026-07-01T12:00:00.000Z",
+      venueId: "venue",
+      home: "beta",
+      away: "hotel",
+      status: "completed",
+      result: { home: 0, away: 4 }
+    });
+
+    expect(calculateFixturePerformanceEntries(data, {}).some((row) => row.fixtureId === "beta-hotel-ko")).toBe(false);
+    expect(calculateFixturePerformanceEntries(data, {}, "all").some((row) => row.fixtureId === "beta-hotel-ko")).toBe(true);
+  });
+
+  it("includes resolved knockout fixtures in all-fixture performance", () => {
+    const data = performanceTournament();
+    data.fixtures.push(
+      {
+        id: "beta-hotel-ko",
+        matchNumber: 50,
+        stage: "round-of-32",
+        date: "2026-07-01T12:00:00.000Z",
+        venueId: "venue",
+        home: "beta",
+        away: "hotel",
+        status: "completed",
+        result: { home: 0, away: 4 }
+      },
+      {
+        id: "echo-india-ko",
+        matchNumber: 51,
+        stage: "round-of-16",
+        date: "2026-07-05T12:00:00.000Z",
+        venueId: "venue",
+        home: "echo",
+        away: "india",
+        status: "scheduled"
+      }
+    );
+
+    const rows = calculateFixturePerformanceEntries(data, {
+      "echo-india-ko": { home: 2, away: 2, decision: "penalties", winner: "away" }
+    }, "all");
+
+    expect(rows.find((row) => row.fixtureId === "beta-hotel-ko" && row.teamId === "hotel")).toMatchObject({
+      stage: "round-of-32",
+      group: undefined,
+      opponentId: "beta",
+      goalsFor: 4,
+      goalsAgainst: 0,
+      result: "win",
+      resultPoints: 3,
+      source: "final"
+    });
+    expect(rows.find((row) => row.fixtureId === "echo-india-ko" && row.teamId === "india")).toMatchObject({
+      stage: "round-of-16",
+      result: "win",
+      actualResult: 1,
+      source: "prediction"
+    });
+    expect(rows.find((row) => row.fixtureId === "echo-india-ko" && row.teamId === "echo")).toMatchObject({
+      result: "loss",
+      actualResult: 0,
+      source: "prediction"
+    });
+  });
+
+  it("skips unresolved knockout placeholders and partial knockout predictions", () => {
+    const data = performanceTournament();
+    data.fixtures.push(
+      {
+        id: "placeholder-ko",
+        matchNumber: 50,
+        stage: "round-of-32",
+        date: "2026-07-01T12:00:00.000Z",
+        venueId: "venue",
+        home: { kind: "placeholder", label: "Winner m001" },
+        away: "hotel",
+        status: "scheduled"
+      },
+      {
+        id: "partial-ko",
+        matchNumber: 51,
+        stage: "round-of-16",
+        date: "2026-07-05T12:00:00.000Z",
+        venueId: "venue",
+        home: "echo",
+        away: "india",
+        status: "scheduled"
+      }
+    );
+
+    const rows = calculateFixturePerformanceEntries(data, {
+      "placeholder-ko": { home: 1, away: 0 }
+    }, "all");
+
+    expect(rows.some((row) => row.fixtureId === "placeholder-ko")).toBe(false);
+    expect(rows.some((row) => row.fixtureId === "partial-ko")).toBe(false);
+  });
+
+  it("uses authoritative knockout results before active predictions", () => {
+    const data = performanceTournament();
+    data.fixtures.push({
+      id: "beta-hotel-ko",
+      matchNumber: 50,
+      stage: "round-of-32",
+      date: "2026-07-01T12:00:00.000Z",
+      venueId: "venue",
+      home: "beta",
+      away: "hotel",
+      status: "completed",
+      result: { home: 0, away: 4 }
+    });
+
+    const rows = calculateFixturePerformanceEntries(data, {
+      "beta-hotel-ko": { home: 9, away: 0 }
+    }, "all");
+
+    expect(rows.find((row) => row.fixtureId === "beta-hotel-ko" && row.teamId === "hotel")).toMatchObject({
+      goalsFor: 4,
+      goalsAgainst: 0,
+      source: "final"
+    });
+    expect(data.fixtures.find((fixture) => fixture.id === "beta-hotel-ko")?.result).toEqual({ home: 0, away: 4 });
+  });
+
   it("sorts fixture performances deterministically when scores tie", () => {
     const data = performanceTournament();
     data.fixtures.push(
@@ -391,6 +521,7 @@ describe("performance analysis", () => {
     expect(rows[0]).toMatchObject({
       teamId: "hotel",
       group: "C",
+      hasKnockoutFixtures: false,
       fifaRanking: 90,
       fixtures: 2,
       won: 2,
@@ -417,6 +548,41 @@ describe("performance analysis", () => {
   it("sorts summaries by total success score", () => {
     const rows = calculateFixturePerformanceSummaries(performanceTournament(), {});
 
+    for (let index = 1; index < rows.length; index += 1) {
+      expect(rows[index - 1].totalSuccessScore).toBeGreaterThanOrEqual(rows[index].totalSuccessScore);
+    }
+  });
+
+  it("summarizes group and knockout entries for all-team performance", () => {
+    const data = performanceTournament();
+    data.fixtures.push({
+      id: "hotel-beta-ko",
+      matchNumber: 50,
+      stage: "round-of-32",
+      date: "2026-07-01T12:00:00.000Z",
+      venueId: "venue",
+      home: "hotel",
+      away: "beta",
+      status: "completed",
+      result: { home: 3, away: 0 }
+    });
+
+    const rows = calculateFixturePerformanceSummaries(data, {}, "all");
+
+    expect(rows.find((row) => row.teamId === "hotel")).toMatchObject({
+      teamId: "hotel",
+      group: "C",
+      hasKnockoutFixtures: true,
+      fixtures: 3,
+      won: 3,
+      goalsFor: 7,
+      goalsAgainst: 0,
+      goalDifference: 7,
+      actualPoints: 9,
+      actualResultTotal: 3,
+      finalCount: 3,
+      predictionCount: 0
+    });
     for (let index = 1; index < rows.length; index += 1) {
       expect(rows[index - 1].totalSuccessScore).toBeGreaterThanOrEqual(rows[index].totalSuccessScore);
     }

@@ -1153,10 +1153,10 @@ h2 {
 
 .fixture-performance-row {
   display: grid;
-  grid-template-columns: 44px minmax(190px, 1fr) minmax(190px, 1fr) 86px 78px 52px 52px 64px 76px 78px 60px 76px minmax(94px, auto);
+  grid-template-columns: 44px minmax(190px, 1fr) minmax(190px, 1fr) 92px 86px 78px 52px 52px 64px 76px 78px 60px 76px minmax(94px, auto);
   gap: 12px;
   align-items: center;
-  min-width: 1240px;
+  min-width: 1330px;
   padding: 10px 12px;
   border-top: 1px solid #edf0ec;
   font-size: 14px;
