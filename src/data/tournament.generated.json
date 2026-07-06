@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-07-05T22:18:14.483Z",
+  "generatedAt": "2026-07-06T02:59:59.065Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -3043,7 +3043,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-05T22:18:14.483Z",
+        "accessedAt": "2026-07-06T02:59:59.065Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3072,7 +3072,7 @@
           "rank": 4,
           "player": "Harry Kane",
           "teamId": "england",
-          "value": 5,
+          "value": 6,
           "detail": "England"
         },
         {
@@ -3084,38 +3084,38 @@
         },
         {
           "rank": 6,
+          "player": "Jude Bellingham",
+          "teamId": "england",
+          "value": 4,
+          "detail": "England"
+        },
+        {
+          "rank": 7,
+          "player": "Julián Quiñones",
+          "teamId": "mexico",
+          "value": 4,
+          "detail": "Mexico"
+        },
+        {
+          "rank": 8,
           "player": "Mikel Oyarzabal",
           "teamId": "spain",
           "value": 4,
           "detail": "Spain"
         },
         {
-          "rank": 7,
+          "rank": 9,
           "player": "Ousmane Dembélé",
           "teamId": "france",
           "value": 4,
           "detail": "France"
         },
         {
-          "rank": 8,
+          "rank": 10,
           "player": "Vinicius Junior",
           "teamId": "brazil",
           "value": 4,
           "detail": "Brazil"
-        },
-        {
-          "rank": 9,
-          "player": "Brian Brobbey",
-          "teamId": "netherlands",
-          "value": 3,
-          "detail": "Netherlands"
-        },
-        {
-          "rank": 10,
-          "player": "Cody Gakpo",
-          "teamId": "netherlands",
-          "value": 3,
-          "detail": "Netherlands"
         }
       ]
     },
@@ -3126,7 +3126,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-05T22:18:14.483Z",
+        "accessedAt": "2026-07-06T02:59:59.065Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3209,37 +3209,37 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-05T22:18:14.483Z",
+        "accessedAt": "2026-07-06T02:59:59.065Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
         {
           "rank": 1,
+          "player": "Harry Kane",
+          "teamId": "england",
+          "value": 2,
+          "detail": "England"
+        },
+        {
+          "rank": 2,
           "player": "Breel Embolo",
           "teamId": "switzerland",
           "value": 1,
           "detail": "Switzerland"
         },
         {
-          "rank": 2,
+          "rank": 3,
           "player": "Cristiano Ronaldo",
           "teamId": "portugal",
           "value": 1,
           "detail": "Portugal"
         },
         {
-          "rank": 3,
+          "rank": 4,
           "player": "Granit Xhaka",
           "teamId": "switzerland",
           "value": 1,
           "detail": "Switzerland"
-        },
-        {
-          "rank": 4,
-          "player": "Harry Kane",
-          "teamId": "england",
-          "value": 1,
-          "detail": "England"
         },
         {
           "rank": 5,
@@ -3264,24 +3264,24 @@
         },
         {
           "rank": 8,
+          "player": "Raúl Jiménez",
+          "teamId": "mexico",
+          "value": 1,
+          "detail": "Mexico"
+        },
+        {
+          "rank": 9,
           "player": "Teboho Mokoena",
           "teamId": "south-africa",
           "value": 1,
           "detail": "South Africa"
         },
         {
-          "rank": 9,
+          "rank": 10,
           "player": "Yoane Wissa",
           "teamId": "dr-congo",
           "value": 1,
           "detail": "Congo DR"
-        },
-        {
-          "rank": 10,
-          "player": "Youri Tielemans",
-          "teamId": "belgium",
-          "value": 1,
-          "detail": "Belgium"
         }
       ]
     }
