@@ -117,6 +117,42 @@ describe("stats refresh", () => {
     expect(goals?.entries.at(-1)).toMatchObject({ rank: 10, player: "Player 10", value: 3 });
   });
 
+  it("uses shared ranks for tied leaderboard values", () => {
+    const data = makeTournamentData();
+    const result = mergeStatsFeed(data, {
+      scorers: [
+        {
+          player: { name: "Example Creator" },
+          team: { name: "Canada", tla: "CAN" },
+          goals: 1,
+          assists: 3,
+          penalties: 0
+        },
+        {
+          player: { name: "Example Wide Player" },
+          team: { name: "Canada", tla: "CAN" },
+          goals: 1,
+          assists: 2,
+          penalties: 0
+        },
+        {
+          player: { name: "Another Creator" },
+          team: { name: "Canada", tla: "CAN" },
+          goals: 1,
+          assists: 2,
+          penalties: 0
+        }
+      ]
+    }, source);
+    const assists = result.data.statLeaderboards?.find((leaderboard) => leaderboard.id === "assists");
+
+    expect(assists?.entries.map((entry) => ({ rank: entry.rank, player: entry.player, value: entry.value }))).toEqual([
+      { rank: 1, player: "Example Creator", value: 3 },
+      { rank: 2, player: "Another Creator", value: 2 },
+      { rank: 2, player: "Example Wide Player", value: 2 }
+    ]);
+  });
+
   it("keeps unmatched scorer teams displayable without a team id", () => {
     const data = makeTournamentData();
     const result = mergeStatsFeed(data, {

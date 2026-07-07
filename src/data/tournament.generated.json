@@ -3075,14 +3075,14 @@
           "detail": "Norway"
         },
         {
-          "rank": 2,
+          "rank": 1,
           "player": "Kylian Mbappé",
           "teamId": "france",
           "value": 7,
           "detail": "France"
         },
         {
-          "rank": 3,
+          "rank": 1,
           "player": "Lionel Messi",
           "teamId": "argentina",
           "value": 7,
@@ -3103,35 +3103,35 @@
           "detail": "Senegal"
         },
         {
-          "rank": 6,
+          "rank": 5,
           "player": "Jude Bellingham",
           "teamId": "england",
           "value": 4,
           "detail": "England"
         },
         {
-          "rank": 7,
+          "rank": 5,
           "player": "Julián Quiñones",
           "teamId": "mexico",
           "value": 4,
           "detail": "Mexico"
         },
         {
-          "rank": 8,
+          "rank": 5,
           "player": "Mikel Oyarzabal",
           "teamId": "spain",
           "value": 4,
           "detail": "Spain"
         },
         {
-          "rank": 9,
+          "rank": 5,
           "player": "Ousmane Dembélé",
           "teamId": "france",
           "value": 4,
           "detail": "France"
         },
         {
-          "rank": 10,
+          "rank": 5,
           "player": "Vinicius Junior",
           "teamId": "brazil",
           "value": 4,
@@ -3165,56 +3165,56 @@
           "detail": "Switzerland"
         },
         {
-          "rank": 3,
+          "rank": 2,
           "player": "Crysencio Summerville",
           "teamId": "netherlands",
           "value": 2,
           "detail": "Netherlands"
         },
         {
-          "rank": 4,
+          "rank": 2,
           "player": "Deniz Undav",
           "teamId": "germany",
           "value": 2,
           "detail": "Germany"
         },
         {
-          "rank": 5,
+          "rank": 2,
           "player": "Johan Manzambi",
           "teamId": "switzerland",
           "value": 2,
           "detail": "Switzerland"
         },
         {
-          "rank": 6,
+          "rank": 2,
           "player": "Kylian Mbappé",
           "teamId": "france",
           "value": 2,
           "detail": "France"
         },
         {
-          "rank": 7,
+          "rank": 2,
           "player": "Mohamed Salah",
           "teamId": "egypt",
           "value": 2,
           "detail": "Egypt"
         },
         {
-          "rank": 8,
+          "rank": 2,
           "player": "Ousmane Dembélé",
           "teamId": "france",
           "value": 2,
           "detail": "France"
         },
         {
-          "rank": 9,
+          "rank": 2,
           "player": "Riyad Mahrez",
           "teamId": "algeria",
           "value": 2,
           "detail": "Algeria"
         },
         {
-          "rank": 10,
+          "rank": 2,
           "player": "Viktor Gyökeres",
           "teamId": "sweden",
           "value": 2,
@@ -3248,56 +3248,56 @@
           "detail": "Switzerland"
         },
         {
-          "rank": 3,
+          "rank": 2,
           "player": "Cristiano Ronaldo",
           "teamId": "portugal",
           "value": 1,
           "detail": "Portugal"
         },
         {
-          "rank": 4,
+          "rank": 2,
           "player": "Granit Xhaka",
           "teamId": "switzerland",
           "value": 1,
           "detail": "Switzerland"
         },
         {
-          "rank": 5,
+          "rank": 2,
           "player": "Kai Havertz",
           "teamId": "germany",
           "value": 1,
           "detail": "Germany"
         },
         {
-          "rank": 6,
+          "rank": 2,
           "player": "Kylian Mbappé",
           "teamId": "france",
           "value": 1,
           "detail": "France"
         },
         {
-          "rank": 7,
+          "rank": 2,
           "player": "Marko Arnautovic",
           "teamId": "austria",
           "value": 1,
           "detail": "Austria"
         },
         {
-          "rank": 8,
+          "rank": 2,
           "player": "Raúl Jiménez",
           "teamId": "mexico",
           "value": 1,
           "detail": "Mexico"
         },
         {
-          "rank": 9,
+          "rank": 2,
           "player": "Teboho Mokoena",
           "teamId": "south-africa",
           "value": 1,
           "detail": "South Africa"
         },
         {
-          "rank": 10,
+          "rank": 2,
           "player": "Yoane Wissa",
           "teamId": "dr-congo",
           "value": 1,

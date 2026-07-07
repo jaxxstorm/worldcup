@@ -149,6 +149,8 @@ function buildLeaderboard(
   valueFor: (scorer: FootballDataScorer) => number | null | undefined,
   limit: number
 ): StatLeaderboard {
+  let previousRank = 0;
+  let previousValue: number | undefined;
   const entries = scorers
     .flatMap((scorer): Omit<StatLeaderboardEntry, "rank">[] => {
       const value = valueFor(scorer);
@@ -165,7 +167,12 @@ function buildLeaderboard(
     })
     .sort((left, right) => right.value - left.value || left.player.localeCompare(right.player))
     .slice(0, limit)
-    .map((entry, index) => ({ rank: index + 1, ...entry }));
+    .map((entry, index) => {
+      const rank = entry.value === previousValue ? previousRank : index + 1;
+      previousRank = rank;
+      previousValue = entry.value;
+      return { rank, ...entry };
+    });
 
   return { id, label, valueLabel, source, entries };
 }
