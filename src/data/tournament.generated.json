@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-07-06T22:24:13.586Z",
+  "generatedAt": "2026-07-07T02:59:50.358Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -2666,7 +2666,17 @@
         "kind": "placeholder",
         "label": "Winner m082"
       },
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 1,
+        "away": 4
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-07-07T02:59:49.725Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m095",
@@ -3063,7 +3073,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-06T02:59:59.065Z",
+        "accessedAt": "2026-07-07T02:59:50.358Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3146,7 +3156,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-06T02:59:59.065Z",
+        "accessedAt": "2026-07-07T02:59:50.358Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3194,10 +3204,10 @@
         },
         {
           "rank": 2,
-          "player": "Mohamed Salah",
-          "teamId": "egypt",
+          "player": "Leandro Trossard",
+          "teamId": "belgium",
           "value": 2,
-          "detail": "Egypt"
+          "detail": "Belgium"
         },
         {
           "rank": 2,
@@ -3229,7 +3239,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-06T02:59:59.065Z",
+        "accessedAt": "2026-07-07T02:59:50.358Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
