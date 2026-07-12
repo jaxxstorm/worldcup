@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-07-12T02:59:04.902Z",
+  "generatedAt": "2026-07-12T05:01:46.109Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -2824,7 +2824,17 @@
         "kind": "placeholder",
         "label": "Winner m096"
       },
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 3,
+        "away": 1
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-07-12T05:01:45.063Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m101",
@@ -3125,7 +3135,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-12T02:59:04.902Z",
+        "accessedAt": "2026-07-12T05:01:46.109Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3208,7 +3218,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-12T02:59:04.902Z",
+        "accessedAt": "2026-07-12T05:01:46.109Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3291,7 +3301,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-12T02:59:04.902Z",
+        "accessedAt": "2026-07-12T05:01:46.109Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3339,6 +3349,13 @@
         },
         {
           "rank": 2,
+          "player": "Lautaro Martínez",
+          "teamId": "argentina",
+          "value": 1,
+          "detail": "Argentina"
+        },
+        {
+          "rank": 2,
           "player": "Marko Arnautovic",
           "teamId": "austria",
           "value": 1,
@@ -3357,13 +3374,6 @@
           "teamId": "south-africa",
           "value": 1,
           "detail": "South Africa"
-        },
-        {
-          "rank": 2,
-          "player": "Yoane Wissa",
-          "teamId": "dr-congo",
-          "value": 1,
-          "detail": "Congo DR"
         }
       ]
     }
