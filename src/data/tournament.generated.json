@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-07-12T00:17:22.297Z",
+  "generatedAt": "2026-07-12T02:59:04.902Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -3125,7 +3125,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-12T00:17:22.297Z",
+        "accessedAt": "2026-07-12T02:59:04.902Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3208,7 +3208,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-12T00:17:22.297Z",
+        "accessedAt": "2026-07-12T02:59:04.902Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3263,6 +3263,13 @@
         },
         {
           "rank": 2,
+          "player": "Lionel Messi",
+          "teamId": "argentina",
+          "value": 2,
+          "detail": "Argentina"
+        },
+        {
+          "rank": 2,
           "player": "Ousmane Dembélé",
           "teamId": "france",
           "value": 2,
@@ -3274,13 +3281,6 @@
           "teamId": "algeria",
           "value": 2,
           "detail": "Algeria"
-        },
-        {
-          "rank": 2,
-          "player": "Viktor Gyökeres",
-          "teamId": "sweden",
-          "value": 2,
-          "detail": "Sweden"
         }
       ]
     },
@@ -3291,7 +3291,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-12T00:17:22.297Z",
+        "accessedAt": "2026-07-12T02:59:04.902Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
