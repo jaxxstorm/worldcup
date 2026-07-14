@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-07-14T20:22:37.217Z",
+  "generatedAt": "2026-07-14T22:17:57.054Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -2850,7 +2850,17 @@
         "kind": "placeholder",
         "label": "Winner m098"
       },
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 0,
+        "away": 2
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-07-14T22:17:57.054Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m102",
