@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-07-12T05:01:46.109Z",
+  "generatedAt": "2026-07-14T20:22:37.217Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -3135,7 +3135,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-12T05:01:46.109Z",
+        "accessedAt": "2026-07-14T20:22:37.217Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3176,34 +3176,34 @@
         },
         {
           "rank": 6,
+          "player": "Mikel Oyarzabal",
+          "teamId": "spain",
+          "value": 5,
+          "detail": "Spain"
+        },
+        {
+          "rank": 6,
           "player": "Ousmane Dembélé",
           "teamId": "france",
           "value": 5,
           "detail": "France"
         },
         {
-          "rank": 7,
+          "rank": 8,
           "player": "Ismaïla Sarr",
           "teamId": "senegal",
           "value": 4,
           "detail": "Senegal"
         },
         {
-          "rank": 7,
+          "rank": 8,
           "player": "Julián Quiñones",
           "teamId": "mexico",
           "value": 4,
           "detail": "Mexico"
         },
         {
-          "rank": 7,
-          "player": "Mikel Oyarzabal",
-          "teamId": "spain",
-          "value": 4,
-          "detail": "Spain"
-        },
-        {
-          "rank": 7,
+          "rank": 8,
           "player": "Vinicius Junior",
           "teamId": "brazil",
           "value": 4,
@@ -3218,7 +3218,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-12T05:01:46.109Z",
+        "accessedAt": "2026-07-14T20:22:37.217Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3301,7 +3301,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-12T05:01:46.109Z",
+        "accessedAt": "2026-07-14T20:22:37.217Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3363,17 +3363,17 @@
         },
         {
           "rank": 2,
+          "player": "Mikel Oyarzabal",
+          "teamId": "spain",
+          "value": 1,
+          "detail": "Spain"
+        },
+        {
+          "rank": 2,
           "player": "Raúl Jiménez",
           "teamId": "mexico",
           "value": 1,
           "detail": "Mexico"
-        },
-        {
-          "rank": 2,
-          "player": "Teboho Mokoena",
-          "teamId": "south-africa",
-          "value": 1,
-          "detail": "South Africa"
         }
       ]
     }
