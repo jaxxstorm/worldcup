@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-07-14T22:17:57.054Z",
+  "generatedAt": "2026-07-15T22:17:45.205Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -2876,7 +2876,17 @@
         "kind": "placeholder",
         "label": "Winner m100"
       },
-      "status": "scheduled"
+      "status": "completed",
+      "result": {
+        "home": 1,
+        "away": 2
+      },
+      "sourceResult": {
+        "name": "FIFA World Cup 2026 match calendar API",
+        "url": "https://api.fifa.com/api/v3/calendar/matches?language=en&count=200&idCompetition=17&idSeason=285023",
+        "accessedAt": "2026-07-15T22:17:44.298Z",
+        "notes": "Official FIFA calendar endpoint used by scheduled result refresh."
+      }
     },
     {
       "id": "m103",
@@ -3145,7 +3155,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-14T20:22:37.217Z",
+        "accessedAt": "2026-07-15T22:17:45.205Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3228,75 +3238,75 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-14T20:22:37.217Z",
+        "accessedAt": "2026-07-15T22:17:45.205Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
         {
           "rank": 1,
+          "player": "Lionel Messi",
+          "teamId": "argentina",
+          "value": 4,
+          "detail": "Argentina"
+        },
+        {
+          "rank": 2,
           "player": "Alexander Isak",
           "teamId": "sweden",
           "value": 3,
           "detail": "Sweden"
         },
         {
-          "rank": 2,
+          "rank": 3,
           "player": "Breel Embolo",
           "teamId": "switzerland",
           "value": 2,
           "detail": "Switzerland"
         },
         {
-          "rank": 2,
+          "rank": 3,
           "player": "Crysencio Summerville",
           "teamId": "netherlands",
           "value": 2,
           "detail": "Netherlands"
         },
         {
-          "rank": 2,
+          "rank": 3,
           "player": "Deniz Undav",
           "teamId": "germany",
           "value": 2,
           "detail": "Germany"
         },
         {
-          "rank": 2,
+          "rank": 3,
           "player": "Johan Manzambi",
           "teamId": "switzerland",
           "value": 2,
           "detail": "Switzerland"
         },
         {
-          "rank": 2,
+          "rank": 3,
           "player": "Kylian Mbappé",
           "teamId": "france",
           "value": 2,
           "detail": "France"
         },
         {
-          "rank": 2,
+          "rank": 3,
           "player": "Leandro Trossard",
           "teamId": "belgium",
           "value": 2,
           "detail": "Belgium"
         },
         {
-          "rank": 2,
-          "player": "Lionel Messi",
-          "teamId": "argentina",
-          "value": 2,
-          "detail": "Argentina"
-        },
-        {
-          "rank": 2,
+          "rank": 3,
           "player": "Ousmane Dembélé",
           "teamId": "france",
           "value": 2,
           "detail": "France"
         },
         {
-          "rank": 2,
+          "rank": 3,
           "player": "Riyad Mahrez",
           "teamId": "algeria",
           "value": 2,
@@ -3311,7 +3321,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-14T20:22:37.217Z",
+        "accessedAt": "2026-07-15T22:17:45.205Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
