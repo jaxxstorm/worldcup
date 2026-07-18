@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2026.0.1",
-  "generatedAt": "2026-07-17T08:40:11.311Z",
+  "generatedAt": "2026-07-18T22:14:30.794Z",
   "sources": [
     {
       "name": "FIFA World Cup 26 match schedule",
@@ -3155,7 +3155,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-17T08:40:11.311Z",
+        "accessedAt": "2026-07-18T22:14:30.794Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3163,11 +3163,11 @@
           "rank": 1,
           "player": "Kylian Mbappé",
           "teamId": "france",
-          "value": 8,
+          "value": 9,
           "detail": "France"
         },
         {
-          "rank": 1,
+          "rank": 2,
           "player": "Lionel Messi",
           "teamId": "argentina",
           "value": 8,
@@ -3238,7 +3238,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-17T08:40:11.311Z",
+        "accessedAt": "2026-07-18T22:14:30.794Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
@@ -3258,59 +3258,59 @@
         },
         {
           "rank": 2,
+          "player": "Bukayo Saka",
+          "teamId": "england",
+          "value": 3,
+          "detail": "England"
+        },
+        {
+          "rank": 2,
           "player": "Kylian Mbappé",
           "teamId": "france",
           "value": 3,
           "detail": "France"
         },
         {
-          "rank": 4,
+          "rank": 5,
           "player": "Breel Embolo",
           "teamId": "switzerland",
           "value": 2,
           "detail": "Switzerland"
         },
         {
-          "rank": 4,
+          "rank": 5,
           "player": "Crysencio Summerville",
           "teamId": "netherlands",
           "value": 2,
           "detail": "Netherlands"
         },
         {
-          "rank": 4,
+          "rank": 5,
           "player": "Deniz Undav",
           "teamId": "germany",
           "value": 2,
           "detail": "Germany"
         },
         {
-          "rank": 4,
+          "rank": 5,
           "player": "Johan Manzambi",
           "teamId": "switzerland",
           "value": 2,
           "detail": "Switzerland"
         },
         {
-          "rank": 4,
+          "rank": 5,
           "player": "Leandro Trossard",
           "teamId": "belgium",
           "value": 2,
           "detail": "Belgium"
         },
         {
-          "rank": 4,
+          "rank": 5,
           "player": "Ousmane Dembélé",
           "teamId": "france",
           "value": 2,
           "detail": "France"
-        },
-        {
-          "rank": 4,
-          "player": "Riyad Mahrez",
-          "teamId": "algeria",
-          "value": 2,
-          "detail": "Algeria"
         }
       ]
     },
@@ -3321,7 +3321,7 @@
       "source": {
         "name": "football-data.org World Cup scorers API",
         "url": "https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=100",
-        "accessedAt": "2026-07-17T08:40:11.311Z",
+        "accessedAt": "2026-07-18T22:14:30.794Z",
         "notes": "football-data.org scorers endpoint normalized into static tournament stat leaderboards."
       },
       "entries": [
